@@ -1,0 +1,171 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.hermod.bottonline.fps</groupId>
+  <artifactId>hermod-bottonline-fps</artifactId>
+  <version>0.0.1</version>
+  <packaging>jar</packaging>
+  <name>hermod-bottonline-fps</name>
+  <url>http://maven.apache.org</url>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.dependency.directory>${basedir}/lib</project.dependency.directory>
+    <java.version>1.8</java.version>
+    
+    <spring.boot.version>1.5.3.RELEASE</spring.boot.version>
+    <spring.kafka.version>1.2.1.RELEASE</spring.kafka.version>
+    <spring.version>4.3.8.RELEASE</spring.version>
+    <com.ibm.mq.version>9.0.3.0</com.ibm.mq.version>
+    <javax.jms.version>2.0.1</javax.jms.version>
+    <jaxb2.basics.version>1.11.1</jaxb2.basics.version>
+    <jaxb2.maven.plugin.version>2.3.1</jaxb2.maven.plugin.version>
+    <umbrella.version>0.0.1</umbrella.version>
+    
+    <junit.version>4.11</junit.version>
+  </properties>
+
+  <parent>
+     <groupId>org.springframework.boot</groupId>
+     <artifactId>spring-boot-starter-parent</artifactId>
+     <version>1.5.3.RELEASE</version>
+  </parent>
+
+  <dependencies>
+  
+  	<dependency>
+    		<groupId>com.ibm.mq</groupId>
+    		<artifactId>allclient</artifactId>
+    		<version>${com.ibm.mq.version}</version>
+	</dependency>
+    <dependency>
+      	<groupId>org.springframework.boot</groupId>
+      	<artifactId>spring-boot-starter-activemq</artifactId>
+      	<version>${spring.boot.version}</version>
+    </dependency>
+    <dependency>
+      	<groupId>org.springframework.kafka</groupId>
+      	<artifactId>spring-kafka</artifactId>
+      	<version>${spring.kafka.version}</version>
+    </dependency>
+    <dependency>
+	    <groupId>org.springframework</groupId>
+	    <artifactId>spring-oxm</artifactId>
+	    <version>${spring.version}</version>
+	</dependency>
+    <dependency>
+    		<groupId>javax.jms</groupId>
+    		<artifactId>javax.jms-api</artifactId>
+    		<version>${javax.jms.version}</version>
+	</dependency>
+	<dependency>
+		<groupId>org.jvnet.jaxb2_commons</groupId>
+		<artifactId>jaxb2-basics-runtime</artifactId>
+		<version>${jaxb2.basics.version}</version>
+	</dependency>
+	<dependency>
+		<groupId>com.orwellg.umbrella</groupId>
+		<artifactId>umbrella-commons</artifactId>
+		<version>${umbrella.version}</version>
+	</dependency>
+    
+    <dependency>
+      	<groupId>junit</groupId>
+      	<artifactId>junit</artifactId>
+      	<version>${junit.version}</version>
+      	<scope>test</scope>
+    </dependency>
+    
+  </dependencies>
+  
+ <build>
+ 
+   <plugins>
+      <!-- Package as an executable jar/war -->
+      <plugin>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-maven-plugin</artifactId>
+      </plugin>
+	    	
+    	 <!-- Maven compiler -->
+     <plugin>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.1</version>
+          <configuration>
+              <source>${jdk.version}</source>
+              <target>${jdk.version}</target>
+          </configuration>
+      </plugin>
+      
+      <plugin>
+		  <groupId>org.apache.maven.plugins</groupId>
+ 		  <artifactId>maven-install-plugin</artifactId>
+ 		  <version>2.5.2</version>
+ 		  <executions>
+     		  <execution>
+          		 <phase>initialize</phase>
+          		 <goals>
+              		<goal>install-file</goal>
+          		 </goals>
+          		 <configuration>
+				 	<groupId>com.ibm.mq</groupId>
+    					<artifactId>allclient</artifactId>
+    					<version>${com.ibm.mq.version}</version>            		
+                		<packaging>jar</packaging>
+      		        <file>${project.dependency.directory}/com.ibm.mq.allclient.jar</file>
+          		 </configuration>
+     		  </execution>
+ 		  </executions>
+  	  </plugin> 
+    
+    <plugin>
+		<groupId>org.jvnet.jaxb2.maven2</groupId>
+		<artifactId>maven-jaxb2-plugin</artifactId>
+		<version>0.13.1</version>
+		<executions>
+			<execution>
+				<goals>
+					<goal>generate</goal>
+				</goals>
+			</execution>
+		</executions>
+		<configuration>
+			<args>
+				<arg>-Xinheritance</arg>
+				<arg>-Xannotate</arg>
+			</args>
+			<extension>true</extension>
+			<schemaDirectory>${basedir}/src/main/xsd</schemaDirectory>
+        		<schemaIncludes>
+	    			<include>*.xsd</include>
+        		</schemaIncludes>
+			<bindingDirectory>${basedir}/src/main/xsd</bindingDirectory>
+			<bindingIncludes>
+				<include>*.xjb</include>
+			</bindingIncludes>
+			<generateDirectory>${basedir}/src/main/generated</generateDirectory>
+			<plugins>
+				<plugin>
+					<groupId>org.jvnet.jaxb2_commons</groupId>
+					<artifactId>jaxb2-basics</artifactId>
+					<version>${jaxb2.basics.version}</version>
+				</plugin>
+				<plugin>
+                		<groupId>org.jvnet.jaxb2_commons</groupId>
+                		<artifactId>jaxb2-basics-annotate</artifactId>
+                		<version>1.0.3</version>
+            		</plugin>
+			</plugins>
+			<verbose>true</verbose>
+		</configuration>
+	</plugin>
+      
+   </plugins>
+
+	<finalName>hermod-bottonline-fps-${version}</finalName>
+
+ </build>
+  
+</project>

@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<jxb:bindings version="1.0" 
+  xmlns:jxb="http://java.sun.com/xml/ns/jaxb" 
+  xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+  xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+  xmlns:inheritance="http://jaxb2-commons.dev.java.net/basic/inheritance"
+  xmlns:annox="http://annox.dev.java.net"
+  jxb:extensionBindingPrefixes="xjc">
+    <jxb:globalBindings>
+    	  <jxb:serializable uid="1" />
+    </jxb:globalBindings>
+    <jxb:bindings schemaLocation="pacs.008.001.05.xsd">
+      <jxb:bindings node="//xs:complexType[@name='Document']">
+        <inheritance:implements>com.hermod.bottonline.fps.types.FPSMessage</inheritance:implements> 
+        <annox:annotate target="class">
+    			<annox:annotate annox:class="javax.xml.bind.annotation.XmlRootElement" name="Document"/>
+		</annox:annotate>
+      </jxb:bindings>
+    </jxb:bindings>
+    <jxb:bindings schemaLocation="pacs.002.001.06.xsd">
+      <jxb:bindings node="//xs:complexType[@name='Document']">
+        <inheritance:implements>com.hermod.bottonline.fps.types.FPSMessage</inheritance:implements> 
+        <annox:annotate target="class">
+    			<annox:annotate annox:class="javax.xml.bind.annotation.XmlRootElement" name="Document"/>
+		</annox:annotate>
+      </jxb:bindings>
+    </jxb:bindings>
+    <jxb:bindings schemaLocation="pacs.004.001.05.xsd">
+      <jxb:bindings node="//xs:complexType[@name='Document']">
+        <inheritance:implements>com.hermod.bottonline.fps.types.FPSMessage</inheritance:implements> 
+        <annox:annotate target="class">
+    			<annox:annotate annox:class="javax.xml.bind.annotation.XmlRootElement" name="Document"/>
+		</annox:annotate>
+      </jxb:bindings>
+    </jxb:bindings>
+    <jxb:bindings schemaLocation="pacs.007.001.05.xsd">
+      <jxb:bindings node="//xs:complexType[@name='Document']">
+        <inheritance:implements>com.hermod.bottonline.fps.types.FPSMessage</inheritance:implements> 
+        <annox:annotate target="class">
+    			<annox:annotate annox:class="javax.xml.bind.annotation.XmlRootElement" name="Document"/>
+		</annox:annotate>
+      </jxb:bindings>
+    </jxb:bindings>
+    <jxb:bindings schemaLocation="pacs.009.001.05.xsd">
+      <jxb:bindings node="//xs:complexType[@name='Document']">
+        <inheritance:implements>com.hermod.bottonline.fps.types.FPSMessage</inheritance:implements> 
+        <annox:annotate target="class">
+    			<annox:annotate annox:class="javax.xml.bind.annotation.XmlRootElement" name="Document"/>
+		</annox:annotate>
+      </jxb:bindings>
+    </jxb:bindings>
+</jxb:bindings>
