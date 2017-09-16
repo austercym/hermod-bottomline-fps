@@ -1,27 +1,19 @@
 package com.hermod.bottonline.fps.config;
 
-import javax.jms.ConnectionFactory;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.connection.CachingConnectionFactory;
 import org.springframework.jms.core.JmsOperations;
 import org.springframework.jms.core.JmsTemplate;
-import org.springframework.jms.listener.DefaultMessageListenerContainer;
 import org.springframework.jms.support.converter.MarshallingMessageConverter;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
-import com.hermod.bottonline.fps.listeners.JmsListener;
 import com.hermod.bottonline.fps.utils.factory.ConfigurationFactory;
 
 @Configuration
 @EnableJms
-public class JmsTemplateConfig extends ComponentConfig {
-	
-	@Autowired
-	private JmsListener mqListener;
+public class JmsProducerConfig extends ComponentConfig {
 	
 	@Bean
 	public Jaxb2Marshaller marshaller() {
@@ -52,15 +44,4 @@ public class JmsTemplateConfig extends ComponentConfig {
 	    return jmsTemplate;
 	}
 	
-	@Bean
-    public DefaultMessageListenerContainer jmsListenerContainer(ConnectionFactory connectionFactory)
-    {
-        DefaultMessageListenerContainer listenerContainer = new DefaultMessageListenerContainer();
-        listenerContainer.setConnectionFactory(connectionFactory);
-        listenerContainer.setDestinationName(ConfigurationFactory.getConfigurationParams().getMQConfigurationParams().getInboundQueue());
-        listenerContainer.setMessageListener(mqListener);
-        listenerContainer.setMaxConcurrentConsumers(ConfigurationFactory.getConfigurationParams().getMQConfigurationParams().getNumMaxConsumers());
-        listenerContainer.setSessionTransacted(true);
-        return listenerContainer;
-    }
 }

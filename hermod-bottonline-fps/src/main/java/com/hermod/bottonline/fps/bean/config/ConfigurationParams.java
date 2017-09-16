@@ -74,10 +74,18 @@ public class ConfigurationParams extends ZkConfigurationParams {
 		private final static String DEFAULT_BOOTSTRAP_SERVER = "localhost:9092";
 		private final static String DEFAULT_INBOUND_TOPIC  = "com.orwellg.fps.request";
 		private final static String DEFAULT_OUTBOUND_TOPIC = "com.orwellg.fps.response";
+		private final static Integer DEFAULT_OUTBOUND_TOPIC_PARTITIONS = 3;
+		private final static String DEFAULT_CONSUMER_GROUP_ID = "fpsConsumerGroup";
+		private final static Integer DEFAULT_CONSUMER_THREADS = 3;
+		private final static Long DEFAULT_CONSUMER_POLL_TIMEOUT = 3000L;
 		
 		private DynamicStringProperty bootstrap;
 	    private DynamicStringProperty inboundTopic;
 	    private DynamicStringProperty outboundTopic;
+	    private DynamicIntProperty outboundTopicPartitions;
+	    private DynamicStringProperty consumerGroup;
+	    private DynamicIntProperty numConsumerThreads;
+	    private DynamicLongProperty consumerPollTimeout;
 	    
 		public String getBootstrap() { return (bootstrap != null) ? bootstrap.get() : DEFAULT_BOOTSTRAP_SERVER; }
 		public void setBootstrap(DynamicStringProperty bootstrap) { this.bootstrap = bootstrap; }
@@ -85,7 +93,15 @@ public class ConfigurationParams extends ZkConfigurationParams {
 		public void setInboundTopic(DynamicStringProperty inboundTopic) { this.inboundTopic = inboundTopic; }
 		public String getOutboundTopic() { return (outboundTopic != null) ? outboundTopic.get() : DEFAULT_OUTBOUND_TOPIC; }
 		public void setOutboundTopic(DynamicStringProperty outboundTopic) { this.outboundTopic = outboundTopic; }
-	   
+		public Integer getOutboundTopicPartitions() { return (outboundTopicPartitions != null) ? outboundTopicPartitions.get() : DEFAULT_OUTBOUND_TOPIC_PARTITIONS; }
+		public void setOutboundTopicPartitions(DynamicIntProperty outboundTopicPartitions) { this.outboundTopicPartitions = outboundTopicPartitions; }
+	    public String getConsumerGroup() { return (consumerGroup != null) ? this.consumerGroup.get() : DEFAULT_CONSUMER_GROUP_ID;	}
+	    public void setConsumerGroup(DynamicStringProperty consumerGroup) { this.consumerGroup = consumerGroup; }
+		public Integer getNumConsumerThreads() { return (numConsumerThreads != null) ? this.numConsumerThreads.get() : DEFAULT_CONSUMER_THREADS; }
+		public void setNumConsumerThreads(DynamicIntProperty numConsumerThreads) { this.numConsumerThreads = numConsumerThreads; }
+		public Long getConsumerPollTimeout() { return (consumerPollTimeout != null) ? this.consumerPollTimeout.get() : DEFAULT_CONSUMER_POLL_TIMEOUT; }
+		public void setConsumerPollTimeout(DynamicLongProperty consumerPollTimeout) { this.consumerPollTimeout = consumerPollTimeout; } 
+	    
 	}
 	
 	private MQConfigurationParams mqConfigurationParams;
@@ -120,6 +136,11 @@ public class ConfigurationParams extends ZkConfigurationParams {
 		kafkaConfigurationParams.setBootstrap(dynamicPropertyFactory.getStringProperty("kafka.bootstrap.host", KafkaConfigurationParams.DEFAULT_BOOTSTRAP_SERVER));
 		kafkaConfigurationParams.setInboundTopic(dynamicPropertyFactory.getStringProperty("kafka.topic.inbound", KafkaConfigurationParams.DEFAULT_INBOUND_TOPIC));
 		kafkaConfigurationParams.setOutboundTopic(dynamicPropertyFactory.getStringProperty("kafka.topic.outbound", KafkaConfigurationParams.DEFAULT_OUTBOUND_TOPIC));
+		kafkaConfigurationParams.setOutboundTopicPartitions(dynamicPropertyFactory.getIntProperty("kafka.topic.outbound.partitions", KafkaConfigurationParams.DEFAULT_OUTBOUND_TOPIC_PARTITIONS));
+		kafkaConfigurationParams.setConsumerGroup(dynamicPropertyFactory.getStringProperty("kafka.consumer.group.id", KafkaConfigurationParams.DEFAULT_CONSUMER_GROUP_ID));
+		kafkaConfigurationParams.setNumConsumerThreads(dynamicPropertyFactory.getIntProperty("kafka.consumer.threads.num", KafkaConfigurationParams.DEFAULT_CONSUMER_THREADS));
+		kafkaConfigurationParams.setConsumerPollTimeout(dynamicPropertyFactory.getLongProperty("kafka.consumer.poll.timeout", KafkaConfigurationParams.DEFAULT_CONSUMER_POLL_TIMEOUT));
+
 	}
 
 	public ConfigurationParams() {

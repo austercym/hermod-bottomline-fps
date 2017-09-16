@@ -11,10 +11,6 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.jms.connection.CachingConnectionFactory;
 import org.springframework.jms.connection.JmsTransactionManager;
 import org.springframework.jms.connection.UserCredentialsConnectionFactoryAdapter;
-import org.springframework.jms.core.JmsOperations;
-import org.springframework.jms.core.JmsTemplate;
-import org.springframework.jms.support.converter.MarshallingMessageConverter;
-import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
@@ -84,32 +80,4 @@ public class JmsConnectionConfig extends ComponentConfig {
 	    return jmsTransactionManager;
 	}
 	
-	@Bean
-	public Jaxb2Marshaller marshaller() {
-	    Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
-	    marshaller.setClassesToBeBound(
-	    		iso.std.iso._20022.tech.xsd.pacs_008_001.Document.class,
-	    		iso.std.iso._20022.tech.xsd.pacs_002_001.Document.class,
-	    		iso.std.iso._20022.tech.xsd.pacs_004_001.Document.class,
-	    		iso.std.iso._20022.tech.xsd.pacs_007_001.Document.class,
-	    		iso.std.iso._20022.tech.xsd.pacs_009_001.Document.class
-	    	);
-	    return marshaller;
-	}
-	
-	@Bean
-	public JmsOperations jmsOperations(CachingConnectionFactory cachingConnectionFactory) {
-		
-		JmsTemplate jmsTemplate = new JmsTemplate(cachingConnectionFactory);
-	    jmsTemplate.setReceiveTimeout(ConfigurationFactory.getConfigurationParams().getMQConfigurationParams().getReceiveTimeout());
-	    
-	    // Creating and asing the message converter for jmsTemplate
-	    MarshallingMessageConverter converter = new MarshallingMessageConverter();
-	    	converter.setMarshaller(marshaller());
-	    	converter.setUnmarshaller(marshaller());
-	    	// set this converter on the implicit Spring JMS template
-	    	jmsTemplate.setMessageConverter(converter);
-	    	    
-	    return jmsTemplate;
-	}
 }
