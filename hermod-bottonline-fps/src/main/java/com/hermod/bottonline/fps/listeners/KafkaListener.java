@@ -5,6 +5,7 @@ package com.hermod.bottonline.fps.listeners;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.core.JmsOperations;
+import org.springframework.kafka.listener.KafkaDataListener;
 import org.springframework.kafka.listener.MessageListener;
 import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.stereotype.Component;
@@ -16,7 +17,7 @@ import com.orwellg.umbrella.avro.types.event.Event;
 import com.orwellg.umbrella.commons.types.utils.avro.RawMessageUtils;
 
 @Component(value="kafkaListener")
-public class KafkaListener extends BaseListener implements MessageListener<String, String> {
+public class KafkaListener extends BaseListener implements MessageListener<String, String>, KafkaDataListener<ConsumerRecord<String, String>> {
 
 	@Autowired
 	private JmsOperations jmsOperations;

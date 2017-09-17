@@ -3,27 +3,25 @@ package com.hermod.bottonline.fps.config;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.jms.MessageListener;
-
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.common.serialization.StringSerializer;
+import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
+import org.springframework.kafka.listener.MessageListener;
 import org.springframework.kafka.listener.config.ContainerProperties;
 
 import com.hermod.bottonline.fps.utils.factory.ConfigurationFactory;
 
 @Configuration
-@EnableKafka
+//@EnableKafka
 public class KafkaConsumerConfig {
 
 	@Autowired
-	private MessageListener kafkaListener;
+	private MessageListener<?, ?> kafkaListener;
 	
 	@Bean
 	public Map<String, Object> consumerConfigs() {
@@ -34,26 +32,26 @@ public class KafkaConsumerConfig {
 	    props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
 	    props.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "100");
 	    props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, "15000");
-	    props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringSerializer.class);
-	    props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringSerializer.class);
+	    props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+	    props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
 	    props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 	
 	    return props;
 	}
 
 	@Bean
-	public ConsumerFactory<String, String> consumerFactory() {
+	public ConsumerFactory<?, ?> kafkaConsumerFactory() {
 		return new DefaultKafkaConsumerFactory<>(consumerConfigs());
 	}
 
 	@Bean
-	public ConcurrentMessageListenerContainer<String, String> kafkaListenerContainer() {
+	public ConcurrentMessageListenerContainer<?, ?> kafkaListenerContainer() {
 		
 		ContainerProperties containerProperties = new ContainerProperties(ConfigurationFactory.getConfigurationParams().getKafkaConfigurationParams().getOutboundTopic());
 		containerProperties.setPollTimeout(ConfigurationFactory.getConfigurationParams().getKafkaConfigurationParams().getConsumerPollTimeout());
 		
-		ConcurrentMessageListenerContainer<String, String> kafkaListenerContainer = new ConcurrentMessageListenerContainer<String, String>(
-				consumerFactory(), 
+		ConcurrentMessageListenerContainer<?, ?> kafkaListenerContainer = new ConcurrentMessageListenerContainer<>(
+				kafkaConsumerFactory(), 
 				containerProperties
 		);
 		kafkaListenerContainer.setConcurrency(ConfigurationFactory.getConfigurationParams().getKafkaConfigurationParams().getNumConsumerThreads());

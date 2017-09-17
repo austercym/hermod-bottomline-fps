@@ -21,17 +21,17 @@ public class ConfigurationParams extends ZkConfigurationParams {
 	
 	public static class MQConfigurationParams {
 		
-		private final static String DEFAULT_HOST  = "localhost";
+		private final static String DEFAULT_HOST  = "192.168.2.101";
 		private final static Integer DEFAULT_PORT = 1414;
-		private final static String DEFAULT_QUEUE_MANAGER = "FPS-QM";
+		private final static String DEFAULT_QUEUE_MANAGER = "FPS";
 		private final static String DEFAULT_CHANNEL  = Constants.EMPTY;
 		private final static String DEFAULT_USERNAME = Constants.EMPTY;
 		private final static String DEFAULT_PASSWORD = Constants.EMPTY;
 		private final static Long DEFAULT_RECEIVED_TIMEOUT = 2000L;
 		private final static Integer DEFAULT_NUM_MAX_CONSUMERS = 3;
 		
-		private final static String DEFAULT_INBOUND_QUEUE  = "Inbound";
-		private final static String DEFAULT_OUTBOUND_QUEUE = "Outbound";
+		private final static String DEFAULT_INBOUND_QUEUE  = "FPS_INBOUND";
+		private final static String DEFAULT_OUTBOUND_QUEUE = "FPS_OUTBOUND";
 		
 	    private DynamicStringProperty host;
 	    private DynamicIntProperty port;
@@ -71,7 +71,7 @@ public class ConfigurationParams extends ZkConfigurationParams {
 	
 	public static class KafkaConfigurationParams {
 		
-		private final static String DEFAULT_BOOTSTRAP_SERVER = "localhost:9092";
+		private final static String DEFAULT_BOOTSTRAP_SERVER = "localhost:9092,localhost:10092";
 		private final static String DEFAULT_INBOUND_TOPIC  = "com.orwellg.fps.request";
 		private final static String DEFAULT_OUTBOUND_TOPIC = "com.orwellg.fps.response";
 		private final static Integer DEFAULT_OUTBOUND_TOPIC_PARTITIONS = 3;
