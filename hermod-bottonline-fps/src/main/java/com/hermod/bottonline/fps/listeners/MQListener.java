@@ -1,6 +1,7 @@
 package com.hermod.bottonline.fps.listeners;
 
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 
@@ -43,29 +44,26 @@ public class MQListener extends BaseListener implements MessageListener {
     public void onMessage(Message message) {
     	
         LOG.info("Entered in messagge reception ...............");
+        InputStream stream = null; 
+        Reader reader = null;
         Source source = null;
+        
         try {
 	        if (message instanceof TextMessage) {
-	            try (Reader reader = new StringReader(((TextMessage) message).getText())) {
-	            		source = new StreamSource(reader);
-	            }
+	            	reader = new StringReader(((TextMessage) message).getText());
 	        } else if (message instanceof BytesMessage) {
-	        		InputStream stream = null; 
-	            try {
-	            		BytesMessage msg = (BytesMessage) message;
-	            		byte[] data = new byte[(int) msg.getBodyLength()];
-	                msg.readBytes(data);
-	                stream = new ByteArrayInputStream(data);
-	                
-	            		source = new StreamSource(stream);
-	            } finally {
-	            		if (stream != null) { stream.close(); }
-	            }
+            		BytesMessage msg = (BytesMessage) message;
+            		byte[] data = new byte[(int) msg.getBodyLength()];
+                msg.readBytes(data);
+                stream = new ByteArrayInputStream(data);
+                
+                reader = new InputStreamReader(stream);
 	        } else {
 	        		throw new MessageConversionException("The received message with type " + message.getJMSType() + " is not recognized.");
 	        }
 	        
-	        if (source != null) {
+	        if (reader != null) {
+	        		source = new StreamSource(reader);
 	        		FPSMessage fpsMessage = (FPSMessage) marshaller.unmarshal(source);
 	        		
 	        		// Call the correspondent transform
@@ -90,6 +88,13 @@ public class MQListener extends BaseListener implements MessageListener {
 	        }
         } catch (Exception e) {
         		throw new MessageConversionException("Exception in message reception. Message: " + e.getMessage(), e);
+        } finally {
+        		try {
+	        		if (reader != null) { reader.close(); }
+	    			if (stream != null) { stream.close(); }
+        		} catch (Exception e) {
+        			LOG.error("Error when try close the streams resources. Message: {}", e.getMessage(), e);
+        		}
         }
     }
 }
