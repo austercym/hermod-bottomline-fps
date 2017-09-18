@@ -14,6 +14,7 @@ import com.hermod.bottonline.fps.services.transform.FPSTransform;
 import com.hermod.bottonline.fps.types.FPSMessage;
 import com.hermod.bottonline.fps.utils.factory.ConfigurationFactory;
 import com.orwellg.umbrella.avro.types.event.Event;
+import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
 import com.orwellg.umbrella.commons.types.utils.avro.RawMessageUtils;
 
 @Component(value="kafkaListener")
@@ -30,7 +31,7 @@ public class KafkaListener extends BaseListener implements MessageListener<Strin
 			Event event = RawMessageUtils.decodeFromString(Event.SCHEMA$, message.value());
 			
 			// Get the correct value for the transform map
-			Object data = event.getEvent().getData();
+			FPSAvroMessage data = (FPSAvroMessage) event.getEvent().getData();
 			// Call the correspondent transform
 			FPSTransform transform = getTransform(data.getClass().getPackage().getName());
 			if (transform != null) {			
