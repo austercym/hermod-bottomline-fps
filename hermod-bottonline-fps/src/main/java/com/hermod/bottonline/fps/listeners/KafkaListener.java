@@ -32,6 +32,7 @@ public class KafkaListener extends BaseListener implements MessageListener<Strin
 			
 			// Get the correct value for the transform map
 			FPSAvroMessage data = (FPSAvroMessage) event.getEvent().getData();
+			
 			// Call the correspondent transform
 			FPSTransform transform = getTransform(data.getClass().getPackage().getName());
 			if (transform != null) {			
