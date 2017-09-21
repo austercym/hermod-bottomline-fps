@@ -1,6 +1,7 @@
 package com.hermod.bottonline.fps.services.transform.helper;
 
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -31,6 +32,7 @@ public final class TransformationHelper {
 	static {
 		Converters.add(new TypeConverterEntry(XMLGregorianCalendar.class, Long.class, calendar -> (Long)((XMLGregorianCalendar)calendar).toGregorianCalendar().getTimeInMillis()));
 		Converters.add(new TypeConverterEntry(XMLGregorianCalendar.class, CharSequence.class, calendar -> ((XMLGregorianCalendar)calendar).toXMLFormat()));
+		Converters.add(new TypeConverterEntry(BigDecimal.class, Double.class, decimalValue -> ((BigDecimal)decimalValue).doubleValue()));
 		Converters.add(new EnumToStringConverter());
 		Converters.add(new MatchingTypeConverter());
 		Converters.add(new ComplexTypeCollectionConverter());
