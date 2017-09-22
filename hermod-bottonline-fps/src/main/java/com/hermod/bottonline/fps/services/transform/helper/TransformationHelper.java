@@ -2,13 +2,19 @@ package com.hermod.bottonline.fps.services.transform.helper;
 
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
+import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import com.hermod.bottonline.fps.services.transform.helper.builder.BuilderRuleIf;
@@ -16,6 +22,7 @@ import com.hermod.bottonline.fps.services.transform.helper.builder.ComplexObject
 import com.hermod.bottonline.fps.services.transform.helper.builder.ConversionBuilderRule;
 import com.hermod.bottonline.fps.services.transform.helper.builder.RootBuilder;
 import com.hermod.bottonline.fps.services.transform.helper.converter.ComplexTypeCollectionConverter;
+import com.hermod.bottonline.fps.services.transform.helper.converter.ConvertFunction;
 import com.hermod.bottonline.fps.services.transform.helper.converter.ConverterEntryIf;
 import com.hermod.bottonline.fps.services.transform.helper.converter.EnumToStringConverter;
 import com.hermod.bottonline.fps.services.transform.helper.converter.MatchingTypeConverter;
@@ -27,12 +34,12 @@ import io.reactivex.Flowable;
 public final class TransformationHelper {
 	private static final Collection<ConverterEntryIf> Converters = new ArrayList<ConverterEntryIf>();
 	private static HashMap<String, BuilderRuleIf> BuilderRules = new HashMap<String, BuilderRuleIf>();
-	
-	
+
 	static {
 		Converters.add(new TypeConverterEntry(XMLGregorianCalendar.class, Long.class, calendar -> (Long)((XMLGregorianCalendar)calendar).toGregorianCalendar().getTimeInMillis()));
 		Converters.add(new TypeConverterEntry(XMLGregorianCalendar.class, CharSequence.class, calendar -> ((XMLGregorianCalendar)calendar).toXMLFormat()));
 		Converters.add(new TypeConverterEntry(BigDecimal.class, Double.class, decimalValue -> ((BigDecimal)decimalValue).doubleValue()));
+		Converters.add(new TypeConverterEntry(CharSequence.class,  XMLGregorianCalendar.class, TransformationHelper::charSequenceToXmlCalendar)); 
 		Converters.add(new EnumToStringConverter());
 		Converters.add(new MatchingTypeConverter());
 		Converters.add(new ComplexTypeCollectionConverter());
@@ -126,5 +133,21 @@ public final class TransformationHelper {
 		final String targetName = targetProperty.getName().substring(3);
 		final boolean isMatch = sourceName.equals(targetName);
 		return isMatch;
+	}
+	
+	static Object charSequenceToXmlCalendar(final Object input) throws ConversionException {
+		try {
+			final DatatypeFactory dtf = DatatypeFactory.newInstance();
+			final DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+	
+			final Date date = format.parse(input.toString());
+			final GregorianCalendar calendar = new GregorianCalendar();
+			calendar.setTime(date);
+			final XMLGregorianCalendar xmlCalendar = dtf.newXMLGregorianCalendar(calendar);
+			return xmlCalendar;
+		}
+		catch (Exception err) {
+			throw new ConversionException(err.getMessage(), err); 
+		}
 	}
 }

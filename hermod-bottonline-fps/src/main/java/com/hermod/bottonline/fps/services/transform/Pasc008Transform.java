@@ -14,6 +14,10 @@ public class Pasc008Transform implements FPSTransform {
 		TransformationHelper.registerMapping(
 			iso.std.iso._20022.tech.xsd.pacs_008_001.Document.class, 
 			com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Document.class);						
+
+		TransformationHelper.registerMapping(				 
+				com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Document.class,
+				iso.std.iso._20022.tech.xsd.pacs_008_001.Document.class);
 	}
 
 	
@@ -24,7 +28,7 @@ public class Pasc008Transform implements FPSTransform {
 		}
 		
 		if (!(message instanceof iso.std.iso._20022.tech.xsd.pacs_008_001.Document)) {
-			throw new ClassCastException("Expected Document of type " + iso.std.iso._20022.tech.xsd.pacs_008_001.Document.class.getTypeName());
+			throw new ConversionException("Expected Document of type " + iso.std.iso._20022.tech.xsd.pacs_008_001.Document.class.getTypeName() + " but got " + message.getClass().getName() + " instead");
 		}
 		
 		final iso.std.iso._20022.tech.xsd.pacs_008_001.Document source = 
@@ -41,7 +45,24 @@ public class Pasc008Transform implements FPSTransform {
 	}
 
 	@Override
-	public FPSMessage avro2fps(FPSAvroMessage message) {
-		return null;
+	public FPSMessage avro2fps(FPSAvroMessage message) throws ConversionException {
+		if (message == null) {
+			return null;
+		}
+		
+		final Object avroMessage = message.getMessage();
+		if (avroMessage == null) {
+			return null;
+		}
+		
+		if (!(avroMessage instanceof com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Document)) {
+			throw new ConversionException("Expected Document of type " + com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Document.class.getTypeName() + " but got " + avroMessage.getClass().getName() + " instead");
+		}
+		
+		final iso.std.iso._20022.tech.xsd.pacs_008_001.Document target = new iso.std.iso._20022.tech.xsd.pacs_008_001.Document();
+		
+		TransformationHelper.updateTargetValues(avroMessage, target);
+		
+		return target;
 	}
 }

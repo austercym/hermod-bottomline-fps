@@ -8,5 +8,5 @@ public interface FPSTransform {
 
 	public FPSAvroMessage fps2avro(FPSMessage message) throws ConversionException;
 	
-	public FPSMessage avro2fps(FPSAvroMessage message);
+	public FPSMessage avro2fps(FPSAvroMessage message) throws ConversionException;
 }
