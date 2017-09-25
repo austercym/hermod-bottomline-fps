@@ -24,7 +24,7 @@ public class MatchingTypeConverter implements ConverterEntryIf{
 		return getClass().getName();
 	}
 
-	private static Object convertValue(final Object source) {
+	private static Object convertValue(final Object source, final Object targetReference) {
 		return source;
 	}
 

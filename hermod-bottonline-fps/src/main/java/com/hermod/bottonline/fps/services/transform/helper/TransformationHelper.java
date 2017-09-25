@@ -12,22 +12,11 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
-
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import com.hermod.bottonline.fps.services.transform.helper.builder.BuilderRuleIf;
-import com.hermod.bottonline.fps.services.transform.helper.builder.ComplexObjectBuilderRule;
-import com.hermod.bottonline.fps.services.transform.helper.builder.ConversionBuilderRule;
-import com.hermod.bottonline.fps.services.transform.helper.builder.RootBuilder;
-import com.hermod.bottonline.fps.services.transform.helper.converter.ComplexTypeCollectionConverter;
-import com.hermod.bottonline.fps.services.transform.helper.converter.ConvertFunction;
-import com.hermod.bottonline.fps.services.transform.helper.converter.ConverterEntryIf;
-import com.hermod.bottonline.fps.services.transform.helper.converter.EnumToStringConverter;
-import com.hermod.bottonline.fps.services.transform.helper.converter.MatchingTypeConverter;
-import com.hermod.bottonline.fps.services.transform.helper.converter.SimpleTypeCollectionConverter;
-import com.hermod.bottonline.fps.services.transform.helper.converter.TypeConverterEntry;
+import com.hermod.bottonline.fps.services.transform.helper.builder.*;
+import com.hermod.bottonline.fps.services.transform.helper.converter.*;
 
 import io.reactivex.Flowable;
 
@@ -36,11 +25,15 @@ public final class TransformationHelper {
 	private static HashMap<String, BuilderRuleIf> BuilderRules = new HashMap<String, BuilderRuleIf>();
 
 	static {
-		Converters.add(new TypeConverterEntry(XMLGregorianCalendar.class, Long.class, calendar -> (Long)((XMLGregorianCalendar)calendar).toGregorianCalendar().getTimeInMillis()));
-		Converters.add(new TypeConverterEntry(XMLGregorianCalendar.class, CharSequence.class, calendar -> ((XMLGregorianCalendar)calendar).toXMLFormat()));
-		Converters.add(new TypeConverterEntry(BigDecimal.class, Double.class, decimalValue -> ((BigDecimal)decimalValue).doubleValue()));
-		Converters.add(new TypeConverterEntry(CharSequence.class,  XMLGregorianCalendar.class, TransformationHelper::charSequenceToXmlCalendar)); 
+		Converters.add(new TypeConverterEntry(XMLGregorianCalendar.class, Long.class, (calendar, ctx) -> (Long)((XMLGregorianCalendar)calendar).toGregorianCalendar().getTimeInMillis()));
+		Converters.add(new TypeConverterEntry(XMLGregorianCalendar.class, CharSequence.class, (calendar, ctx) -> ((XMLGregorianCalendar)calendar).toXMLFormat()));
+		Converters.add(new TypeConverterEntry(BigDecimal.class, Double.class, (decimalValue, ctx) -> ((BigDecimal)decimalValue).doubleValue()));
+		Converters.add(new TypeConverterEntry(Double.class, BigDecimal.class, (doubleValue, ctx) -> new BigDecimal(((Double)doubleValue))));
+		Converters.add(new TypeConverterEntry(CharSequence.class,  XMLGregorianCalendar.class, TransformationHelper::charSequenceToXmlCalendar));
+		Converters.add(new TypeConverterEntry(String.class,  XMLGregorianCalendar.class, TransformationHelper::charSequenceToXmlCalendar));
+		Converters.add(new TypeConverterEntry(Long.class, XMLGregorianCalendar.class, TransformationHelper::longToXmlCalendar));
 		Converters.add(new EnumToStringConverter());
+		Converters.add(new StringToEnumConverter());
 		Converters.add(new MatchingTypeConverter());
 		Converters.add(new ComplexTypeCollectionConverter());
 		Converters.add(new SimpleTypeCollectionConverter());
@@ -89,21 +82,30 @@ public final class TransformationHelper {
 		
 		final Flowable<Method> targetMethodsStream = Flowable
 				.fromArray(toClass.getDeclaredMethods())
-				.filter(p -> p.getName().startsWith("set"));
+				.filter(p -> p.getName().startsWith("set") || p.getName().startsWith("get"))
+				.sorted(new Comparator<Method>() {
+					@Override
+					public int compare(Method o1, Method o2) {
+						return o1.getName().startsWith("set") ? -1 : 1;
+					}
+				});
 		
 		final List<Method[]> result = sourceMethodsStream
-				.flatMap(s -> targetMethodsStream.filter(t -> MatchProperties(s, t)).map(t -> new Method[] { s, t }))
+				.flatMap(s -> targetMethodsStream.filter(t -> MatchProperties(s, t)).take(1).map(t -> new Method[] { s, t }))
 				.toList()
 				.blockingGet();
 
 		for (Method[] pair : result) {
-			final Method getter = pair[0];
-			final Method setter = pair[1];
-			final String path = rootPath + "." + getter.getName().substring(3);
-			final Class<?> getterType = getter.getReturnType();
-			final Class<?> setterType = setter.getParameterTypes()[0];
+			final Method sourceAccessor = pair[0];
+			final Method targetAccessor = pair[1];
+			final String path = rootPath + "." + sourceAccessor.getName().substring(3);
+			final Class<?> getterType = sourceAccessor.getReturnType();
 			
-			final BuilderContext ctx = new BuilderContext(path, getter, setter);
+			final Class<?> setterType = targetAccessor.getName().startsWith("set") 
+					? targetAccessor.getParameterTypes()[0]
+					: targetAccessor.getReturnType();
+			
+			final BuilderContext ctx = new BuilderContext(path, sourceAccessor, targetAccessor);
 			final Optional<ConverterEntryIf> converter = Converters
 				.stream()
 				.filter(c -> c.canConvert(ctx))
@@ -135,19 +137,41 @@ public final class TransformationHelper {
 		return isMatch;
 	}
 	
-	static Object charSequenceToXmlCalendar(final Object input) throws ConversionException {
+	static Object charSequenceToXmlCalendar(final Object input, final BuilderContext ctx) throws ConversionException {
 		try {
-			final DatatypeFactory dtf = DatatypeFactory.newInstance();
+			final String inputDate = input.toString();
+			
+			if (inputDate.length() == 0) {
+				return null;
+			}
+			
 			final DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-	
-			final Date date = format.parse(input.toString());
+			final Date date = format.parse(inputDate);
 			final GregorianCalendar calendar = new GregorianCalendar();
 			calendar.setTime(date);
+			
+			final DatatypeFactory dtf = DatatypeFactory.newInstance();
 			final XMLGregorianCalendar xmlCalendar = dtf.newXMLGregorianCalendar(calendar);
 			return xmlCalendar;
 		}
 		catch (Exception err) {
-			throw new ConversionException(err.getMessage(), err); 
+			throw new ConversionException("Custom conversion CharSequence -> XMLGregorianCalendar failed with '" + err.getMessage() + "' <" + err.getClass().getName() +">", err, ctx); 
+		}
+	}
+	
+	static Object longToXmlCalendar(final Object input, final BuilderContext ctx) throws ConversionException {
+		try {
+			final Long dateAsLong = (Long)input;
+			final Date date = new Date(dateAsLong);
+			final GregorianCalendar calendar = new GregorianCalendar();
+			calendar.setTime(date);
+
+			final DatatypeFactory dtf = DatatypeFactory.newInstance();
+			final XMLGregorianCalendar xmlCalendar = dtf.newXMLGregorianCalendar(calendar);
+			return xmlCalendar;
+		}
+		catch (Exception err) {
+			throw new ConversionException("Custom convertsion Long->XMLGregorianCalendar failed with '" + err.getMessage() + "' <" + err.getClass().getName() +">", err, ctx); 
 		}
 	}
 }

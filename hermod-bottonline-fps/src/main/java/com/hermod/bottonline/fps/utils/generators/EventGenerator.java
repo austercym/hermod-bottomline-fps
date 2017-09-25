@@ -42,7 +42,7 @@ public class EventGenerator {
 		eventType.setSource(source);
 		SimpleDateFormat format = new SimpleDateFormat(Constants.getDefaultEventTimestampFormat());
 		eventType.setTimestamp(format.format(new Date()));
-		eventType.setData(eventData);
+		eventType.setData(eventData.toString());
 		
 		ProcessIdentifierType processIdentifier = new ProcessIdentifierType();
 		processIdentifier.setUuid("PROCESS-" + uuid);

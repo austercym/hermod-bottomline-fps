@@ -1,14 +1,15 @@
 package com.hermod.bottonline.fps.services.transform.helper;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import io.reactivex.Flowable;
 
 public class BuilderContext {
 
-	private Method getter;
-	private Method setter;
+	private Method sourceValueAccessor;
+	private Method targetValueAccessor;
 	private String path;
 	private String propertyName;
 	private Field sourceField;
@@ -17,28 +18,45 @@ public class BuilderContext {
 	private String targetFieldTypeName;
 	private Class<?> getterType;
 	private Class<?> setterType;
+	private boolean propertyIsReadonly;
 	
-	public BuilderContext(String path, Method getter, Method setter) {
-		this.propertyName = getter.getName().substring(3);
-		this.getter = getter;
-		this.setter = setter;
+	public BuilderContext(String path, Method sourceValueAccessor, Method targetValueAccessor) {
+		this.propertyName = sourceValueAccessor.getName().substring(3);
+		this.sourceValueAccessor = sourceValueAccessor;
+		this.targetValueAccessor = targetValueAccessor;
 		this.path = path;
-		this.sourceField = getUnderlyingField(getter);
-		this.targetField = getUnderlyingField(setter);
+		this.sourceField = getUnderlyingField(sourceValueAccessor);
+		this.targetField = getUnderlyingField(targetValueAccessor);
 		this.sourceFieldTypeName = this.sourceField.getType().getName();
 		this.targetFieldTypeName = this.targetField.getType().getName();		
-		this.getterType = getter.getReturnType();
-		this.setterType = setter.getParameterTypes()[0];
+		this.getterType = sourceValueAccessor.getReturnType();
+		
+		if (targetValueAccessor.getName().startsWith("set")) {
+			this.setterType = targetValueAccessor.getParameterTypes()[0];
+			this.propertyIsReadonly = false;
+		} else {
+			this.setterType = targetValueAccessor.getReturnType();
+			this.propertyIsReadonly = true;
+		}
+	}
+	
+	public Object createTargetObject(final Object containerObject) throws InvocationTargetException, IllegalAccessException, InstantiationException {
+		if (propertyIsReadonly) {
+			return targetValueAccessor.invoke(containerObject);
+		} else {
+			return setterType.newInstance();
+		}
+	}
+	
+	public void updateTargetObject(final Object containerObject, final Object targetValue) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		if (propertyIsReadonly) return;
+		targetValueAccessor.invoke(containerObject, targetValue);
 	}
 
 	public Method getGetter() {
-		return getter;
+		return sourceValueAccessor;
 	}
-	
-	public Method getSetter() {
-		return setter;
-	}
-	
+
 	public String getPath() {
 		return path;
 	}

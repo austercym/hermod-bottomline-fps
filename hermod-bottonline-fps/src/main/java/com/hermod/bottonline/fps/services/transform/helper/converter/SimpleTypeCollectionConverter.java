@@ -1,7 +1,6 @@
 package com.hermod.bottonline.fps.services.transform.helper.converter;
 
 import java.lang.reflect.ParameterizedType;
-import java.util.ArrayList;
 import java.util.Collection;
 
 import com.hermod.bottonline.fps.services.transform.helper.BuilderContext;
@@ -30,23 +29,8 @@ public class SimpleTypeCollectionConverter implements ConverterEntryIf {
 	}
 
 	@Override
-	public ConvertFunction getConvertFunction(final BuilderContext context) {
-		
-		return new ConvertFunction() {
-			
-			@Override
-			public Object convert(Object inputCollection) throws ConversionException {
-				if (null == inputCollection) return null;
-				
-				int items = 0;
-				final Collection<Object> result = new ArrayList<Object>();
-				for (Object item: (Collection<?>)inputCollection) {
-					++items;
-					result.add(item);
-				}
-				return items == 0 ? null : result;
-			}			
-		};
+	public ConvertFunction getConvertFunction(final BuilderContext context) {		
+		return (source, targetReference) -> copyCollection(source, targetReference, context);
 	}
 	
 	@Override
@@ -59,13 +43,23 @@ public class SimpleTypeCollectionConverter implements ConverterEntryIf {
 		return ConverterPriority.SIMPLE_TYPE_COLLECTION_CONVERTER_PRIORITY;
 	}
 	
-	static Object copyCollection(final Object source) {
+	static Object copyCollection(final Object source, final Object targetReference, final BuilderContext context) throws ConversionException {
 		if (null == source) return null;
 		final Collection<?> collection = (Collection<?>)source;
 		if (collection.isEmpty()) return null;
 		
-		final Collection<Object> result = new ArrayList<Object>(collection);
-		return result;
+		try {
+			int items = 0;
+			final Collection<Object> result = (Collection<Object>)context.createTargetObject(targetReference);
+			for (Object item: (Collection<?>)collection) {
+				++items;
+				result.add(item);
+			}
+			return items == 0 ? null : result;	
+		}
+		catch (Exception err) {
+			throw new ConversionException("Failed to apply conversion at '" + context.getPath() + "' due to " + err.getMessage() + " <" + err.getClass().getName() + ">", err, context);
+		}
 	}
 	
 	private static boolean canBeCopied(final Class<?> type) {

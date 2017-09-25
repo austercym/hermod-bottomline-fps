@@ -9,7 +9,7 @@ public class convertFromSourceToTargetTest {
 	static {
 		TransformationHelper.registerMapping(
 			input.types.ContainerType.class, 
-			output.types.ContainerType.class);
+			output.types.ContainerType.class);		
 	}
 	
 	@Test

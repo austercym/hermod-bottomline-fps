@@ -18,6 +18,11 @@ public class ConversionException extends Exception {
 		super(message);
 	}
 
+	public ConversionException(String message, Object sender) {
+		super(message);
+		this.sender = sender;
+	}
+	
 	public Object getSender() {
 		return this.sender;
 	}

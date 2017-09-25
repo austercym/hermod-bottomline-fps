@@ -27,7 +27,7 @@ public class EnumToStringConverter implements ConverterEntryIf {
 		return getClass().getName();
 	}
 
-	static Object convertValue(final Object source) {
+	static Object convertValue(final Object source, final Object targetReference) {
 		if (null == source) {
 			return null;
 		}

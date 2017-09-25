@@ -6,9 +6,9 @@ public class TypeConverterEntry implements ConverterEntryIf {
 	
 	private Class<?> sourceClass;
 	private Class<?> targetClass;
-	private ConvertFunction convertMethod;
+	private ConvertFunctionExtended convertMethod;
 	
-	public TypeConverterEntry(Class<?> sourceClass, Class<?> targetClass, ConvertFunction convertMethod) {
+	public TypeConverterEntry(Class<?> sourceClass, Class<?> targetClass, ConvertFunctionExtended convertMethod) {
 		this.sourceClass = sourceClass;
 		this.targetClass = targetClass;
 		this.convertMethod = convertMethod;
@@ -27,7 +27,7 @@ public class TypeConverterEntry implements ConverterEntryIf {
 
 	@Override
 	public ConvertFunction getConvertFunction(final BuilderContext context) {
-		return this.convertMethod;
+		return (value, targetReference) -> this.convertMethod.convert(value, context);
 	}
   
 	@Override

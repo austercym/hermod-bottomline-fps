@@ -43,12 +43,12 @@ public class ComplexTypeCollectionConverter implements ConverterEntryIf {
 		return new ConvertFunction() {
 			
 			@Override
-			public Object convert(Object inputCollection) throws ConversionException {
+			public Object convert(final Object inputCollection, final Object targetReference) throws ConversionException {
 				if (null == inputCollection) return null;
 				
-				int items = 0;
-				final Collection<Object> result = new ArrayList<Object>();
 				try {
+					int items = 0;
+					final Collection<Object> result = (Collection<Object>)context.createTargetObject(targetReference);
 					for (Object item: (Collection<?>)inputCollection) {
 						++items;
 						Object target = targetFieldClass.newInstance();
@@ -56,15 +56,16 @@ public class ComplexTypeCollectionConverter implements ConverterEntryIf {
 							try {
 								rule.apply(item, target);
 							}
+							catch (ConversionException err) {
+								throw err;
+							}
 							catch (Exception err) {
-								if (err instanceof ConversionException) {
-									throw (ConversionException)err;
-								}
 								throw new ConversionException("Failed to apply conversion at '" + context.getPath() + "[" + (items-1) + "]' due to" + err.getMessage() + " <" + err.getClass().getName() + ">", err, rule);
 							}
 						}
 						result.add(target);
 					}
+					return items == 0 ? null : result;
 				}
 				catch (ConversionException err) {
 					throw err;
@@ -73,43 +74,8 @@ public class ComplexTypeCollectionConverter implements ConverterEntryIf {
 					throw new ConversionException("Failed to apply conversion at '"+context.getPath()+"' due to " + err.getMessage() + " <" + err.getClass().getName() + ">", err, this);			
 				}
 				
-				return items == 0 ? null : result;
 			}			
 		};
-		/*
-		int i = 0;
-		final ArrayList<Object> targetCollection = new ArrayList<Object>();
-
-		for (Object item : (Collection<?>)sourceValue) {
-			
-			if (targetFieldClass.isAssignableFrom(sourceFieldClass)) {
-				targetCollection.add(item);
-				++i;
-				continue;
-			}
-			
-			final Optional<Function<Object, Object>> opt = tryGetConverter(targetFieldClass, sourceFieldClass);
-			
-			if (opt.isPresent()) {
-				final Object convertedValue = opt.get().apply(item);
-				targetCollection.add(convertedValue);
-				++i;
-				continue;
-			}
-			
-			final Object targetValue = targetFieldClass.newInstance();
-			final String location = path + "[" + i + "]";
-			deepCopy(sourceFieldClass, targetFieldClass, item, targetValue, location);
-			targetCollection.add(targetValue);
-			++i;
-		}
-		if (i > 0) {
-			setter.invoke(toInstance, targetCollection);
-		}
-		
-		
-		return null;
-		*/
 	}
 
 	@Override

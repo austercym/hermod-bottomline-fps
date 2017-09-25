@@ -26,8 +26,8 @@ public class ConversionBuilderRule implements BuilderRuleIf {
 			
 			final Object sourceValue = this.ctx.getGetter().invoke(source);
 			if (null == sourceValue) return;
-			final Object targetValue = this.convertMethod.convert(sourceValue);
-			this.ctx.getSetter().invoke(target, targetValue);
+			final Object targetValue = this.convertMethod.convert(sourceValue, target);
+			this.ctx.updateTargetObject(target,  targetValue);
 		}
 		catch (ConversionException err) {
 			throw err;

@@ -11,13 +11,14 @@ import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
 public class Pasc008Transform implements FPSTransform {
 
 	static {
+		TransformationHelper.registerMapping(				 
+				com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Document.class,
+				iso.std.iso._20022.tech.xsd.pacs_008_001.Document.class);
+
 		TransformationHelper.registerMapping(
 			iso.std.iso._20022.tech.xsd.pacs_008_001.Document.class, 
 			com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Document.class);						
 
-		TransformationHelper.registerMapping(				 
-				com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Document.class,
-				iso.std.iso._20022.tech.xsd.pacs_008_001.Document.class);
 	}
 
 	
