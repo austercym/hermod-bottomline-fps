@@ -5,12 +5,17 @@ import org.junit.Test;
 import com.hermod.bottonline.fps.services.transform.helper.ConversionException;
 import com.hermod.bottonline.fps.services.transform.helper.TransformationHelper;
 
-public class convertObjectsWithCollectionTest {
+public class ConvertObjectsWithCollectionTest {
 
 	static {
-		TransformationHelper.registerMapping(
-			input.types.ObjectWithCollection.class, 
-			output.types.ObjectWithCollection.class);
+		try {
+			TransformationHelper.registerMapping(
+				input.types.ObjectWithCollection.class, 
+				output.types.ObjectWithCollection.class);
+		}
+		catch (Exception err) {
+			err.printStackTrace();
+		}
 	}
 	
 	@Test

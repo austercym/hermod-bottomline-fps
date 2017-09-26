@@ -4,12 +4,17 @@ import org.junit.Test;
 
 import com.hermod.bottonline.fps.services.transform.helper.TransformationHelper;
 
-public class convertFromSourceToTargetTest {
+public class ConvertFromSourceToTargetTest {
 
 	static {
-		TransformationHelper.registerMapping(
-			input.types.ContainerType.class, 
-			output.types.ContainerType.class);		
+		try {
+			TransformationHelper.registerMapping(
+				input.types.ContainerType.class, 
+				output.types.ContainerType.class);
+		}
+		catch (Exception err) {
+			err.printStackTrace();
+		}
 	}
 	
 	@Test

@@ -59,75 +59,90 @@ public final class TransformationHelper {
 		return target;
 	}
 	
-	public static synchronized void registerMapping(final Class<?> fromClass, final Class<?> toClass) {
+	public static synchronized void registerMapping(final Class<?> fromClass, final Class<?> toClass) throws ConfigurationException {
 		final RootBuilder rule = createMapping(fromClass, toClass);
 		HashMap<String, BuilderRuleIf> newRules = new HashMap<String, BuilderRuleIf>(BuilderRules);
 		newRules.put(rule.getKey(), rule);
 		BuilderRules = newRules;
 	}
 	
-	private static RootBuilder createMapping(final Class<?> fromClass, final Class<?> toClass) {
+	private static RootBuilder createMapping(final Class<?> fromClass, final Class<?> toClass) throws ConfigurationException {
 		final Collection<BuilderRuleIf> rules = reflectType(fromClass, toClass, "root");
 		final RootBuilder rule = new RootBuilder(fromClass, toClass, rules);
 		return rule;
 	}
 	
-	public static Collection<BuilderRuleIf> reflectType(final Class<?> fromClass, final Class<?> toClass, final String rootPath) {
-		
-		final Collection<BuilderRuleIf> ruleSet = new ArrayList<BuilderRuleIf>();
-		
-		final Flowable<Method> sourceMethodsStream = Flowable
-				.fromArray(fromClass.getDeclaredMethods())
-				.filter(p -> p.getName().startsWith("get"));
-		
-		final Flowable<Method> targetMethodsStream = Flowable
-				.fromArray(toClass.getDeclaredMethods())
-				.filter(p -> p.getName().startsWith("set") || p.getName().startsWith("get"))
-				.sorted(new Comparator<Method>() {
-					@Override
-					public int compare(Method o1, Method o2) {
-						return o1.getName().startsWith("set") ? -1 : 1;
+	public static Collection<BuilderRuleIf> reflectType(final Class<?> fromClass, final Class<?> toClass, final String rootPath) throws ConfigurationException {
+		try {
+			final Collection<BuilderRuleIf> ruleSet = new ArrayList<BuilderRuleIf>();
+			
+			final Flowable<Method> sourceMethodsStream = Flowable
+					.fromArray(fromClass.getDeclaredMethods())
+					.filter(p -> p.getName().startsWith("get"));
+			
+			final Flowable<Method> targetMethodsStream = Flowable
+					.fromArray(toClass.getDeclaredMethods())
+					.filter(p -> p.getName().startsWith("set") || p.getName().startsWith("get"))
+					.sorted(new Comparator<Method>() {
+						@Override
+						public int compare(Method o1, Method o2) {
+							return o1.getName().compareTo(o2.getName()) * -1;
+						}
+					});
+			
+			final List<Method[]> result = sourceMethodsStream
+					.flatMap(s -> targetMethodsStream.filter(t -> MatchProperties(s, t)).take(1).map(t -> new Method[] { s, t }))
+					.toList()
+					.blockingGet();
+	
+			for (Method[] pair : result) {
+				final Method sourceAccessor = pair[0];
+				final Method targetAccessor = pair[1];
+				final String path = rootPath + "." + sourceAccessor.getName().substring(3);
+				final Class<?> getterType = sourceAccessor.getReturnType();
+				
+				final Class<?> setterType = targetAccessor.getName().startsWith("set") 
+						? targetAccessor.getParameterTypes()[0]
+						: targetAccessor.getReturnType();
+				
+				final BuilderContext ctx = new BuilderContext(path, sourceAccessor, targetAccessor);
+				final Optional<ConverterEntryIf> converter = Converters
+					.stream()
+					.filter(c -> c.canConvert(ctx))
+					.sorted(new Comparator<ConverterEntryIf>() {
+						public int compare(ConverterEntryIf o1, ConverterEntryIf o2) {
+							return o1.getPriority() == o2.getPriority() ? 0 : o1.getPriority() > o2.getPriority() ? 1 : -1;
+						};
+					})
+					.findFirst();
+	
+				try {
+					if (converter.isPresent()) {
+						final ConverterEntryIf valueConverter = converter.get();
+						final BuilderRuleIf rule = new ConversionBuilderRule(ctx, valueConverter);
+						ruleSet.add(rule);
 					}
-				});
-		
-		final List<Method[]> result = sourceMethodsStream
-				.flatMap(s -> targetMethodsStream.filter(t -> MatchProperties(s, t)).take(1).map(t -> new Method[] { s, t }))
-				.toList()
-				.blockingGet();
-
-		for (Method[] pair : result) {
-			final Method sourceAccessor = pair[0];
-			final Method targetAccessor = pair[1];
-			final String path = rootPath + "." + sourceAccessor.getName().substring(3);
-			final Class<?> getterType = sourceAccessor.getReturnType();
-			
-			final Class<?> setterType = targetAccessor.getName().startsWith("set") 
-					? targetAccessor.getParameterTypes()[0]
-					: targetAccessor.getReturnType();
-			
-			final BuilderContext ctx = new BuilderContext(path, sourceAccessor, targetAccessor);
-			final Optional<ConverterEntryIf> converter = Converters
-				.stream()
-				.filter(c -> c.canConvert(ctx))
-				.sorted(new Comparator<ConverterEntryIf>() {
-					public int compare(ConverterEntryIf o1, ConverterEntryIf o2) {
-						return o1.getPriority() == o2.getPriority() ? 0 : o1.getPriority() > o2.getPriority() ? 1 : -1;
-					};
-				})
-				.findFirst();
-
-			if (converter.isPresent()) {
-				final ConverterEntryIf valueConverter = converter.get();
-				final BuilderRuleIf rule = new ConversionBuilderRule(ctx, valueConverter);
-				ruleSet.add(rule);
+					else {
+						final Collection<BuilderRuleIf> childRules = reflectType(getterType, setterType, path);
+						final BuilderRuleIf rule = new ComplexObjectBuilderRule(ctx, childRules);
+						ruleSet.add(rule);
+					}
+				}
+				catch (ConfigurationException err) {
+					throw err;
+				}
+				catch (Exception err) {
+					throw new ConfigurationException("Failed to configure conversion at path '" + path + "' due to " + err.getMessage() + " <" + err.getClass().getName() + ">", err, ctx);
+				}
 			}
-			else {
-				final Collection<BuilderRuleIf> childRules = reflectType(getterType, setterType, path);
-				final BuilderRuleIf rule = new ComplexObjectBuilderRule(ctx, childRules);
-				ruleSet.add(rule);
-			}
+			return ruleSet;
 		}
-		return ruleSet;
+		catch (ConfigurationException err) {
+			throw err;
+		}
+		catch (Exception err) {
+			throw new ConfigurationException("Failed to configure conversion at path '" + rootPath + "' due to " +err.getMessage() + " <" + err.getClass().getName() + ">", err);
+		}
 	}
 	
 	static boolean MatchProperties(Method sourceProperty, Method targetProperty) {

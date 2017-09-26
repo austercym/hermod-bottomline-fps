@@ -2,6 +2,7 @@ package com.hermod.bottonline.fps.services.transform;
 
 import org.springframework.stereotype.Component;
 
+import com.hermod.bottonline.fps.services.transform.helper.ConfigurationException;
 import com.hermod.bottonline.fps.services.transform.helper.ConversionException;
 import com.hermod.bottonline.fps.services.transform.helper.TransformationHelper;
 import com.hermod.bottonline.fps.types.FPSMessage;
@@ -11,13 +12,18 @@ import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
 public class Pasc002Transform implements FPSTransform {
 
 	static {
-		TransformationHelper.registerMapping(
-			iso.std.iso._20022.tech.xsd.pacs_002_001.Document.class, 
-			com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs002_001_06.Document.class);						
-
-		TransformationHelper.registerMapping(
-				com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs002_001_06.Document.class,
-				iso.std.iso._20022.tech.xsd.pacs_002_001.Document.class);						
+		try {
+			TransformationHelper.registerMapping(
+				iso.std.iso._20022.tech.xsd.pacs_002_001.Document.class, 
+				com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs002_001_06.Document.class);						
+	
+			TransformationHelper.registerMapping(
+					com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs002_001_06.Document.class,
+					iso.std.iso._20022.tech.xsd.pacs_002_001.Document.class);
+		}
+		catch (ConfigurationException err) {
+			err.printStackTrace();
+		}
 	}
 	
 	@Override

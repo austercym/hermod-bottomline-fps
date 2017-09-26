@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import com.hermod.bottonline.fps.services.transform.helper.BuilderContext;
+import com.hermod.bottonline.fps.services.transform.helper.ConfigurationException;
 import com.hermod.bottonline.fps.services.transform.helper.ConversionException;
 import com.hermod.bottonline.fps.services.transform.helper.TransformationHelper;
 import com.hermod.bottonline.fps.services.transform.helper.builder.BuilderRuleIf;
@@ -24,7 +25,7 @@ public class ComplexTypeCollectionConverter implements ConverterEntryIf {
 	}
 
 	@Override
-	public ConvertFunction getConvertFunction(final BuilderContext context) {
+	public ConvertFunction getConvertFunction(final BuilderContext context) throws ConfigurationException {
 
 		final Field sourceField = context.getSourceField();
 		final Field targetField = context.getTargetField();

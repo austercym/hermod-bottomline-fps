@@ -1,6 +1,7 @@
 package com.hermod.bottonline.fps.services.transform.helper.builder;
 
 import com.hermod.bottonline.fps.services.transform.helper.BuilderContext;
+import com.hermod.bottonline.fps.services.transform.helper.ConfigurationException;
 import com.hermod.bottonline.fps.services.transform.helper.ConversionException;
 import com.hermod.bottonline.fps.services.transform.helper.converter.ConvertFunction;
 import com.hermod.bottonline.fps.services.transform.helper.converter.ConverterEntryIf;
@@ -10,7 +11,7 @@ public class ConversionBuilderRule implements BuilderRuleIf {
 	private String converterName;
 	private ConvertFunction convertMethod;
 	
-	public ConversionBuilderRule(final BuilderContext context, final ConverterEntryIf converter) {
+	public ConversionBuilderRule(final BuilderContext context, final ConverterEntryIf converter) throws ConfigurationException {
 		this.ctx = context;
 		this.convertMethod = converter.getConvertFunction(context);
 		this.converterName = converter.getConverterName();

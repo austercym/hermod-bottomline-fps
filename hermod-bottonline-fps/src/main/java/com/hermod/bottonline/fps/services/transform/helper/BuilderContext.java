@@ -3,6 +3,8 @@ package com.hermod.bottonline.fps.services.transform.helper;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import io.reactivex.Flowable;
 
@@ -43,8 +45,10 @@ public class BuilderContext {
 	public Object createTargetObject(final Object containerObject) throws InvocationTargetException, IllegalAccessException, InstantiationException {
 		if (propertyIsReadonly) {
 			return targetValueAccessor.invoke(containerObject);
+		} else if (Collection.class.isAssignableFrom(setterType)){
+			return new ArrayList<Object>();
 		} else {
-			return setterType.newInstance();
+			return setterType.newInstance();			
 		}
 	}
 	
