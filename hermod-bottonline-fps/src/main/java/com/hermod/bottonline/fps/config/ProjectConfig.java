@@ -10,7 +10,7 @@ import org.springframework.jms.listener.DefaultMessageListenerContainer;
 import org.springframework.kafka.listener.AbstractMessageListenerContainer;
 
 @Configuration
-public class ProjectConfig {
+public class ProjectConfig extends ComponentConfig {
 
 	private static final Logger LOG = LogManager.getLogger(ProjectConfig.class);
 	

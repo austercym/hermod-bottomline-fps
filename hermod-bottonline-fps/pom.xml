@@ -11,6 +11,10 @@
   <url>http://maven.apache.org</url>
 
   <properties>
+  
+  	<maven.compiler.source>1.8</maven.compiler.source>
+	<maven.compiler.target>1.8</maven.compiler.target>
+		
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.dependency.directory>${basedir}/lib</project.dependency.directory>
     <java.version>1.8</java.version>
@@ -22,9 +26,12 @@
     <javax.jms.version>2.0.1</javax.jms.version>
     <jaxb2.basics.version>1.11.1</jaxb2.basics.version>
     <jaxb2.maven.plugin.version>2.3.1</jaxb2.maven.plugin.version>
+    <gson.google.version>2.8.1</gson.google.version>
     <umbrella.version>0.0.1</umbrella.version>
     
     <junit.version>4.11</junit.version>
+    
+    
   </properties>
 
   <parent>
@@ -64,6 +71,11 @@
 		<groupId>org.jvnet.jaxb2_commons</groupId>
 		<artifactId>jaxb2-basics-runtime</artifactId>
 		<version>${jaxb2.basics.version}</version>
+	</dependency>
+	<dependency>
+		<groupId>com.google.code.gson</groupId>
+		<artifactId>gson</artifactId>
+		<version>${gson.google.version}</version>
 	</dependency>
 	<dependency>
 		<groupId>com.orwellg.umbrella</groupId>

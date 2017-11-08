@@ -18,11 +18,11 @@ public class EventGenerator {
 
 	private final static Logger LOG = LogManager.getLogger(EventGenerator.class);
 
-	public static Event generateEvent(String source, String eventName, Object eventData) {
+	public static Event generateEvent(String source, String eventName, String eventData) {
 		return generateEvent(source, eventName, eventData, Constants.IPAGOO_ENTITY, Constants.IPAGOO_BRAND);
 	}
 	
-	public static Event generateEvent(String source, String eventName, Object eventData, String componentEntity, String componentBrand) {
+	public static Event generateEvent(String source, String eventName, String eventData, String componentEntity, String componentBrand) {
 		
 		LOG.debug("Generating event with received datas.");
 		

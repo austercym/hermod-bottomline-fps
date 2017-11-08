@@ -1,8 +1,15 @@
 package com.hermod.bottonline.fps.config;
 
-import com.hermod.bottonline.fps.utils.factory.ConfigurationFactory;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
+import com.google.gson.Gson;
+
+@Configuration
 public abstract class ComponentConfig {
-
-	public ComponentConfig() { ConfigurationFactory.initConfigurationParams(); }
+	
+	@Bean
+	public Gson gson() {
+		return new Gson();
+	}
 }

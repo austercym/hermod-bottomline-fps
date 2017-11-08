@@ -5,6 +5,7 @@ import javax.jms.QueueConnectionFactory;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -14,7 +15,6 @@ import org.springframework.jms.connection.UserCredentialsConnectionFactoryAdapte
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import com.hermod.bottonline.fps.utils.factory.ConfigurationFactory;
 import com.ibm.mq.jms.MQQueueConnectionFactory;
 import com.ibm.msg.client.wmq.WMQConstants;
 
@@ -23,6 +23,19 @@ import com.ibm.msg.client.wmq.WMQConstants;
 public class JmsConnectionConfig extends ComponentConfig {
 
 	private Logger LOG = LogManager.getLogger(JmsConnectionConfig.class);
+	
+	@Value("${wq.mq.host}")
+	private String host;
+	@Value("${wq.mq.port}")
+	private Integer port;
+	@Value("${wq.mq.channel}")
+	private String channel;
+	@Value("${wq.mq.queue.manager}")
+	private String queueManager;
+	@Value("${wq.mq.username}")
+	private String username;
+	@Value("${wq.mq.password}")
+	private String password;
 	
 	@Bean
     public ConnectionFactory connectionFactory() {
@@ -38,14 +51,14 @@ public class JmsConnectionConfig extends ComponentConfig {
 	public MQQueueConnectionFactory mqQueueConnectionFactory() {
 		
 	    MQQueueConnectionFactory mqQueueConnectionFactory = new MQQueueConnectionFactory();
-	    mqQueueConnectionFactory.setHostName(ConfigurationFactory.getConfigurationParams().getMQConfigurationParams().getHost());
+	    mqQueueConnectionFactory.setHostName(host);
 	    try {
 	        mqQueueConnectionFactory.setTransportType(WMQConstants.WMQ_CM_CLIENT);
 	        // CCISD has to be the same within the Queue Manager, 1208 is UTF-8
 	        mqQueueConnectionFactory.setCCSID(1208);
-	        mqQueueConnectionFactory.setChannel(ConfigurationFactory.getConfigurationParams().getMQConfigurationParams().getChannel());
-	        mqQueueConnectionFactory.setPort(ConfigurationFactory.getConfigurationParams().getMQConfigurationParams().getPort());
-	        mqQueueConnectionFactory.setQueueManager(ConfigurationFactory.getConfigurationParams().getMQConfigurationParams().getQueueManager());
+	        mqQueueConnectionFactory.setChannel(channel);
+	        mqQueueConnectionFactory.setPort(port);
+	        mqQueueConnectionFactory.setQueueManager(queueManager);
 	    } catch (Exception e) {
 	    		LOG.error("Error creating the MQ Connection Factory. Message: {}", e.getMessage(), e);
 	    }
@@ -56,8 +69,8 @@ public class JmsConnectionConfig extends ComponentConfig {
 	@Bean
 	public UserCredentialsConnectionFactoryAdapter userCredentialsConnectionFactoryAdapter(MQQueueConnectionFactory mqQueueConnectionFactory) {
 	    UserCredentialsConnectionFactoryAdapter userCredentialsConnectionFactoryAdapter = new UserCredentialsConnectionFactoryAdapter();
-	    userCredentialsConnectionFactoryAdapter.setUsername(ConfigurationFactory.getConfigurationParams().getMQConfigurationParams().getUsername());
-	    userCredentialsConnectionFactoryAdapter.setPassword(ConfigurationFactory.getConfigurationParams().getMQConfigurationParams().getPassword());
+	    userCredentialsConnectionFactoryAdapter.setUsername(username);
+	    userCredentialsConnectionFactoryAdapter.setPassword(password);
 	    userCredentialsConnectionFactoryAdapter.setTargetConnectionFactory(mqQueueConnectionFactory);
 	    return userCredentialsConnectionFactoryAdapter;
 	}

@@ -1,18 +1,18 @@
 package com.hermod.bottonline.fps;
 
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 
-import com.hermod.bottonline.fps.utils.factory.ConfigurationFactory;
+import com.hermod.bottonline.fps.spring.context.SpringProfileSettingApplicationContextInitializer;
+import com.hermod.bottonline.fps.utils.properties.DefaultPropertyValues;
 
 @SpringBootApplication
 public class FpsBootApplication {
 
-    public static void main(String[] args) {
-    		
-    		ConfigurationFactory.initConfigurationParams();
-    		
-        SpringApplication.run(FpsBootApplication.class, args);
+    public static void main(String[] args) {	
+    		new SpringApplicationBuilder(FpsBootApplication.class)
+    			.initializers(new SpringProfileSettingApplicationContextInitializer("hermod-bottonline-fps.properties", DefaultPropertyValues.getDefaultValues()))
+    			.run(args);
     }
 
 }

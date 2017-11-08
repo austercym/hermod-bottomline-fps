@@ -16,14 +16,15 @@ import org.apache.activemq.util.ByteArrayInputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.stereotype.Component;
 
+import com.google.gson.Gson;
 import com.hermod.bottonline.fps.services.kafka.KafkaSender;
 import com.hermod.bottonline.fps.services.transform.FPSTransform;
 import com.hermod.bottonline.fps.types.FPSMessage;
-import com.hermod.bottonline.fps.utils.factory.ConfigurationFactory;
 import com.hermod.bottonline.fps.utils.generators.EventGenerator;
 import com.orwellg.umbrella.avro.types.event.Event;
 import com.orwellg.umbrella.commons.types.utils.avro.RawMessageUtils;
@@ -34,6 +35,16 @@ public class MQListener extends BaseListener implements MessageListener {
 
 	private static Logger LOG = LogManager.getLogger(MQListener.class);
     
+	@Autowired
+	private Gson gson;
+	
+	@Value("{entity.name}")
+	private String entity;
+	@Value("${brand.name}")
+	private String brand;
+	@Value("${kafka.topic.outbound}")
+	private String outboundTopic;
+	
 	@Autowired
 	private Jaxb2Marshaller marshaller;
 	
@@ -74,12 +85,12 @@ public class MQListener extends BaseListener implements MessageListener {
 		        		// Send avro message to Kafka
 		        		Event event = EventGenerator.generateEvent(
 		        				this.getClass().getName(), FPSEvents.FPS_REQUEST_RECEIVED.getEventName(), 
-		        				avroFpsMessage, 
-		        				ConfigurationFactory.getConfigurationParams().getComponentConfigurationParam().getEntity(), 
-		        				ConfigurationFactory.getConfigurationParams().getComponentConfigurationParam().getBrand()
+		        				gson.toJson(avroFpsMessage), 
+		        				entity, 
+		        				brand
 		        			);
 		        		kafkaSender.send(
-		        				ConfigurationFactory.getConfigurationParams().getKafkaConfigurationParams().getOutboundTopic(), 
+		        				outboundTopic, 
 		        				RawMessageUtils.encodeToString(Event.SCHEMA$, event)
 		        			);
 	        		} else {

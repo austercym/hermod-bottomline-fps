@@ -1,5 +1,6 @@
 package com.hermod.bottonline.fps.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jms.annotation.EnableJms;
@@ -9,11 +10,12 @@ import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.support.converter.MarshallingMessageConverter;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
-import com.hermod.bottonline.fps.utils.factory.ConfigurationFactory;
-
 @Configuration
 @EnableJms
 public class JmsProducerConfig extends ComponentConfig {
+	
+	@Value("${wq.mq.receive.timeout}")
+	private Long receiveTimeout;
 	
 	@Bean
 	public Jaxb2Marshaller marshaller() {
@@ -32,7 +34,7 @@ public class JmsProducerConfig extends ComponentConfig {
 	public JmsOperations jmsOperations(CachingConnectionFactory cachingConnectionFactory) {
 		
 		JmsTemplate jmsTemplate = new JmsTemplate(cachingConnectionFactory);
-	    jmsTemplate.setReceiveTimeout(ConfigurationFactory.getConfigurationParams().getMQConfigurationParams().getReceiveTimeout());
+	    jmsTemplate.setReceiveTimeout(receiveTimeout);
 	    
 	    // Creating and asing the message converter for jmsTemplate
 	    MarshallingMessageConverter converter = new MarshallingMessageConverter();
