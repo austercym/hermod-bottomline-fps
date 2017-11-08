@@ -1,0 +1,221 @@
+{
+	"Message": {
+		"FIToFICstmrCdtTrf": {
+			"GrpHdr": {
+				"MsgId": "MsgPrefix...20160513223041000000008",
+				"CreDtTm": 1463171441000,
+				"BtchBookg": null,
+				"NbOfTxs": "1",
+				"CtrlSum": null,
+				"TtlIntrBkSttlmAmt": {
+					"value": 432.1,
+					"Ccy": "USD"
+				},
+				"IntrBkSttlmDt": "2016-05-13",
+				"SttlmInf": {
+					"SttlmMtd": "CLRG",
+					"SttlmAcct": null,
+					"ClrSys": {
+						"Cd": "TCH",
+						"Prtry": null
+					},
+					"InstgRmbrsmntAgt": null,
+					"InstgRmbrsmntAgtAcct": null,
+					"InstdRmbrsmntAgt": null,
+					"InstdRmbrsmntAgtAcct": null,
+					"ThrdRmbrsmntAgt": null,
+					"ThrdRmbrsmntAgtAcct": null
+				},
+				"PmtTpInf": null,
+				"InstgAgt": null,
+				"InstdAgt": null
+			},
+			"CdtTrfTxInf": [{
+					"PmtId": {
+						"InstrId": "20160516021200201BFFF0000000001",
+						"EndToEndId": "E2E-TxPrefix20160513223041391000000",
+						"TxId": "TxPrefix....20160513223041391000000",
+						"ClrSysRef": "001"
+					},
+					"PmtTpInf": {
+						"InstrPrty": null,
+						"ClrChanl": null,
+						"SvcLvl": {
+							"Cd": "SDVA",
+							"Prtry": null
+						},
+						"LclInstrm": {
+							"Cd": null,
+							"Prtry": "CONSUMER"
+						},
+						"CtgyPurp": null
+					},
+					"IntrBkSttlmAmt": {
+						"value": 432.1,
+						"Ccy": "USD"
+					},
+					"IntrBkSttlmDt": null,
+					"SttlmPrty": null,
+					"SttlmTmIndctn": null,
+					"SttlmTmReq": null,
+					"AccptncDtTm": null,
+					"PoolgAdjstmntDt": null,
+					"InstdAmt": null,
+					"XchgRate": null,
+					"ChrgBr": "SLEV",
+					"ChrgsInf": null,
+					"PrvsInstgAgt": null,
+					"PrvsInstgAgtAcct": null,
+					"InstgAgt": {
+						"FinInstnId": {
+							"BICFI": null,
+							"ClrSysMmbId": {
+								"ClrSysId": null,
+								"MmbId": "021200201"
+							},
+							"Nm": null,
+							"PstlAdr": null,
+							"Othr": null
+						},
+						"BrnchId": null
+					},
+					"InstdAgt": {
+						"FinInstnId": {
+							"BICFI": null,
+							"ClrSysMmbId": {
+								"ClrSysId": null,
+								"MmbId": "020010001"
+							},
+							"Nm": null,
+							"PstlAdr": null,
+							"Othr": null
+						},
+						"BrnchId": null
+					},
+					"IntrmyAgt1": null,
+					"IntrmyAgt1Acct": null,
+					"IntrmyAgt2": null,
+					"IntrmyAgt2Acct": null,
+					"IntrmyAgt3": null,
+					"IntrmyAgt3Acct": null,
+					"UltmtDbtr": null,
+					"InitgPty": null,
+					"Dbtr": {
+						"Nm": "Mr Debtor 1",
+						"PstlAdr": {
+							"AdrTp": null,
+							"Dept": null,
+							"SubDept": null,
+							"StrtNm": "22 Heron Drive",
+							"BldgNb": null,
+							"PstCd": null,
+							"TwnNm": "London",
+							"CtrySubDvsn": null,
+							"Ctry": "UK",
+							"AdrLine": null
+						},
+						"Id": {
+							"OrgId": null,
+							"PrvtId": {
+								"DtAndPlcOfBirth": {
+									"BirthDt": "1969-06-28",
+									"PrvcOfBirth": null,
+									"CityOfBirth": "City",
+									"CtryOfBirth": "US"
+								},
+								"Othr": null
+							}
+						},
+						"CtryOfRes": null,
+						"CtctDtls": null
+					},
+					"DbtrAcct": {
+						"Id": {
+							"IBAN": null,
+							"Othr": {
+								"Id": "GR3001720810005081023929510",
+								"SchmeNm": null,
+								"Issr": null
+							}
+						},
+						"Tp": null,
+						"Ccy": null,
+						"Nm": null
+					},
+					"DbtrAgt": {
+						"FinInstnId": {
+							"BICFI": null,
+							"ClrSysMmbId": {
+								"ClrSysId": null,
+								"MmbId": "021200201"
+							},
+							"Nm": null,
+							"PstlAdr": null,
+							"Othr": null
+						},
+						"BrnchId": null
+					},
+					"DbtrAgtAcct": null,
+					"CdtrAgt": {
+						"FinInstnId": {
+							"BICFI": null,
+							"ClrSysMmbId": {
+								"ClrSysId": null,
+								"MmbId": "020010001"
+							},
+							"Nm": null,
+							"PstlAdr": null,
+							"Othr": null
+						},
+						"BrnchId": null
+					},
+					"CdtrAgtAcct": null,
+					"Cdtr": {
+						"Nm": "Mr Creditor 1",
+						"PstlAdr": null,
+						"Id": {
+							"OrgId": null,
+							"PrvtId": {
+								"DtAndPlcOfBirth": {
+									"BirthDt": "1969-06-28",
+									"PrvcOfBirth": null,
+									"CityOfBirth": "City",
+									"CtryOfBirth": "US"
+								},
+								"Othr": null
+							}
+						},
+						"CtryOfRes": null,
+						"CtctDtls": null
+					},
+					"CdtrAcct": {
+						"Id": {
+							"IBAN": null,
+							"Othr": {
+								"Id": "GR3001720810005081023929510",
+								"SchmeNm": null,
+								"Issr": null
+							}
+						},
+						"Tp": null,
+						"Ccy": null,
+						"Nm": null
+					},
+					"UltmtCdtr": null,
+					"InstrForCdtrAgt": null,
+					"InstrForNxtAgt": null,
+					"Purp": null,
+					"RgltryRptg": null,
+					"Tax": null,
+					"RltdRmtInf": null,
+					"RmtInf": {
+						"Ustrd": ["Company Details No.2"],
+						"Strd": null
+					},
+					"SplmtryData": null
+				}
+			],
+			"SplmtryData": null
+		}
+	}
+}
