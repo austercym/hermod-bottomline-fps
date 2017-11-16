@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pacs.008.001.05">
+  <FIToFICstmrCdtTrf>
+    <GrpHdr>
+      <MsgId>008-FPS1711150000005--4020171115826</MsgId>
+      <CreDtTm>2017-11-15T16:16:29</CreDtTm>
+      <NbOfTxs>1</NbOfTxs>
+      <SttlmInf>
+        <SttlmMtd>CLRG</SttlmMtd>
+      </SttlmInf>
+	   <InstdAgt>
+        <FinInstnId>
+          <ClrSysMmbId>
+            <ClrSysId>
+              <Prtry>ISCD Bank Code</Prtry>
+            </ClrSysId>
+            <MmbId>000535</MmbId>
+          </ClrSysMmbId>
+        </FinInstnId>
+      </InstdAgt>
+    </GrpHdr>
+    <CdtTrfTxInf>
+      <PmtId>
+        <EndToEndId>PROPERTY REF678</EndToEndId>
+        <TxId>FPS1711150000005</TxId>
+        <ClrSysRef>20171115002</ClrSysRef>
+      </PmtId>
+      <PmtTpInf>
+        <InstrPrty>NORM</InstrPrty>
+        <SvcLvl>
+          <Cd>URNS</Cd>
+        </SvcLvl>
+        <LclInstrm>
+          <Prtry>FDP/401010</Prtry>
+        </LclInstrm>
+        <CtgyPurp>
+          <Prtry>BRANCH</Prtry>
+        </CtgyPurp>
+      </PmtTpInf>
+      <IntrBkSttlmAmt Ccy="GBP">589.00</IntrBkSttlmAmt>
+      <IntrBkSttlmDt>2017-11-15</IntrBkSttlmDt>
+      <ChrgBr>SHAR</ChrgBr>
+      <InstgAgt>
+        <FinInstnId>
+          <ClrSysMmbId>
+            <ClrSysId>
+              <Cd>GBDSC</Cd>
+            </ClrSysId>
+            <MmbId>200000</MmbId>
+          </ClrSysMmbId>
+        </FinInstnId>
+      </InstgAgt>
+      <IntrmyAgt1>
+        <FinInstnId>
+          <ClrSysMmbId>
+            <ClrSysId>
+              <Prtry>ISCD Bank Code</Prtry>
+            </ClrSysId>
+            <MmbId>000002</MmbId>
+          </ClrSysMmbId>
+        </FinInstnId>
+      </IntrmyAgt1>
+      <IntrmyAgt2>
+        <FinInstnId>
+          <ClrSysMmbId>
+            <ClrSysId>
+              <Prtry>ISCD Bank Code</Prtry>
+            </ClrSysId>
+            <MmbId>000535</MmbId>
+          </ClrSysMmbId>
+        </FinInstnId>
+      </IntrmyAgt2>
+      <Dbtr>
+        <Nm>JOHN JONES</Nm>
+        <PstlAdr>
+          <AdrLine>78 BLACKSTOCK ROAD</AdrLine>
+          <AdrLine>BIRMINGHAM</AdrLine>
+        </PstlAdr>
+      </Dbtr>
+      <DbtrAcct>
+        <Id>
+          <Othr>
+            <Id>98765432</Id>
+          </Othr>
+        </Id>
+      </DbtrAcct>
+      <DbtrAgt>
+        <FinInstnId>
+          <ClrSysMmbId>
+            <ClrSysId>
+              <Cd>GBDSC</Cd>
+            </ClrSysId>
+            <MmbId>204112</MmbId>
+          </ClrSysMmbId>
+        </FinInstnId>
+      </DbtrAgt>
+      <CdtrAgt>
+        <FinInstnId>
+          <ClrSysMmbId>
+            <ClrSysId>
+              <Cd>GBDSC</Cd>
+            </ClrSysId>
+            <MmbId>233456</MmbId>
+          </ClrSysMmbId>
+        </FinInstnId>
+      </CdtrAgt>
+      <Cdtr>
+        <Nm>MISS CHRISTINE JONES</Nm>
+      </Cdtr>
+      <CdtrAcct>
+        <Id>
+          <Othr>
+            <Id>23000032</Id>
+          </Othr>
+        </Id>
+      </CdtrAcct>
+      <InstrForNxtAgt>
+        <InstrInf>/FPID/FPS1711150000005  4020171115826200000     </InstrInf>
+      </InstrForNxtAgt>
+      <RmtInf>
+        <Strd>
+          <CdtrRefInf>
+            <Ref>NOVEMBER RENT</Ref>
+          </CdtrRefInf>
+        </Strd>
+      </RmtInf>
+    </CdtTrfTxInf>
+  </FIToFICstmrCdtTrf>
+</Document>
