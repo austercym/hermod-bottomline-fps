@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pacs.002.001.06">
+  <FIToFIPmtStsRpt>
+    <GrpHdr>
+      <MsgId>002-FPS1711150000005--00000002</MsgId>
+      <CreDtTm>2017-11-15T09:59:52</CreDtTm>
+      <InstgAgt>
+        <FinInstnId>
+          <ClrSysMmbId>
+            <ClrSysId>
+              <Prtry>ISCD Bank Code</Prtry>
+            </ClrSysId>
+            <MmbId>000535</MmbId>
+          </ClrSysMmbId>
+        </FinInstnId>
+      </InstgAgt>
+    </GrpHdr>
+    <TxInfAndSts>
+	  <OrgnlGrpInf>
+          <OrgnlMsgId>008-FPS1711150000005--4020171115826</OrgnlMsgId>
+          <OrgnlMsgNmId>pacs.008.001.05</OrgnlMsgNmId>		  
+	 </OrgnlGrpInf>
+      <OrgnlTxId>FPS1711150000005</OrgnlTxId>
+      <TxSts>ACTC</TxSts>
+      <StsRsnInf>
+        <Rsn>
+          <Prtry>0080</Prtry>
+        </Rsn>
+      </StsRsnInf>
+      <InstdAgt>
+        <FinInstnId>
+          <ClrSysMmbId>
+            <ClrSysId>
+              <Cd>GBDSC</Cd>
+            </ClrSysId>
+            <MmbId>200000</MmbId>
+          </ClrSysMmbId>
+        </FinInstnId>
+      </InstdAgt>
+      <OrgnlTxRef>
+        <IntrBkSttlmAmt Ccy="GBP">589.00</IntrBkSttlmAmt>
+        <IntrBkSttlmDt>2017-11-15</IntrBkSttlmDt>
+        <SttlmInf>
+          <SttlmMtd>CLRG</SttlmMtd>
+        </SttlmInf>
+        <PmtTpInf>
+          <SvcLvl>
+            <Cd>URNS</Cd>
+          </SvcLvl>
+          <LclInstrm>
+            <Prtry>FDP/401010</Prtry>
+          </LclInstrm>
+        </PmtTpInf>
+        <RmtInf>
+          <Strd>
+            <AddtlRmtInf>/FPID/FPS1711150000005  4020171115826200000     </AddtlRmtInf>
+          </Strd>
+        </RmtInf>
+      </OrgnlTxRef>
+    </TxInfAndSts>
+  </FIToFIPmtStsRpt>
+</Document>
