@@ -2,9 +2,10 @@
 
 This is a sample app that can send an receive a message from the Bottomline simulator.
 
-WARNING: The code is ugly. Sorry!
-Hardcoded message is incorrect (
-Receiving not tested yet! Working on that... (it seems that we have the wrong queue name)
+WARNING:
+- The code is ugly. Sorry!
+- Hardcoded message is incorrect.
+- Receiving not tested yet! Working on that... (it seems that we have the wrong queue name)
 
 # HOW I RUN IT
 Probably not the best way but:
