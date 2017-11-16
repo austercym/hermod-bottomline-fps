@@ -10,16 +10,16 @@ public class DefaultPropertyValues {
 	private final static String APP_DEFAULT_ORWELLG_ENTITY = Constants.IPAGOO_ENTITY;
 	private final static String APP_DEFAULT_ORWELLG_BRAND  = Constants.IPAGOO_BRAND;
 	
-	private final static String MQ_DEFAULT_HOST  = "192.168.2.101";
-	private final static Integer MQ_DEFAULT_PORT = 2414;
-	private final static String MQ_DEFAULT_QUEUE_MANAGER = "FPS_TEST";
-	private final static String MQ_DEFAULT_CHANNEL  = "FPS_CHANNEL";
-	private final static String MQ_DEFAULT_USERNAME = "Particular";
-	private final static String MQ_DEFAULT_PASSWORD = "347.m0n0";
+	private final static String MQ_DEFAULT_HOST  = "localhost";
+	private final static Integer MQ_DEFAULT_PORT = 1414;
+	private final static String MQ_DEFAULT_QUEUE_MANAGER = "QM1";
+	private final static String MQ_DEFAULT_CHANNEL  = "DEV.APP.SVRCONN";
+	private final static String MQ_DEFAULT_USERNAME = "root";
+	private final static String MQ_DEFAULT_PASSWORD = "";
 	private final static Long MQ_DEFAULT_RECEIVED_TIMEOUT = 2000L;
 	private final static Integer MQ_DEFAULT_NUM_MAX_CONSUMERS = 3;
-	private final static String MQ_DEFAULT_INBOUND_QUEUE  = "FPS_INBOUND";
-	private final static String MQ_DEFAULT_OUTBOUND_QUEUE = "FPS_OUTBOUND";
+	private final static String MQ_DEFAULT_INBOUND_QUEUE  = "DEV.QUEUE.1;IPAGOO.HOST.SIP.RECV.QR;IPAGOO.HOST.OTH.RECV.QR;IPAGOO.HOST.SOP.RECV.QR;IPAGOO.HOST.USM.RECV.QR";
+	private final static String MQ_DEFAULT_OUTBOUND_QUEUE = "IPAGOO.HOST.SIP.RECV.RESP.QR;IPAGOO.HOST.OTH.RECV.RESP.QR;IPAGOO.HOST.SOP.RECV.RESP.QR;IPAGOO.HOST.USM.RECV.QR";
 	
 	private final static String KAFKA_DEFAULT_BOOTSTRAP_SERVER = "localhost:9092,localhost:10092";
 	private final static String KAFKA_DEFAULT_INBOUND_TOPIC  = "com.orwellg.fps.request";

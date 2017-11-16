@@ -9,6 +9,8 @@ import org.springframework.context.event.EventListener;
 import org.springframework.jms.listener.DefaultMessageListenerContainer;
 import org.springframework.kafka.listener.AbstractMessageListenerContainer;
 
+import java.util.ArrayList;
+
 @Configuration
 public class ProjectConfig extends ComponentConfig {
 
@@ -22,9 +24,14 @@ public class ProjectConfig extends ComponentConfig {
 
 	@EventListener(ApplicationReadyEvent.class)
 	public void doSomethingAfterStartup() {
-	    LOG.info("Aplication start. Starting containers....");
+	    LOG.info("Application start. Starting containers....");
 	    kafkaListenerContainer.start();
-	    jmsListenerContainer.start();
+	    /*for (DefaultMessageListenerContainer jmsListener: jmsListenerContainer){
+			jmsListener.start();
+        }
+        */
+		jmsListenerContainer.start();
+
 	    LOG.info("Containers started");
 	}
 }
