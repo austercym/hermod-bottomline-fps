@@ -1,8 +1,9 @@
-package com.hermod.bottonline.fps.config;
+package com.hermod.bottonline.fps.config.jms;
 
 import javax.jms.ConnectionFactory;
 import javax.jms.QueueConnectionFactory;
 
+import com.hermod.bottonline.fps.config.ComponentConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;

@@ -17,15 +17,19 @@ public class DefaultPropertyValues {
 	private final static String MQ_DEFAULT_USERNAME = "root";
 	private final static String MQ_DEFAULT_PASSWORD = "";
 	private final static Long MQ_DEFAULT_RECEIVED_TIMEOUT = 2000L;
-	private final static Integer MQ_DEFAULT_NUM_MAX_CONSUMERS = 3;
-	private final static String MQ_DEFAULT_INBOUND_QUEUE  = "DEV.QUEUE.1;IPAGOO.HOST.SIP.RECV.QR;IPAGOO.HOST.OTH.RECV.QR;IPAGOO.HOST.SOP.RECV.QR;IPAGOO.HOST.USM.RECV.QR";
-	private final static String MQ_DEFAULT_OUTBOUND_QUEUE = "IPAGOO.HOST.SIP.RECV.RESP.QR;IPAGOO.HOST.OTH.RECV.RESP.QR;IPAGOO.HOST.SOP.RECV.RESP.QR;IPAGOO.HOST.USM.RECV.QR";
-	
-	private final static String KAFKA_DEFAULT_BOOTSTRAP_SERVER = "localhost:9092,localhost:10092";
-	private final static String KAFKA_DEFAULT_INBOUND_TOPIC  = "com.orwellg.fps.request";
-	private final static String KAFKA_DEFAULT_OUTBOUND_TOPIC = "com.orwellg.fps.response";
+	private final static Integer MQ_DEFAULT_NUM_MAX_CONSUMERS = 1;
+	private final static String MQ_DEFAULT_INBOUND_QUEUE  = "DEV.QUEUE.1";
+	private final static String MQ_DEFAULT_OUTBOUND_QUEUE = "IPAGOO.HOST.SIP.RECV.RESP.QR";
+	private final static String MQ_BOTTOMLINE1_ENVIRONMENT = "BOTTOMLINE1";
+	private final static String MQ_BOTTOMLINE2_ENVIRONMENT = "BOTTOMLINE2";
+
+	private final static String KAFKA_DEFAULT_BOOTSTRAP_SERVER = "confluent-node1:9092,confluent-node2:9092,confluent-node3:9092,confluent-node4:9092,confluent-node5:9092,confluent-node6:9092";
+	//private final static String KAFKA_DEFAULT_BOOTSTRAP_SERVER = "localhost:9092";
+	private final static String KAFKA_DEFAULT_INBOUND_TOPIC  = "com.orwellg.yggdrasil.dsl.fps.inbound.payment.response.1";
+	private final static String KAFKA_DEFAULT_OUTBOUND_TOPIC = "com.orwellg.yggdrasil.dsl.fps.inbound.payment.request.1";
+	private final static String KAFKA_DEFAULT_OUTBOUND_ERROR_TOPIC = "com.orwellg.yggdrasil.dsl.fps.inbound.payment.reject.1";
 	private final static Integer KAFKA_DEFAULT_OUTBOUND_TOPIC_PARTITIONS = 3;
-	private final static String KAFKA_DEFAULT_CONSUMER_GROUP_ID = "fpsConsumerGroup";
+	private final static String KAFKA_DEFAULT_CONSUMER_GROUP_ID = "hermod-bottomline-fps-inbound";
 	private final static Integer KAFKA_DEFAULT_CONSUMER_THREADS = 3;
 	private final static Long KAFKA_DEFAULT_CONSUMER_POLL_TIMEOUT = 3000L;
 
@@ -49,10 +53,12 @@ public class DefaultPropertyValues {
 		defaultValues.put("wq.mq.queue.inbound", MQ_DEFAULT_INBOUND_QUEUE);
 		defaultValues.put("wq.mq.queue.outbound", MQ_DEFAULT_OUTBOUND_QUEUE);
 		defaultValues.put("wq.mq.receive.num.max.consumers", MQ_DEFAULT_NUM_MAX_CONSUMERS);
+		defaultValues.put("jms.mq.bottomline.environment", MQ_BOTTOMLINE1_ENVIRONMENT);
 	
 		defaultValues.put("kafka.bootstrap.host", KAFKA_DEFAULT_BOOTSTRAP_SERVER);
 		defaultValues.put("kafka.topic.inbound", KAFKA_DEFAULT_INBOUND_TOPIC);
 		defaultValues.put("kafka.topic.outbound", KAFKA_DEFAULT_OUTBOUND_TOPIC);
+		defaultValues.put("kafka.topic.outbound.error", KAFKA_DEFAULT_OUTBOUND_ERROR_TOPIC);
 		defaultValues.put("kafka.topic.outbound.partitions", KAFKA_DEFAULT_OUTBOUND_TOPIC_PARTITIONS);
 		defaultValues.put("kafka.consumer.group.id", KAFKA_DEFAULT_CONSUMER_GROUP_ID);
 		defaultValues.put("kafka.consumer.threads.num", KAFKA_DEFAULT_CONSUMER_THREADS);

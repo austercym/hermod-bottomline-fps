@@ -18,11 +18,11 @@ public class EventGenerator {
 
 	private final static Logger LOG = LogManager.getLogger(EventGenerator.class);
 
-	public static Event generateEvent(String source, String eventName, String eventData) {
-		return generateEvent(source, eventName, eventData, Constants.IPAGOO_ENTITY, Constants.IPAGOO_BRAND);
+	public static Event generateEvent(String source, String eventName, String id, String eventData) {
+		return generateEvent(source, eventName, id, eventData, Constants.IPAGOO_ENTITY, Constants.IPAGOO_BRAND);
 	}
 	
-	public static Event generateEvent(String source, String eventName, String eventData, String componentEntity, String componentBrand) {
+	public static Event generateEvent(String source, String eventName, String id, String eventData, String componentEntity, String componentBrand) {
 		
 		LOG.debug("Generating event with received datas.");
 		
@@ -31,27 +31,25 @@ public class EventGenerator {
 		String brand = Constants.IPAGOO_BRAND;
 		if (!StringUtils.isEmpty(componentBrand)) { entity = componentBrand; }
 		
-		String uuid = UUID.randomUUID().toString();
-		
 		// Create the event type
 		EventType eventType = new EventType();
 		eventType.setName(eventName);
 		eventType.setVersion(Constants.getDefaultEventVersion());
 		eventType.setParentKey(Constants.EMPTY);
-		eventType.setKey("EVENT-" + uuid);
+		eventType.setKey("EVENT-" + id);
 		eventType.setSource(source);
 		SimpleDateFormat format = new SimpleDateFormat(Constants.getDefaultEventTimestampFormat());
 		eventType.setTimestamp(format.format(new Date()));
-		eventType.setData(eventData.toString());
+		eventType.setData(eventData);
 		
 		ProcessIdentifierType processIdentifier = new ProcessIdentifierType();
-		processIdentifier.setUuid("PROCESS-" + uuid);
+		processIdentifier.setUuid("PROCESS-" + id);
 		
 		EntityIdentifierType entityIdentifier = new EntityIdentifierType();
 		entityIdentifier.setEntity(entity);
 		entityIdentifier.setBrand(brand);
 		
-		// Create the corresponden event
+		// Create the correspondent event
 		Event event = new Event();
 		event.setEvent(eventType);
 		event.setProcessIdentifier(processIdentifier);

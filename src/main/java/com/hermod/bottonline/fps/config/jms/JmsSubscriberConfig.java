@@ -1,9 +1,10 @@
-package com.hermod.bottonline.fps.config;
+package com.hermod.bottonline.fps.config.jms;
 
 import javax.annotation.Resource;
 import javax.jms.ConnectionFactory;
 import javax.jms.MessageListener;
 
+import com.hermod.bottonline.fps.config.ComponentConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;

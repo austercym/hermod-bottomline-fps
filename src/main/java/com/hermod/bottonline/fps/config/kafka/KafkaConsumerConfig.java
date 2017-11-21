@@ -1,4 +1,4 @@
-package com.hermod.bottonline.fps.config;
+package com.hermod.bottonline.fps.config.kafka;
 
 import java.util.HashMap;
 import java.util.Map;

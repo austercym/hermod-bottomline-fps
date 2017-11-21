@@ -42,7 +42,9 @@ public class ConvertFullPacs008Test {
 		
 		final JAXBContext jc = JAXBContext.newInstance(Document.class);
 		final Unmarshaller u = jc.createUnmarshaller();
-		final File xmlFile = new File("src/test/resources/fps20022_paymentrequest_in_02_008.xml");
+
+		final File xmlFile = new File("src/test/resources/fps20022_paymentrequest_in_01_008.xml");
+
 		final JAXBElement<Document> result = (JAXBElement<Document>)u.unmarshal(xmlFile);
 		return (Document) result.getValue();
 	}

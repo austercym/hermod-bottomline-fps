@@ -1,0 +1,14 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="TestJMS:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/TestJMS_jar</output-path>
+    <root id="archive" name="TestJMS.jar">
+      <element id="module-output" name="TestJMS" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/apache/activemq/activemq-all/5.12.0/activemq-all-5.12.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/sun/messaging/mq/imq/4.6-b01/imq-4.6-b01.jar" path-in-jar="/" />
+      <element id="file-copy" path="$PROJECT_DIR$/libs/com.ibm.mq.jar" />
+      <element id="file-copy" path="$PROJECT_DIR$/libs/com.ibm.mq.jmqi.jar" />
+      <element id="file-copy" path="$PROJECT_DIR$/libs/com.ibm.mqjms.jar" />
+      <element id="file-copy" path="$PROJECT_DIR$/libs/jms.jar" />
+    </root>
+  </artifact>
+</component>

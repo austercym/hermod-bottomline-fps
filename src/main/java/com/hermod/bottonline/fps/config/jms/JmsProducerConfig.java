@@ -1,14 +1,19 @@
-package com.hermod.bottonline.fps.config;
+package com.hermod.bottonline.fps.config.jms;
 
+import com.hermod.bottonline.fps.config.ComponentConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.connection.CachingConnectionFactory;
+import org.springframework.jms.connection.JmsTransactionManager;
 import org.springframework.jms.core.JmsOperations;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.support.converter.MarshallingMessageConverter;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
+import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 @EnableJms
@@ -36,7 +41,7 @@ public class JmsProducerConfig extends ComponentConfig {
 		JmsTemplate jmsTemplate = new JmsTemplate(cachingConnectionFactory);
 	    jmsTemplate.setReceiveTimeout(receiveTimeout);
 	    
-	    // Creating and asing the message converter for jmsTemplate
+	    // Creating and assing the message converter for jmsTemplate
 	    MarshallingMessageConverter converter = new MarshallingMessageConverter();
 	    	converter.setMarshaller(marshaller());
 	    	converter.setUnmarshaller(marshaller());
@@ -44,6 +49,13 @@ public class JmsProducerConfig extends ComponentConfig {
 	    	jmsTemplate.setMessageConverter(converter);
 	    	    
 	    return jmsTemplate;
+	}
+
+	@Bean
+	public PlatformTransactionManager jmsTransactionManager(CachingConnectionFactory cachingConnectionFactory) {
+		JmsTransactionManager jmsTransactionManager = new JmsTransactionManager();
+		jmsTransactionManager.setConnectionFactory(cachingConnectionFactory);
+		return jmsTransactionManager;
 	}
 	
 }

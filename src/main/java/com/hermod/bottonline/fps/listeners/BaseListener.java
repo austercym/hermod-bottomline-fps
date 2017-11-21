@@ -12,7 +12,7 @@ public class BaseListener {
 	protected Map<String, FPSTransform> transforms;
 	
 	protected FPSTransform getTransform(String pagkageName) {
-		String beanKey = "transform_" + pagkageName.substring(pagkageName.lastIndexOf("."));
+		String beanKey = "transform_" + pagkageName.substring(pagkageName.lastIndexOf(".")+1);
 		return (transforms.containsKey(beanKey)) ? transforms.get(beanKey) : null;
 	}
 }

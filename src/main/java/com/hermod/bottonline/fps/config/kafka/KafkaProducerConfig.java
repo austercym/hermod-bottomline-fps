@@ -1,8 +1,9 @@
-package com.hermod.bottonline.fps.config;
+package com.hermod.bottonline.fps.config.kafka;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import com.hermod.bottonline.fps.config.ComponentConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;

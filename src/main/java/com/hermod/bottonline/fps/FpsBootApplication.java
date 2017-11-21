@@ -9,7 +9,9 @@ import com.hermod.bottonline.fps.utils.properties.DefaultPropertyValues;
 @SpringBootApplication
 public class FpsBootApplication {
 
-    public static void main(String[] args) {	
+    public static void main(String[] args) {
+
+		System.getProperties().put( "server.port", 9595 );
     		new SpringApplicationBuilder(FpsBootApplication.class)
     			.initializers(new SpringProfileSettingApplicationContextInitializer("hermod-bottonline-fps.properties", DefaultPropertyValues.getDefaultValues()))
     			.run(args);

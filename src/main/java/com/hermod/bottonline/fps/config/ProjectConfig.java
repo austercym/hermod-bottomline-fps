@@ -16,7 +16,7 @@ public class ProjectConfig extends ComponentConfig {
 
 	private static final Logger LOG = LogManager.getLogger(ProjectConfig.class);
 	
-	@Autowired
+	//@Autowired
 	private AbstractMessageListenerContainer<?,?> kafkaListenerContainer;
 	
 	@Autowired
@@ -25,7 +25,7 @@ public class ProjectConfig extends ComponentConfig {
 	@EventListener(ApplicationReadyEvent.class)
 	public void doSomethingAfterStartup() {
 	    LOG.info("Application start. Starting containers....");
-	    kafkaListenerContainer.start();
+	    //kafkaListenerContainer.start();
 	    /*for (DefaultMessageListenerContainer jmsListener: jmsListenerContainer){
 			jmsListener.start();
         }
