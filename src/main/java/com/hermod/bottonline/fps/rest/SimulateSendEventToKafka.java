@@ -20,27 +20,15 @@ public class SimulateSendEventToKafka {
     @RequestMapping(method= RequestMethod.POST, value="/sip")
     public ResponseEntity<String> sendSIP(@RequestBody String queueMessage) {
         Reader reader = new StringReader(queueMessage);
-        try {
-            mqListener.sendMessageToTopic(reader);
-            return new ResponseEntity<>("Message sent", HttpStatus.OK);
-        } catch (ConversionException e) {
-            e.printStackTrace();
-            return new ResponseEntity<>("Failed message sent: "+e.getMessage(), HttpStatus.NOT_FOUND);
-        }
-
+        mqListener.sendMessageToTopic(reader);
+        return new ResponseEntity<>("Message sent ", HttpStatus.OK);
     }
 
     @RequestMapping(method= RequestMethod.POST, value="/send")
     public ResponseEntity<String> sendMQSIP(@RequestBody String queueMessage) {
         Reader reader = new StringReader(queueMessage);
-        try {
-            //TDOD Send message to MQ queue
-            mqListener.sendMessageToTopic(reader);
-            return new ResponseEntity<>("Message sent", HttpStatus.OK);
-        } catch (ConversionException e) {
-            e.printStackTrace();
-            return new ResponseEntity<>("Failed message sent: "+e.getMessage(), HttpStatus.NOT_FOUND);
-        }
-
+        //TDOD Send message to MQ queue
+        mqListener.sendMessageToTopic(reader);
+        return new ResponseEntity<>("Message sent", HttpStatus.OK);
     }
 }

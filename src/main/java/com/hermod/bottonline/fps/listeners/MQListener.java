@@ -1,6 +1,7 @@
 package com.hermod.bottonline.fps.listeners;
 
 import java.io.*;
+import java.util.Properties;
 import java.util.UUID;
 
 import javax.jms.*;
@@ -16,10 +17,15 @@ import com.hermod.bottonline.fps.services.transform.helper.ConversionException;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSInboundPayment;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSInboundPaymentResponse;
+import com.orwellg.yggdrasil.net.client.producer.CommandProducerConfig;
+import com.orwellg.yggdrasil.net.client.producer.GeneratorIdCommandProducer;
 import iso.std.iso._20022.tech.xsd.pacs_008_001.CreditTransferTransaction19;
 import iso.std.iso._20022.tech.xsd.pacs_008_001.Document;
 import org.apache.activemq.util.ByteArrayInputStream;
 import org.apache.commons.io.IOUtils;
+import org.apache.kafka.clients.CommonClientConfigs;
+import org.apache.kafka.common.protocol.SecurityProtocol;
+import org.apache.kafka.common.utils.Time;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -118,7 +124,7 @@ public class MQListener extends BaseListener implements MessageListener {
         }
     }
 
-    public void sendMessageToTopic(Reader reader) throws ConversionException {
+    public void sendMessageToTopic(Reader reader) {
         Source source;
         boolean schemaValidation = true;
         SchemaFactory schemaFactory = SchemaFactory
@@ -157,8 +163,8 @@ public class MQListener extends BaseListener implements MessageListener {
                     boolean isValid = validMessage((FPSAvroMessage)avroFpsMessage);
 
                     LOG.info("Sending message to Kafka ...............");
-                    //TODO get ID from Generator ID
-                    String uuid = UUID.randomUUID().toString();
+
+                    String uuid = generatorID().getGeneralUniqueId();
 
                     String FPID = extractFPID((FPSAvroMessage) avroFpsMessage);
                     String paymentTypeCode = extractParameterTypeCode((FPSAvroMessage) avroFpsMessage);
@@ -220,8 +226,12 @@ public class MQListener extends BaseListener implements MessageListener {
                 }
             }catch (ConversionException convEx){
                 LOG.error("Error generating Avro file{}", convEx.getMessage());
-            }catch(IOException e){
+            }catch(IOException e) {
                 LOG.error("IO Error {}", e.getMessage());
+            }catch(MessageConversionException conversionEx){
+                LOG.error("Error transforming message {}", conversionEx.getMessage());
+            } catch (Exception ex) {
+                LOG.error("Error getting unique ID", ex.getMessage());
             }
         }
     }
@@ -253,5 +263,15 @@ public class MQListener extends BaseListener implements MessageListener {
 
     private boolean validMessage(FPSAvroMessage avroFpsMessage) {
         return true;
+    }
+
+    private GeneratorIdCommandProducer generatorID(){
+        Properties props  = new Properties();
+        props.setProperty(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, SecurityProtocol.PLAINTEXT.name());
+        props.setProperty("bootstrap.servers", "hdf-node1:2181,hdf-node2:2181,hdf-node3:2181");
+        props.setProperty("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+        props.setProperty("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+
+        return new GeneratorIdCommandProducer(new CommandProducerConfig(props), 1, Time.SYSTEM);
     }
 }
