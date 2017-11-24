@@ -18,6 +18,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import com.hermod.bottonline.fps.services.transform.helper.builder.*;
 import com.hermod.bottonline.fps.services.transform.helper.converter.*;
 
+import com.orwellg.umbrella.avro.types.commons.Decimal;
 import io.reactivex.Flowable;
 
 public final class TransformationHelper {
@@ -25,8 +26,15 @@ public final class TransformationHelper {
 	private static HashMap<String, BuilderRuleIf> BuilderRules = new HashMap<String, BuilderRuleIf>();
 
 	static {
-		Converters.add(new TypeConverterEntry(XMLGregorianCalendar.class, Long.class, (calendar, ctx) -> (Long)((XMLGregorianCalendar)calendar).toGregorianCalendar().getTimeInMillis()));
-		Converters.add(new TypeConverterEntry(XMLGregorianCalendar.class, CharSequence.class, (calendar, ctx) -> ((XMLGregorianCalendar)calendar).toXMLFormat()));
+		Converters.add(new TypeConverterEntry(XMLGregorianCalendar.class, Long.class, (calendar, ctx) -> {
+			return (Long)((XMLGregorianCalendar)calendar).toGregorianCalendar().getTimeInMillis();
+		}));
+		Converters.add(new TypeConverterEntry(XMLGregorianCalendar.class, CharSequence.class, (calendar, ctx) -> {
+			return ((XMLGregorianCalendar)calendar).toXMLFormat();}
+		));
+		Converters.add(new TypeConverterEntry(XMLGregorianCalendar.class, String.class, (calendar, ctx) -> {
+			return ((XMLGregorianCalendar)calendar).toXMLFormat();
+		}));
 		Converters.add(new TypeConverterEntry(BigDecimal.class, Double.class, (decimalValue, ctx) -> ((BigDecimal)decimalValue).doubleValue()));
 		Converters.add(new TypeConverterEntry(Double.class, BigDecimal.class, (doubleValue, ctx) -> new BigDecimal(((Double)doubleValue))));
 		Converters.add(new TypeConverterEntry(CharSequence.class,  XMLGregorianCalendar.class, TransformationHelper::charSequenceToXmlCalendar));
@@ -37,6 +45,9 @@ public final class TransformationHelper {
 		Converters.add(new MatchingTypeConverter());
 		Converters.add(new ComplexTypeCollectionConverter());
 		Converters.add(new SimpleTypeCollectionConverter());
+		Converters.add(new TypeConverterEntry(BigDecimal.class, Decimal.class, (value, ctx) -> {
+			return new Decimal((BigDecimal)value);
+		}));
 	}
 	
 	
