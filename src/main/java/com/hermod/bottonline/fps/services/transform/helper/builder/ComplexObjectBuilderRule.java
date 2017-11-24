@@ -38,7 +38,7 @@ public class ComplexObjectBuilderRule implements BuilderRuleIf {
 			throw err;
 		}
 		catch (Exception err) {
-			throw new ConversionException(source.getClass()+"----"+target.getClass()+" JORGE4 Failed to apply conversion at '"+this.ctx.getPath()+"' due to " + err.getMessage() + " <" + err.getClass().getName() + ">", err, this);
+			throw new ConversionException(source.getClass()+"----"+target.getClass()+" Failed to apply conversion at '"+this.ctx.getPath()+"' due to " + err.getMessage() + " <" + err.getClass().getName() + ">", err, this);
 		}
 	}
 	

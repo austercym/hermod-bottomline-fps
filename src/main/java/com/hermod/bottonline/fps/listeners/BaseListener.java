@@ -11,8 +11,8 @@ public class BaseListener {
 	@Autowired
 	protected Map<String, FPSTransform> transforms;
 	
-	protected FPSTransform getTransform(String pagkageName) {
-		String beanKey = "transform_" + pagkageName.substring(pagkageName.lastIndexOf(".")+1);
+	protected FPSTransform getTransform(String packageName) {
+		String beanKey = "transform_" + packageName.substring(packageName.lastIndexOf(".")+1);
 		return (transforms.containsKey(beanKey)) ? transforms.get(beanKey) : null;
 	}
 }

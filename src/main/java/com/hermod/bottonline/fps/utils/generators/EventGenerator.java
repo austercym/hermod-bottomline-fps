@@ -36,7 +36,7 @@ public class EventGenerator {
 		eventType.setName(eventName);
 		eventType.setVersion(Constants.getDefaultEventVersion());
 		eventType.setParentKey(Constants.EMPTY);
-		eventType.setKey("EVENT-" + id);
+		eventType.setKey(id);
 		eventType.setSource(source);
 		SimpleDateFormat format = new SimpleDateFormat(Constants.getDefaultEventTimestampFormat());
 		eventType.setTimestamp(format.format(new Date()));

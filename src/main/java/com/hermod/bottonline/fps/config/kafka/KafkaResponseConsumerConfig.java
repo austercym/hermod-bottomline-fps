@@ -18,21 +18,21 @@ import org.springframework.kafka.listener.config.ContainerProperties;
 
 @Configuration
 @EnableKafka
-public class KafkaConsumerConfig {
+public class KafkaResponseConsumerConfig {
 
 	@Value("${kafka.bootstrap.host}")
 	private String bootstrap;
 	@Value("${kafka.consumer.group.id}")
 	private String groupId;
-	@Value("${kafka.topic.inbound}")
-	private String inboundTopic;
+	@Value("${kafka.topic.inbound.response}")
+	private String outboundTopic;
 	@Value("${kafka.consumer.poll.timeout}")
 	private Long consumerPoolTimeout;
 	@Value("${kafka.consumer.threads.num}")
 	private Integer numMaxThreads;
 	
 	@Autowired
-	private MessageListener<?, ?> kafkaListener;
+	private MessageListener<?, ?> kafkaResponseListener;
 	
 	@Bean
 	public Map<String, Object> consumerConfigs() {
@@ -56,19 +56,19 @@ public class KafkaConsumerConfig {
 	}
 
 	@Bean
-	public ConcurrentMessageListenerContainer<?, ?> kafkaListenerContainer() {
+	public ConcurrentMessageListenerContainer<?, ?> kafkaResponseListenerContainer() {
 		
-		ContainerProperties containerProperties = new ContainerProperties(inboundTopic);
+		ContainerProperties containerProperties = new ContainerProperties(outboundTopic);
 		containerProperties.setPollTimeout(consumerPoolTimeout);
 		
-		ConcurrentMessageListenerContainer<?, ?> kafkaListenerContainer = new ConcurrentMessageListenerContainer<>(
+		ConcurrentMessageListenerContainer<?, ?> kafkaResponseListenerContainer = new ConcurrentMessageListenerContainer<>(
 				kafkaConsumerFactory(), 
 				containerProperties
 		);
-		kafkaListenerContainer.setConcurrency(numMaxThreads);
-		kafkaListenerContainer.setupMessageListener(kafkaListener);
+		kafkaResponseListenerContainer.setConcurrency(numMaxThreads);
+		kafkaResponseListenerContainer.setupMessageListener(kafkaResponseListener);
 		
-		return kafkaListenerContainer;
+		return kafkaResponseListenerContainer;
 	}
 
 }

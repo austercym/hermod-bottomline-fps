@@ -15,4 +15,9 @@ public class KafkaSender {
 		LOGGER.info("sending payload='{}' to topic='{}'", payload, topic);
 		kafkaTemplate.send(topic, payload, key, replayTo, environment, paymentType);
 	}
+
+	public void sendRawMessage(String topic, String payload, String key) {
+		LOGGER.info("sending payload='{}' to topic='{}'", payload, topic);
+		kafkaTemplate.sendRawMessage(topic, payload, key);
+	}
 }

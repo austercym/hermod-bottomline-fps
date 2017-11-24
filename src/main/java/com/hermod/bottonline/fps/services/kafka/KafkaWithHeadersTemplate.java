@@ -26,4 +26,9 @@ public class KafkaWithHeadersTemplate<K, V> extends KafkaTemplate {
 
         return this.doSend(producerRecord);
     }
+
+    public ListenableFuture<SendResult<K, V>> sendRawMessage(String topic, V data, String key) {
+        ProducerRecord<K, V> producerRecord = new ProducerRecord(topic, key, data);
+        return this.doSend(producerRecord);
+    }
 }

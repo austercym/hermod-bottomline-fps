@@ -20,37 +20,44 @@ import java.util.Map;
 @Configuration
 @EnableJms
 public class JmsSubscriberConfig extends ComponentConfig {
-
-    public final static String SPLIT_CHARACTER_QUEUE_NAMES = ";";
-
     @Autowired private ApplicationContext applicationContext;
 	
 	@Autowired
-	private MessageListener mqListener;
+	private MessageListener mqSIPListener;
+    @Autowired
+    private MessageListener mqSOPListener;
 	
-	@Value("${wq.mq.queue.inbound}")
-	private String destinationsName;
+	@Value("${wq.mq.queue.sip.inbound}")
+	private String sipQueue;
+    @Value("${wq.mq.queue.sop.inbound}")
+    private String sopQueue;
 	@Value("${wq.mq.receive.num.max.consumers}")
 	private Integer maxConcurrentConsumers;
 	
 	@Bean
-    public DefaultMessageListenerContainer jmsListenerContainer(ConnectionFactory connectionFactory)
+    public DefaultMessageListenerContainer jmsSIPListenerContainer(ConnectionFactory connectionFactory)
     {
-        ArrayList<DefaultMessageListenerContainer> listListeners = new ArrayList<>();
-        String[] destinationQueues = destinationsName.split(SPLIT_CHARACTER_QUEUE_NAMES);
+        DefaultMessageListenerContainer listenerContainer = new DefaultMessageListenerContainer();
+        listenerContainer.setConnectionFactory((ConnectionFactory)(applicationContext.getBean("mqQueueConnectionFactory")));
+        listenerContainer.setSessionTransacted(true);
+        listenerContainer.setDestinationName(sipQueue);
+        listenerContainer.setMessageListener(applicationContext.getBean("mqSIPListener"));
+        listenerContainer.setMaxConcurrentConsumers(maxConcurrentConsumers);
+        listenerContainer.setSessionTransacted(true);
 
+        return listenerContainer;
+    }
 
-        //for (int i = 0; i < destinationQueues.length; i++) {
-            DefaultMessageListenerContainer listenerContainer = new DefaultMessageListenerContainer();
-            listenerContainer.setConnectionFactory((ConnectionFactory)(applicationContext.getBean("mqQueueConnectionFactory")));
-            listenerContainer.setSessionTransacted(true);
-            listenerContainer.setDestinationName(destinationQueues[0]);
-            listenerContainer.setMessageListener(applicationContext.getBean("mqListener"));
-            listenerContainer.setMaxConcurrentConsumers(maxConcurrentConsumers);
-            listenerContainer.setSessionTransacted(true);
-            listListeners.add(listenerContainer);
-        //}
-
+    @Bean
+    public DefaultMessageListenerContainer jmsSOPListenerContainer(ConnectionFactory connectionFactory)
+    {
+        DefaultMessageListenerContainer listenerContainer = new DefaultMessageListenerContainer();
+        listenerContainer.setConnectionFactory((ConnectionFactory)(applicationContext.getBean("mqQueueConnectionFactory")));
+        listenerContainer.setSessionTransacted(true);
+        listenerContainer.setDestinationName(sopQueue);
+        listenerContainer.setMessageListener(applicationContext.getBean("mqSOPListener"));
+        listenerContainer.setMaxConcurrentConsumers(maxConcurrentConsumers);
+        listenerContainer.setSessionTransacted(true);
 
         return listenerContainer;
     }

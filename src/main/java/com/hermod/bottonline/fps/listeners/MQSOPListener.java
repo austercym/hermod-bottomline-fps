@@ -1,31 +1,20 @@
 package com.hermod.bottonline.fps.listeners;
 
-import java.io.*;
-import java.util.Properties;
-import java.util.UUID;
-
-import javax.jms.*;
-import javax.xml.XMLConstants;
-import javax.xml.bind.JAXBElement;
-import javax.xml.transform.Source;
-import javax.xml.transform.stream.StreamSource;
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
-import javax.xml.validation.Validator;
-
+import com.google.gson.Gson;
+import com.hermod.bottonline.fps.services.kafka.KafkaSender;
+import com.hermod.bottonline.fps.services.transform.FPSTransform;
 import com.hermod.bottonline.fps.services.transform.helper.ConversionException;
+import com.hermod.bottonline.fps.types.FPSMessage;
+import com.hermod.bottonline.fps.utils.generators.EventGenerator;
+import com.hermod.bottonline.fps.utils.generators.IDGeneratorBean;
+import com.orwellg.umbrella.avro.types.event.Event;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSInboundPayment;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSInboundPaymentResponse;
-import com.orwellg.yggdrasil.net.client.producer.CommandProducerConfig;
-import com.orwellg.yggdrasil.net.client.producer.GeneratorIdCommandProducer;
-import iso.std.iso._20022.tech.xsd.pacs_008_001.CreditTransferTransaction19;
-import iso.std.iso._20022.tech.xsd.pacs_008_001.Document;
+import com.orwellg.umbrella.commons.types.utils.avro.RawMessageUtils;
+import com.orwellg.umbrella.commons.utils.enums.FPSEvents;
 import org.apache.activemq.util.ByteArrayInputStream;
 import org.apache.commons.io.IOUtils;
-import org.apache.kafka.clients.CommonClientConfigs;
-import org.apache.kafka.common.protocol.SecurityProtocol;
-import org.apache.kafka.common.utils.Time;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,45 +25,51 @@ import org.springframework.core.io.Resource;
 import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.stereotype.Component;
-
-import com.google.gson.Gson;
-import com.hermod.bottonline.fps.services.kafka.KafkaSender;
-import com.hermod.bottonline.fps.services.transform.FPSTransform;
-import com.hermod.bottonline.fps.types.FPSMessage;
-import com.hermod.bottonline.fps.utils.generators.EventGenerator;
-import com.orwellg.umbrella.avro.types.event.Event;
-import com.orwellg.umbrella.commons.types.utils.avro.RawMessageUtils;
-import com.orwellg.umbrella.commons.utils.enums.FPSEvents;
 import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
-import org.xml.sax.helpers.DefaultHandler;
 
-@Component(value = "mqListener")
+import javax.jms.BytesMessage;
+import javax.jms.Message;
+import javax.jms.MessageListener;
+import javax.jms.TextMessage;
+import javax.xml.XMLConstants;
+import javax.xml.bind.JAXBElement;
+import javax.xml.transform.Source;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Validator;
+import java.io.*;
+import java.util.Properties;
+
+@Component(value = "mqSOPListener")
 @Scope("prototype")
-public class MQListener extends BaseListener implements MessageListener {
+public class MQSOPListener extends BaseListener implements MessageListener {
 
-    public static final String PAYMENT_TYPE = "SIP";
+    public static final String PAYMENT_TYPE = "SOP";
     public static final String REJECT_CODE = "RJCT";
     public static final String NO_VALIDATION_CODE = "9999";
-    private static Logger LOG = LogManager.getLogger(MQListener.class);
+    private static Logger LOG = LogManager.getLogger(MQSOPListener.class);
 
     @Autowired
     private Gson gson;
+    @Autowired
+    private IDGeneratorBean idGenerator;
+
 
     @Value("{entity.name}")
     private String entity;
     @Value("${brand.name}")
     private String brand;
-    @Value("${kafka.topic.outbound}")
+    @Value("${kafka.topic.outbound.request}")
     private String outboundTopic;
-    @Value("${kafka.topic.outbound.error}")
+    @Value("${kafka.topic.outbound.reject}")
     private String outboundErrorTopic;
 
-    @Value("${kafka.topic.inbound}")
+    @Value("${kafka.topic.fps.logging}")
+    private String loggingTopic;
+
+    @Value("${kafka.topic.inbound.response}")
     private String replyTo;
-
-
-
 
     @Value("${jms.mq.bottomline.environment}")
     private String bottomlineEnv;
@@ -89,7 +84,8 @@ public class MQListener extends BaseListener implements MessageListener {
     @Override
     public void onMessage(Message message) {
 
-        LOG.info("Entered in messagge reception ...............");
+        //LOG.info(“[FPS][PmtId: {}] Processing response for FPS inbound payment”, key);
+        LOG.info("[FPS][Env: {}][PaymentType: {}] Getting payment message...............", bottomlineEnv, PAYMENT_TYPE);
         InputStream stream = null;
         Reader reader = null;
 
@@ -119,7 +115,8 @@ public class MQListener extends BaseListener implements MessageListener {
                     stream.close();
                 }
             } catch (Exception e) {
-                LOG.error("Error when try close the streams resources. Message: {}", e.getMessage(), e);
+                LOG.error("[FPS][Env: {}][PaymentType: {}] Error closing streams resources. Message: {}", bottomlineEnv,
+                        PAYMENT_TYPE, e.getMessage());
             }
         }
     }
@@ -131,10 +128,15 @@ public class MQListener extends BaseListener implements MessageListener {
                 .newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
         if (reader != null) {
             Resource xsdResource = new ClassPathResource("./xsd/pacs.008.001.05.xsd");
+            String message = "";
             try {
+                String uuid = idGenerator.generatorID().getGeneralUniqueId();
                 StringWriter writer = new StringWriter();
                 IOUtils.copy(reader, writer);
-                String message = writer.toString();
+                message = writer.toString();
+
+                //Send mq message to logging topic
+                kafkaSender.sendRawMessage(loggingTopic, message, uuid);
                 try {
                     Source src = new StreamSource(new StringReader(message));
                     // Validate against scheme
@@ -144,10 +146,12 @@ public class MQListener extends BaseListener implements MessageListener {
                     validator.validate(src);
                 } catch (SAXException ex) {
                     schemaValidation = false;
-                    LOG.error("Error validate message with scheme: {}", ex.getMessage());
+                    LOG.error("[FPS][Env: {}][PaymentType: {}] Error Validating message against scheme. Error:{} Message: {}", bottomlineEnv,
+                            PAYMENT_TYPE,  ex.getMessage(), message);
                 } catch (IOException e) {
                     schemaValidation = false;
-                    LOG.error("Error I/O: {}", e.getMessage());
+                    LOG.error("[FPS][Env: {}][PaymentType: {}] I/O Error. Error:{} Message: {}", bottomlineEnv,
+                            PAYMENT_TYPE,  e.getMessage(), message);
                 }
 
                 // Getting Avro
@@ -155,28 +159,26 @@ public class MQListener extends BaseListener implements MessageListener {
                 final JAXBElement result = (JAXBElement) marshaller.unmarshal(src);
                 FPSMessage fpsMessage = (FPSMessage) result.getValue();
 
+
                 // Call the correspondent transform
                 FPSTransform transform = getTransform(fpsMessage.getClass().getPackage().getName());
                 if (transform != null) {
                     Object avroFpsMessage = transform.fps2avro(fpsMessage);
-
                     boolean isValid = validMessage((FPSAvroMessage)avroFpsMessage);
 
-                    LOG.info("Sending message to Kafka ...............");
-
-                    String uuid = generatorID().getGeneralUniqueId();
 
                     String FPID = extractFPID((FPSAvroMessage) avroFpsMessage);
                     String paymentTypeCode = extractParameterTypeCode((FPSAvroMessage) avroFpsMessage);
 
                     if (schemaValidation && isValid) {
                         // Send avro message to Kafka
-
                         FPSInboundPayment fpsRequest = new FPSInboundPayment();
                         fpsRequest.setPaymentDocument((com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Document) ((FPSAvroMessage) avroFpsMessage).getMessage());
                         fpsRequest.setFPID(FPID);
                         fpsRequest.setPaymentId(uuid);
                         fpsRequest.setPaymentType(paymentTypeCode);
+
+                        LOG.info("[FPS][PmtId: {}] Sending FPS Inbound payment request", uuid);
 
                         Event event = EventGenerator.generateEvent(
                                 this.getClass().getName(),
@@ -193,6 +195,8 @@ public class MQListener extends BaseListener implements MessageListener {
                                 uuid,
                                 replyTo, bottomlineEnv, PAYMENT_TYPE
                         );
+
+                        LOG.info("[FPS][PmtId: {}] Sent FPS Inbound payment request", uuid);
                     } else {
 
                         FPSInboundPaymentResponse fpsResponse = new FPSInboundPaymentResponse();
@@ -204,6 +208,7 @@ public class MQListener extends BaseListener implements MessageListener {
                         fpsResponse.setStsRsn(NO_VALIDATION_CODE);
 
 
+                        LOG.info("[FPS][PmtId: {}] Sending FPS Inbound payment Reject response", uuid);
                         // Send avro message to Kafka
                         Event event = EventGenerator.generateEvent(
                                 this.getClass().getName(), FPSEvents.FPS_VALIDATION_ERROR.getEventName(),
@@ -218,20 +223,24 @@ public class MQListener extends BaseListener implements MessageListener {
                                 RawMessageUtils.encodeToString(Event.SCHEMA$, event), uuid,
                                 replyTo, bottomlineEnv, PAYMENT_TYPE
                         );
-
+                        LOG.info("[FPS][PmtId: {}] Sent FPS Inbound payment Reject response", uuid);
                     }
-                    LOG.info("Sent message to Kafka ...............");
+
                 } else {
                     throw new MessageConversionException("Exception in message reception. The transform for the class " + fpsMessage.getClass().getName() + " is null");
                 }
             }catch (ConversionException convEx){
-                LOG.error("Error generating Avro file{}", convEx.getMessage());
+                LOG.error("[FPS][Env: {}][PaymentType: {}]Error generating Avro file. Error: {} Message: {}", bottomlineEnv,
+                        PAYMENT_TYPE, convEx.getMessage(), message);
             }catch(IOException e) {
-                LOG.error("IO Error {}", e.getMessage());
+                LOG.error("[FPS][Env: {}][PaymentType: {}] IO Error {}", bottomlineEnv,
+                        PAYMENT_TYPE, e.getMessage());
             }catch(MessageConversionException conversionEx){
-                LOG.error("Error transforming message {}", conversionEx.getMessage());
+                LOG.error("[FPS][Env: {}][PaymentType: {}] Error transforming message {}", bottomlineEnv,
+                        PAYMENT_TYPE, conversionEx.getMessage());
             } catch (Exception ex) {
-                LOG.error("Error getting unique ID", ex.getMessage());
+                LOG.error("[FPS][Env: {}][PaymentType: {}] Error getting unique ID", bottomlineEnv,
+                        PAYMENT_TYPE,  ex.getMessage());
             }
         }
     }
@@ -263,15 +272,5 @@ public class MQListener extends BaseListener implements MessageListener {
 
     private boolean validMessage(FPSAvroMessage avroFpsMessage) {
         return true;
-    }
-
-    private GeneratorIdCommandProducer generatorID(){
-        Properties props  = new Properties();
-        props.setProperty(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, SecurityProtocol.PLAINTEXT.name());
-        props.setProperty("bootstrap.servers", "hdf-node1:2181,hdf-node2:2181,hdf-node3:2181");
-        props.setProperty("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-        props.setProperty("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-
-        return new GeneratorIdCommandProducer(new CommandProducerConfig(props), 1, Time.SYSTEM);
     }
 }
