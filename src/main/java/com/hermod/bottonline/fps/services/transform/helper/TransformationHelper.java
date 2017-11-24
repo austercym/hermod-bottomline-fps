@@ -19,7 +19,6 @@ import com.hermod.bottonline.fps.services.transform.helper.builder.*;
 import com.hermod.bottonline.fps.services.transform.helper.converter.*;
 
 import com.orwellg.umbrella.avro.types.commons.Decimal;
-import com.orwellg.umbrella.commons.types.utils.avro.DecimalTypeUtils;
 import io.reactivex.Flowable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,13 +31,19 @@ public final class TransformationHelper {
 	private static HashMap<String, BuilderRuleIf> BuilderRules = new HashMap<String, BuilderRuleIf>();
 
 	static {
-		//Converters.add(new TypeConverterEntry(XMLGregorianCalendar.class, Long.class, (calendar, ctx) -> { return (Long)((XMLGregorianCalendar)calendar).toGregorianCalendar().getTimeInMillis(); }));
-		//Converters.add(new TypeConverterEntry(XMLGregorianCalendar.class, CharSequence.class, (calendar, ctx) -> { return ((XMLGregorianCalendar)calendar).toXMLFormat();}));
-		Converters.add(new TypeConverterEntry(XMLGregorianCalendar.class, Long.class, (calendar, ctx) -> (Long)((XMLGregorianCalendar)calendar).toGregorianCalendar().getTimeInMillis()));
-		Converters.add(new TypeConverterEntry(XMLGregorianCalendar.class, CharSequence.class, (calendar, ctx) -> ((XMLGregorianCalendar)calendar).toXMLFormat()));
-		// EL NUEVO Converters.add(new TypeConverterEntry(BigDecimal.class, Decimal.class, (value, ctx) ->  new Decimal((BigDecimal)value)));
-		Converters.add(new TypeConverterEntry(BigDecimal.class, Decimal.class, (decimalValue, ctx) -> DecimalTypeUtils.toDecimal((BigDecimal)decimalValue)));
-		Converters.add(new TypeConverterEntry(Decimal.class, BigDecimal.class, (decimalValue, ctx) ->  ((Decimal)decimalValue).getValue()));
+
+		Converters.add(new TypeConverterEntry(XMLGregorianCalendar.class, Long.class, (calendar, ctx) -> {
+			return (Long)((XMLGregorianCalendar)calendar).toGregorianCalendar().getTimeInMillis();
+		}));
+		Converters.add(new TypeConverterEntry(XMLGregorianCalendar.class, CharSequence.class, (calendar, ctx) -> {
+			return ((XMLGregorianCalendar)calendar).toXMLFormat();}
+		));
+		Converters.add(new TypeConverterEntry(XMLGregorianCalendar.class, String.class, (calendar, ctx) -> {
+			return ((XMLGregorianCalendar)calendar).toXMLFormat();
+		}));
+		Converters.add(new TypeConverterEntry(BigDecimal.class, Double.class, (decimalValue, ctx) -> ((BigDecimal)decimalValue).doubleValue()));
+		Converters.add(new TypeConverterEntry(Double.class, BigDecimal.class, (doubleValue, ctx) -> new BigDecimal(((Double)doubleValue))));
+
 		Converters.add(new TypeConverterEntry(CharSequence.class,  XMLGregorianCalendar.class, TransformationHelper::charSequenceToXmlCalendar));
 		Converters.add(new TypeConverterEntry(String.class,  XMLGregorianCalendar.class, TransformationHelper::charSequenceToXmlCalendar));
 		Converters.add(new TypeConverterEntry(Long.class, XMLGregorianCalendar.class, TransformationHelper::longToXmlCalendar));
@@ -47,6 +52,9 @@ public final class TransformationHelper {
 		Converters.add(new MatchingTypeConverter());
 		Converters.add(new ComplexTypeCollectionConverter());
 		Converters.add(new SimpleTypeCollectionConverter());
+		Converters.add(new TypeConverterEntry(BigDecimal.class, Decimal.class, (value, ctx) -> {
+			return new Decimal((BigDecimal)value);
+		}));
 	}
 	
 	
