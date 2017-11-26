@@ -3,7 +3,7 @@ package input.types;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import com.hermod.bottonline.fps.types.FPSMessage;
+import com.hermod.bottomline.fps.types.FPSMessage;
 
 public class ContainerType implements FPSMessage{
 

@@ -2,11 +2,11 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.hermod.bottonline.fps</groupId>
-  	<artifactId>hermod-bottonline-fps</artifactId>
+	<groupId>com.hermod.bottomline.fps</groupId>
+  	<artifactId>hermod-bottomline-fps</artifactId>
 	<version>0.0.1</version>
 	<packaging>jar</packaging>
-	<name>hermod-bottonline-fps</name>
+	<name>hermod-bottomline-fps</name>
 	<url>http://maven.apache.org</url>
 
 	<properties>
@@ -203,7 +203,7 @@
       
    </plugins>
 
-	<finalName>hermod-bottonline-fps-${project.version}</finalName>
+	<finalName>hermod-bottomline-fps-${project.version}</finalName>
 
  </build>
 

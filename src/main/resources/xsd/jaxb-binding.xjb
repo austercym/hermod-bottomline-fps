@@ -11,7 +11,7 @@
     </jxb:globalBindings>
     <jxb:bindings schemaLocation="pacs.008.001.05.xsd">
       <jxb:bindings node="//xs:complexType[@name='Document']">
-        <inheritance:implements>com.hermod.bottonline.fps.types.FPSMessage</inheritance:implements> 
+        <inheritance:implements>com.hermod.bottomline.fps.types.FPSMessage</inheritance:implements>
         <annox:annotate target="class">
     			<annox:annotate annox:class="javax.xml.bind.annotation.XmlRootElement" name="Document"/>
 		</annox:annotate>
@@ -19,7 +19,7 @@
     </jxb:bindings>
     <jxb:bindings schemaLocation="pacs.002.001.06.xsd">
       <jxb:bindings node="//xs:complexType[@name='Document']">
-        <inheritance:implements>com.hermod.bottonline.fps.types.FPSMessage</inheritance:implements> 
+        <inheritance:implements>com.hermod.bottomline.fps.types.FPSMessage</inheritance:implements>
         <annox:annotate target="class">
     			<annox:annotate annox:class="javax.xml.bind.annotation.XmlRootElement" name="Document"/>
 		</annox:annotate>
@@ -27,7 +27,7 @@
     </jxb:bindings>
     <jxb:bindings schemaLocation="pacs.004.001.05.xsd">
       <jxb:bindings node="//xs:complexType[@name='Document']">
-        <inheritance:implements>com.hermod.bottonline.fps.types.FPSMessage</inheritance:implements> 
+        <inheritance:implements>com.hermod.bottomline.fps.types.FPSMessage</inheritance:implements>
         <annox:annotate target="class">
     			<annox:annotate annox:class="javax.xml.bind.annotation.XmlRootElement" name="Document"/>
 		</annox:annotate>
@@ -35,7 +35,7 @@
     </jxb:bindings>
     <jxb:bindings schemaLocation="pacs.007.001.05.xsd">
       <jxb:bindings node="//xs:complexType[@name='Document']">
-        <inheritance:implements>com.hermod.bottonline.fps.types.FPSMessage</inheritance:implements> 
+        <inheritance:implements>com.hermod.bottomline.fps.types.FPSMessage</inheritance:implements>
         <annox:annotate target="class">
     			<annox:annotate annox:class="javax.xml.bind.annotation.XmlRootElement" name="Document"/>
 		</annox:annotate>
@@ -43,7 +43,7 @@
     </jxb:bindings>
     <jxb:bindings schemaLocation="pacs.009.001.05.xsd">
       <jxb:bindings node="//xs:complexType[@name='Document']">
-        <inheritance:implements>com.hermod.bottonline.fps.types.FPSMessage</inheritance:implements> 
+        <inheritance:implements>com.hermod.bottomline.fps.types.FPSMessage</inheritance:implements>
         <annox:annotate target="class">
     			<annox:annotate annox:class="javax.xml.bind.annotation.XmlRootElement" name="Document"/>
 		</annox:annotate>

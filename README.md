@@ -1,5 +1,5 @@
-# hermod-bottonline-fps
-Connector between Bottonline and Kafka
+# hermod-bottomline-fps
+Connector between Bottomline and Kafka
 
 This Module allows the connectivity between the core system and the BottomLine Faster payments gateway.
 
