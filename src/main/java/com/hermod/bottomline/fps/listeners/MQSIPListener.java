@@ -17,7 +17,7 @@ public class MQSIPListener extends MQListener {
     public static final String PAYMENT_TYPE = "SIP";
     private static Logger LOG = LogManager.getLogger(MQSIPListener.class);
 
-    @Value("${jms.mq.bottomline.environment}")
+    @Value("${jms.mq.bottomline.environment.1}")
     private String bottomlineEnv;
 
     @Override

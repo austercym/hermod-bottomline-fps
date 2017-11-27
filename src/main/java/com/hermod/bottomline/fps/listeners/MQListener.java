@@ -3,6 +3,9 @@ package com.hermod.bottomline.fps.listeners;
 import com.google.gson.Gson;
 import com.hermod.bottomline.fps.services.transform.FPSTransform;
 import com.hermod.bottomline.fps.services.transform.helper.ConversionException;
+import com.hermod.bottomline.fps.storage.InMemoryPaymentStorage;
+import com.hermod.bottomline.fps.storage.PaymentBean;
+import com.hermod.bottomline.fps.storage.PaymentStatus;
 import com.hermod.bottomline.fps.types.FPSMessage;
 import com.hermod.bottomline.fps.utils.generators.EventGenerator;
 import com.hermod.bottomline.fps.services.kafka.KafkaSender;
@@ -107,7 +110,7 @@ public abstract class MQListener extends BaseListener implements MessageListener
         }
     }
 
-    public void sendMessageToTopic(Reader reader, String paymnetType) {
+    public void sendMessageToTopic(Reader reader, String paymentType) {
         boolean schemaValidation = true;
         SchemaFactory schemaFactory = SchemaFactory
                 .newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
@@ -132,11 +135,11 @@ public abstract class MQListener extends BaseListener implements MessageListener
                 } catch (SAXException ex) {
                     schemaValidation = false;
                     LOG.error("[FPS][PaymentType: {}] Error Validating message against scheme. Error:{} Message: {}", 
-                            paymnetType,  ex.getMessage(), message);
+                            paymentType,  ex.getMessage(), message);
                 } catch (IOException e) {
                     schemaValidation = false;
                     LOG.error("[FPS][PaymentType: {}] I/O Error. Error:{} Message: {}", 
-                            paymnetType,  e.getMessage(), message);
+                            paymentType,  e.getMessage(), message);
                 }
                 // Getting Avro
                 Source src = new StreamSource(new StringReader(message));
@@ -172,7 +175,9 @@ public abstract class MQListener extends BaseListener implements MessageListener
                                 brand
                         );
 
-                        sendToKafka(outboundTopic, uuid, event);
+
+                        String paymentMessage = gson.toJson(fpsRequest.getPaymentDocument());
+                        selectMessageDestination(outboundTopic, paymentMessage, uuid, FPID, event);
 
                         LOG.info("[FPS][PmtId: {}] Sent FPS Inbound payment request", uuid);
                     } else {
@@ -196,7 +201,8 @@ public abstract class MQListener extends BaseListener implements MessageListener
                                 brand
                         );
 
-                        sendToKafka(outboundErrorTopic,uuid, event);
+                        String paymentMessage = gson.toJson(fpsResponse.getOrgnlPaymentDocument());
+                        selectMessageDestination(outboundErrorTopic, paymentMessage, uuid, FPID, event);
 
                         LOG.info("[FPS][PmtId: {}] Sent FPS Inbound payment Reject response", uuid);
                     }
@@ -206,18 +212,41 @@ public abstract class MQListener extends BaseListener implements MessageListener
                 }
             }catch (ConversionException convEx){
                 LOG.error("[FPS][PaymentType: {}]Error generating Avro file. Error: {} Message: {}", 
-                        paymnetType, convEx.getMessage(), message);
+                        paymentType, convEx.getMessage(), message);
             }catch(IOException e) {
                 LOG.error("[FPS][PaymentType: {}] IO Error {}", 
-                        paymnetType, e.getMessage());
+                        paymentType, e.getMessage());
             }catch(MessageConversionException conversionEx){
                 LOG.error("[FPS][PaymentType: {}] Error transforming message {}", 
-                        paymnetType, conversionEx.getMessage());
+                        paymentType, conversionEx.getMessage());
             } catch (Exception ex) {
                 LOG.error("[FPS][PaymentType: {}] Error getting unique ID", 
-                        paymnetType,  ex.getMessage());
+                        paymentType,  ex.getMessage());
             }
         }
+    }
+
+    private void selectMessageDestination(String topic, String message, String uuid, String FPID, Event event) {
+        PaymentBean resendPreviousResponse = checkPreviousResponse(message, uuid, FPID);
+
+        if(resendPreviousResponse == null) {
+            sendToKafka(topic, uuid, event);
+        }else{
+            //TODO send previous response to resp queue
+        }
+    }
+
+    private PaymentBean checkPreviousResponse(String message, String uuid, String FPID) {
+        PaymentBean resendPreviousResponse = null;
+        InMemoryPaymentStorage storage = InMemoryPaymentStorage.getInstance();
+        PaymentBean payment = storage.findPayment(FPID, message);
+        if (payment != null && payment.getStatus().equals(PaymentStatus.PROCESSED)){
+            LOG.info("[FPS][PmtId: {}] Payment previously processed, FPID: {}. Sending previous FPS Inbound payment response", uuid, FPID);
+            resendPreviousResponse = payment;
+        }else{
+            storage.storePayment(FPID, message, uuid);
+        }
+        return resendPreviousResponse;
     }
 
     private String extractFPID(FPSAvroMessage avroFpsMessage) {

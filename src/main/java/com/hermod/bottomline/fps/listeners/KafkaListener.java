@@ -1,12 +1,17 @@
 package com.hermod.bottomline.fps.listeners;
 
 import com.google.gson.Gson;
+import com.hermod.bottomline.fps.services.transform.FPSTransform;
+import com.hermod.bottomline.fps.storage.InMemoryPaymentStorage;
+import com.hermod.bottomline.fps.storage.PaymentBean;
 import com.hermod.bottomline.fps.types.FPSMessage;
 import com.hermod.bottomline.fps.utils.generators.IDGeneratorBean;
+import com.orwellg.umbrella.avro.types.event.Event;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSInboundPaymentResponse;
 import com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs002_001_06.*;
 import com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.InstructionForNextAgent1;
+import com.orwellg.umbrella.commons.types.utils.avro.RawMessageUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,7 +77,7 @@ public class KafkaListener extends BaseListener{
         // <OrgnlGrpInf>
         pmtInfAndSts.setOrgnlGrpInf(new OriginalGroupInformation3());
         pmtInfAndSts.getOrgnlGrpInf().setOrgnlMsgId(fpsPaymentResponse.getOrgnlPaymentDocument().getFIToFICstmrCdtTrf().getGrpHdr().getMsgId());
-        // TODO
+        // TODO Change pacs.008 version to v.06
         pmtInfAndSts.getOrgnlGrpInf().setOrgnlMsgNmId("pacs.008.001.05");
         // <OrgnlTxId>
         pmtInfAndSts.setOrgnlTxId(fpsPaymentResponse.getOrgnlPaymentDocument().getFIToFICstmrCdtTrf().getCdtTrfTxInf().get(0).getPmtId().getTxId());
@@ -122,5 +127,50 @@ public class KafkaListener extends BaseListener{
 
         avroMessage.setMessage(fpsPacs002Response);
         return avroMessage;
+    }
+
+    protected PaymentBean updatePaymentResponseInMemory(com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Document originalMessage,
+                                                        String responseMessage, String paymentId) {
+        InMemoryPaymentStorage storage = InMemoryPaymentStorage.getInstance();
+        Gson gson = new Gson();
+
+        String originalStr = gson.toJson(originalMessage);
+        String FPID = extractFPID(originalMessage);
+
+        LOG.debug("[FPS][PmtId: {}] Storing response message to in-memory storage with FPID {}",FPID, paymentId);
+        PaymentBean payment = storage.findPayment(FPID, originalStr);
+        if (payment == null) {
+            storage.storePayment(FPID, originalStr, paymentId);
+        }
+        payment = storage.completePaymentResponse(FPID, originalStr, responseMessage);
+
+        return payment;
+    }
+
+    private String extractFPID(com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Document originalMessage) {
+        String FPID = "";
+        com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.CreditTransferTransaction19 creditTransferTransaction = originalMessage
+                .getFIToFICstmrCdtTrf().getCdtTrfTxInf().get(0);
+        if(!creditTransferTransaction.getInstrForNxtAgt().isEmpty()){
+            FPID = creditTransferTransaction.getInstrForNxtAgt().get(0).getInstrInf();
+            FPID = FPID.substring(FPID.lastIndexOf('/')+1);
+        } else{
+            String txId = creditTransferTransaction.getPmtId().getTxId();
+            String paymentTypeCode = creditTransferTransaction.getPmtTpInf().getLclInstrm().getPrtry();
+            String currency = creditTransferTransaction.getIntrBkSttlmAmt().getCcy();
+            String sendingFPSInstitution = creditTransferTransaction.getInstgAgt().getFinInstnId().getClrSysMmbId().getMmbId();
+            String dateSent = creditTransferTransaction.getIntrBkSttlmDt().replaceAll("-","");
+            FPID = txId+paymentTypeCode+dateSent+currency+sendingFPSInstitution;
+        }
+        return FPID;
+    }
+
+    protected StringWriter transformPaymentRequestToString(FPSMessage fpsMessage) throws JAXBException {
+        StringWriter rawMessage = new StringWriter();
+        final JAXBContext jc = JAXBContext.newInstance(com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Document.class);
+        final Marshaller marshaller = jc.createMarshaller();
+
+        marshaller.marshal(fpsMessage, new StreamResult(rawMessage));
+        return rawMessage;
     }
 }

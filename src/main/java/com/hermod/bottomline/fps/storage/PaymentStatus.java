@@ -1,8 +1,8 @@
 package com.hermod.bottomline.fps.storage;
 
-public enum MessageStatus {
+public enum PaymentStatus {
     PENDING("pending"),
-    COMPLETED("completed");
+    PROCESSED("processed");
 
     private final String name;
 
@@ -10,7 +10,7 @@ public enum MessageStatus {
         return name;
     }
 
-    MessageStatus(String name) {
+    PaymentStatus(String name) {
         this.name = name;
     }
 }

@@ -27,7 +27,7 @@ import java.io.StringWriter;
 public class KafkaRejectListener extends KafkaListener implements MessageListener<String, String>, KafkaDataListener<ConsumerRecord<String, String>> {
 
 	private static Logger LOG = LogManager.getLogger(KafkaRejectListener.class);
-	@Value("${wq.mq.queue.sip.outbound}")
+	@Value("${wq.mq.queue.sip.inbound.resp}")
 	private String outboundQueue;
 
 	@Value("${kafka.topic.fps.logging}")
@@ -68,27 +68,30 @@ public class KafkaRejectListener extends KafkaListener implements MessageListene
 			FPSAvroMessage fpsPacs002Response = null;
 			try {
 				fpsPacs002Response  = generateFPSPacs002Response(fpsPaymentReject);
+				LOG.info("[FPS][PmtId: {}] Response Reject generated for FPS inbound payment. Response: {}", key, fpsPacs002Response.toString());
+				// Call the correspondent transform
+				FPSTransform transform = transforms.get("transform_pacs_002_001");
+				if (transform != null) {
+					FPSMessage fpsMessage = transform.avro2fps(fpsPacs002Response);
+
+					StringWriter rawMessage = transformResponseToString(fpsMessage);
+
+					LOG.info("[FPS][PmtId: {}] XML Reject Response generated for FPS inbound payment. Response: {}", key, rawMessage.toString());
+					kafkaSender.sendRawMessage(loggingTopic, rawMessage.toString(), key);
+
+					updatePaymentResponseInMemory(fpsPaymentReject.getOrgnlPaymentDocument() ,rawMessage.toString(), key);
+
+					//TODO Send to MQ (Environment=Queue)
+					//jmsOperations.convertAndSend(outboundQueue, fpsMessage);
+				} else {
+					throw new MessageConversionException("Exception in message emission. The transform for pacs_002_001 is null");
+				}
 			} catch (Exception ex) {
 				LOG.error("[FPS][PmtId: {}] Error generating rejection for FPS inbound payment. Error Message: {}", key, ex.getMessage(), ex);
 			}
-			LOG.info("[FPS][PmtId: {}] Response Reject generated for FPS inbound payment. Response: {}", key, fpsPacs002Response.toString());
 
-			// Call the correspondent transform
-			FPSTransform transform = transforms.get("transform_pacs_002_001");
-			if (transform != null) {
-				FPSMessage fpsMessage = transform.avro2fps(fpsPacs002Response);
-
-				StringWriter rawMessage = transformResponseToString(fpsMessage);
-
-				LOG.info("[FPS][PmtId: {}] XML Reject Response generated for FPS inbound payment. Response: {}", key, rawMessage.toString());
-				kafkaSender.sendRawMessage(loggingTopic, rawMessage.toString(), key);
-				//TODO Send to MQ (Environment=Queue)
-				//jmsOperations.convertAndSend(outboundQueue, fpsMessage);
-			} else {
-				throw new MessageConversionException("Exception in message emision. The transform for pacs_002_001 is null");
-			}
 		 } catch (Exception e) {
-     		throw new MessageConversionException("Exception in message emision. Message: " + e.getMessage(), e);
+     		throw new MessageConversionException("Exception in message emission. Message: " + e.getMessage(), e);
 		 }
 	}
 

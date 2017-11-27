@@ -61,6 +61,11 @@
 			<version>${spring.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-core</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>javax.jms</groupId>
 			<artifactId>javax.jms-api</artifactId>
 			<version>${javax.jms.version}</version>
@@ -80,7 +85,7 @@
 			<artifactId>umbrella-commons</artifactId>
 			<version>${umbrella.version}</version>
 		</dependency>
-    
+
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>

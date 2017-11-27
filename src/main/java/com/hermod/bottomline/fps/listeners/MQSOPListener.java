@@ -17,7 +17,7 @@ public class MQSOPListener extends MQListener {
     public static String PAYMENT_TYPE = "SOP";
     public static Logger LOG = LogManager.getLogger(MQSOPListener.class);
 
-    @Value("${jms.mq.bottomline.environment}")
+    @Value("${jms.mq.bottomline.environment.1}")
     private String bottomlineEnv;
 
     @Override

@@ -18,15 +18,18 @@ public class DefaultPropertyValues {
 	private final static String MQ_DEFAULT_PASSWORD = "";
 	private final static Long MQ_DEFAULT_RECEIVED_TIMEOUT = 2000L;
 	private final static Integer MQ_DEFAULT_NUM_MAX_CONSUMERS = 1;
-	private final static String MQ_DEFAULT_INBOUND_SIP_QUEUE  = "DEV.QUEUE.1";
-	private final static String MQ_DEFAULT_INBOUND_SOP_QUEUE  = "DEV.QUEUE.2";
-	private final static String MQ_DEFAULT_OUTBOUND_SIP_QUEUE = "IPAGOO.HOST.SIP.RESP.QR";
-	private final static String MQ_DEFAULT_OUTBOUND_SOP_QUEUE = "IPAGOO.HOST.SIP.RESP.QR";
+	private final static String MQ_DEFAULT_INBOUND_SIP_QUEUE  = "IPAGOO.HOST.SIP.RECV.QR";
+	private final static String MQ_DEFAULT_INBOUND_SOP_QUEUE  = "IPAGOO.HOST.SOP.RECV.QR";
+	private final static String MQ_DEFAULT_INBOUND_OTH_QUEUE  = "IPAGOO.HOST.OTH.RECV.QR";
+	private final static String MQ_DEFAULT_INBOUND_USM_QUEUE  = "IPAGOO.HOST.USM.RECV.QR";
+	private final static String MQ_DEFAULT_INBOUND_RESP_SIP_QUEUE = "IPAGOO.HOST.SIP.RECV.RESP.QR";
+	private final static String MQ_DEFAULT_INBOUND_RESP_SOP_QUEUE = "IPAGOO.HOST.SOP.RECV.RESP.QR";
+	private final static String MQ_DEFAULT_INBOUND_RESP_OTH_QUEUE = "IPAGOO.HOST.OTH.RECV.RESP.QR";
 	private final static String MQ_BOTTOMLINE1_ENVIRONMENT = "BOTTOMLINE1";
 	private final static String MQ_BOTTOMLINE2_ENVIRONMENT = "BOTTOMLINE2";
 
-	//private final static String KAFKA_DEFAULT_BOOTSTRAP_SERVER = "confluent-node1:9092,confluent-node2:9092,confluent-node3:9092,confluent-node4:9092,confluent-node5:9092,confluent-node6:9092";
-	private final static String KAFKA_DEFAULT_BOOTSTRAP_SERVER = "localhost:9092";
+	private final static String KAFKA_DEFAULT_BOOTSTRAP_SERVER = "confluent-node1:9092,confluent-node2:9092,confluent-node3:9092,confluent-node4:9092,confluent-node5:9092,confluent-node6:9092";
+	//private final static String KAFKA_DEFAULT_BOOTSTRAP_SERVER = "localhost:9092";
 	private final static String KAFKA_DEFAULT_INBOUND_TOPIC  = "com.orwellg.yggdrasil.dsl.fps.inbound.payment.response.1";
 	private final static String KAFKA_DEFAULT_INBOUND_REJECT_TOPIC = "com.orwellg.yggdrasil.dsl.fps.inbound.payment.reject.1";
 	private final static String KAFKA_DEFAULT_OUTBOUND_TOPIC = "com.orwellg.yggdrasil.dsl.fps.inbound.payment.request.1";
@@ -56,11 +59,15 @@ public class DefaultPropertyValues {
 		defaultValues.put("wq.mq.receive.timeout", MQ_DEFAULT_RECEIVED_TIMEOUT);
 		defaultValues.put("wq.mq.queue.sip.inbound", MQ_DEFAULT_INBOUND_SIP_QUEUE);
 		defaultValues.put("wq.mq.queue.sop.inbound", MQ_DEFAULT_INBOUND_SOP_QUEUE);
-		defaultValues.put("wq.mq.queue.sip.outbound", MQ_DEFAULT_OUTBOUND_SIP_QUEUE);
-		defaultValues.put("wq.mq.queue.sop.outbound", MQ_DEFAULT_OUTBOUND_SOP_QUEUE);
+		defaultValues.put("wq.mq.queue.oth.inbound", MQ_DEFAULT_INBOUND_OTH_QUEUE);
+		defaultValues.put("wq.mq.queue.usm.inbound", MQ_DEFAULT_INBOUND_USM_QUEUE);
+		defaultValues.put("wq.mq.queue.sip.inbound.resp", MQ_DEFAULT_INBOUND_RESP_SIP_QUEUE);
+		defaultValues.put("wq.mq.queue.sop.inbound.resp", MQ_DEFAULT_INBOUND_RESP_SOP_QUEUE);
+		defaultValues.put("wq.mq.queue.oth.inbound.resp", MQ_DEFAULT_INBOUND_RESP_OTH_QUEUE);
 
 		defaultValues.put("wq.mq.receive.num.max.consumers", MQ_DEFAULT_NUM_MAX_CONSUMERS);
-		defaultValues.put("jms.mq.bottomline.environment", MQ_BOTTOMLINE1_ENVIRONMENT);
+		defaultValues.put("jms.mq.bottomline.environment.1", MQ_BOTTOMLINE1_ENVIRONMENT);
+		defaultValues.put("jms.mq.bottomline.environment.2", MQ_BOTTOMLINE2_ENVIRONMENT);
 
 		defaultValues.put("kafka.bootstrap.host", KAFKA_DEFAULT_BOOTSTRAP_SERVER);
 		defaultValues.put("kafka.topic.inbound.response", KAFKA_DEFAULT_INBOUND_TOPIC);
