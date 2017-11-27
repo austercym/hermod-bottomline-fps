@@ -14,6 +14,7 @@ import com.orwellg.umbrella.avro.types.event.Event;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSInboundPayment;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSInboundPaymentResponse;
+import com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Document;
 import com.orwellg.umbrella.commons.utils.enums.FPSEvents;
 import org.apache.activemq.util.ByteArrayInputStream;
 import org.apache.commons.io.IOUtils;
@@ -156,55 +157,62 @@ public abstract class MQListener extends BaseListener implements MessageListener
                     String FPID = extractFPID((FPSAvroMessage) avroFpsMessage);
                     String paymentTypeCode = extractParameterTypeCode((FPSAvroMessage) avroFpsMessage);
 
-                    if (schemaValidation && isValid) {
-                        // Send avro message to Kafka
-                        FPSInboundPayment fpsRequest = new FPSInboundPayment();
-                        fpsRequest.setPaymentDocument((com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Document) ((FPSAvroMessage) avroFpsMessage).getMessage());
-                        fpsRequest.setFPID(FPID);
-                        fpsRequest.setPaymentId(uuid);
-                        fpsRequest.setPaymentType(paymentTypeCode);
+                    Document paymentDocument = ((com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Document) ((FPSAvroMessage) avroFpsMessage).getMessage());
+                    String originalPaymentMessage = gson.toJson(paymentDocument);
+                    PaymentBean previousPaymentProcessed = checkPreviousResponse(originalPaymentMessage,uuid, FPID);
 
-                        LOG.info("[FPS][PmtId: {}] Sending FPS Inbound payment request", uuid);
+                    if (previousPaymentProcessed != null){
+                        //TODO send previous response to resp queue
+                        LOG.info("[FPS][PmtId: {}] Payment previously processed, FPID: {}. Sending previous FPS Inbound payment response. Message: {}",
+                                uuid, FPID, previousPaymentProcessed.getResponseMessage());
+                    }else {
+                        if (schemaValidation && isValid) {
+                            // Send avro message to Kafka
+                            FPSInboundPayment fpsRequest = new FPSInboundPayment();
+                            fpsRequest.setPaymentDocument(paymentDocument);
+                            fpsRequest.setFPID(FPID);
+                            fpsRequest.setPaymentId(uuid);
+                            fpsRequest.setPaymentType(paymentTypeCode);
 
-                        Event event = EventGenerator.generateEvent(
-                                this.getClass().getName(),
-                                FPSEvents.FPS_REQUEST_RECEIVED.getEventName(),
-                                uuid,
-                                gson.toJson(fpsRequest),
-                                entity,
-                                brand
-                        );
+                            LOG.info("[FPS][PmtId: {}] Sending FPS Inbound payment request", uuid);
+
+                            Event event = EventGenerator.generateEvent(
+                                    this.getClass().getName(),
+                                    FPSEvents.FPS_REQUEST_RECEIVED.getEventName(),
+                                    uuid,
+                                    gson.toJson(fpsRequest),
+                                    entity,
+                                    brand
+                            );
+
+                            sendToKafka(outboundTopic, uuid, event);
+
+                            LOG.info("[FPS][PmtId: {}] Sent FPS Inbound payment request", uuid);
+                        } else {
+
+                            FPSInboundPaymentResponse fpsResponse = new FPSInboundPaymentResponse();
+
+                            fpsResponse.setFPID(FPID);
+                            fpsResponse.setPaymentId(uuid);
+                            fpsResponse.setOrgnlPaymentDocument(paymentDocument);
+                            fpsResponse.setTxSts(REJECT_CODE);
+                            fpsResponse.setStsRsn(NO_VALIDATION_CODE);
 
 
-                        String paymentMessage = gson.toJson(fpsRequest.getPaymentDocument());
-                        selectMessageDestination(outboundTopic, paymentMessage, uuid, FPID, event);
+                            LOG.info("[FPS][PmtId: {}] Sending FPS Inbound payment Reject response", uuid);
+                            // Send avro message to Kafka
+                            Event event = EventGenerator.generateEvent(
+                                    this.getClass().getName(), FPSEvents.FPS_VALIDATION_ERROR.getEventName(),
+                                    uuid,
+                                    gson.toJson(fpsResponse),
+                                    entity,
+                                    brand
+                            );
 
-                        LOG.info("[FPS][PmtId: {}] Sent FPS Inbound payment request", uuid);
-                    } else {
+                            sendToKafka(outboundErrorTopic, uuid, event);
 
-                        FPSInboundPaymentResponse fpsResponse = new FPSInboundPaymentResponse();
-
-                        fpsResponse.setFPID(FPID);
-                        fpsResponse.setPaymentId(uuid);
-                        fpsResponse.setOrgnlPaymentDocument((com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Document) ((FPSAvroMessage) avroFpsMessage).getMessage());
-                        fpsResponse.setTxSts(REJECT_CODE);
-                        fpsResponse.setStsRsn(NO_VALIDATION_CODE);
-
-
-                        LOG.info("[FPS][PmtId: {}] Sending FPS Inbound payment Reject response", uuid);
-                        // Send avro message to Kafka
-                        Event event = EventGenerator.generateEvent(
-                                this.getClass().getName(), FPSEvents.FPS_VALIDATION_ERROR.getEventName(),
-                                uuid,
-                                gson.toJson(fpsResponse),
-                                entity,
-                                brand
-                        );
-
-                        String paymentMessage = gson.toJson(fpsResponse.getOrgnlPaymentDocument());
-                        selectMessageDestination(outboundErrorTopic, paymentMessage, uuid, FPID, event);
-
-                        LOG.info("[FPS][PmtId: {}] Sent FPS Inbound payment Reject response", uuid);
+                            LOG.info("[FPS][PmtId: {}] Sent FPS Inbound payment Reject response", uuid);
+                        }
                     }
 
                 } else {
@@ -226,22 +234,11 @@ public abstract class MQListener extends BaseListener implements MessageListener
         }
     }
 
-    private void selectMessageDestination(String topic, String message, String uuid, String FPID, Event event) {
-        PaymentBean resendPreviousResponse = checkPreviousResponse(message, uuid, FPID);
-
-        if(resendPreviousResponse == null) {
-            sendToKafka(topic, uuid, event);
-        }else{
-            //TODO send previous response to resp queue
-        }
-    }
-
     private PaymentBean checkPreviousResponse(String message, String uuid, String FPID) {
         PaymentBean resendPreviousResponse = null;
         InMemoryPaymentStorage storage = InMemoryPaymentStorage.getInstance();
         PaymentBean payment = storage.findPayment(FPID, message);
         if (payment != null && payment.getStatus().equals(PaymentStatus.PROCESSED)){
-            LOG.info("[FPS][PmtId: {}] Payment previously processed, FPID: {}. Sending previous FPS Inbound payment response", uuid, FPID);
             resendPreviousResponse = payment;
         }else{
             storage.storePayment(FPID, message, uuid);

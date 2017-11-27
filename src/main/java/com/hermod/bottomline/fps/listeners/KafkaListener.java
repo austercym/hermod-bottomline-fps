@@ -137,7 +137,7 @@ public class KafkaListener extends BaseListener{
         String originalStr = gson.toJson(originalMessage);
         String FPID = extractFPID(originalMessage);
 
-        LOG.debug("[FPS][PmtId: {}] Storing response message to in-memory storage with FPID {}",FPID, paymentId);
+        LOG.debug("[FPS][PmtId: {}] Storing response message to in-memory storage with FPID {}", paymentId, FPID);
         PaymentBean payment = storage.findPayment(FPID, originalStr);
         if (payment == null) {
             storage.storePayment(FPID, originalStr, paymentId);
