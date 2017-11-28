@@ -32,8 +32,6 @@ public final class TransformationHelper {
 		Converters.add(new TypeConverterEntry(XMLGregorianCalendar.class, String.class, (calendar, ctx) -> {
 			return ((XMLGregorianCalendar)calendar).toXMLFormat();
 		}));
-
-		// EL NUEVO Converters.add(new TypeConverterEntry(BigDecimal.class, Decimal.class, (value, ctx) ->  new Decimal((BigDecimal)value)));
 		Converters.add(new TypeConverterEntry(BigDecimal.class, Decimal.class, (decimalValue, ctx) -> DecimalTypeUtils.toDecimal((BigDecimal)decimalValue)));
 		Converters.add(new TypeConverterEntry(Decimal.class, BigDecimal.class, (decimalValue, ctx) ->  ((Decimal)decimalValue).getValue()));
 		Converters.add(new TypeConverterEntry(CharSequence.class,  XMLGregorianCalendar.class, TransformationHelper::charSequenceToXmlCalendar));
