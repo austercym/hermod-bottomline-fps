@@ -13,9 +13,7 @@ import org.springframework.kafka.listener.AbstractMessageListenerContainer;
 public class ProjectConfig extends ComponentConfig {
 
 	private static final Logger LOG = LogManager.getLogger(ProjectConfig.class);
-	
-	@Autowired
-	private AbstractMessageListenerContainer<?,?> kafkaRejectListenerContainer;
+
 	@Autowired
 	private AbstractMessageListenerContainer<?,?> kafkaResponseListenerContainer;
 	
@@ -29,7 +27,6 @@ public class ProjectConfig extends ComponentConfig {
 	public void doSomethingAfterStartup() {
 	    LOG.info("Connector to Bottomline start. Starting containers....");
 		kafkaResponseListenerContainer.start();
-		kafkaRejectListenerContainer.start();
 		jmsSIPListenerContainer.start();
 		jmsSOPListenerContainer.start();
 

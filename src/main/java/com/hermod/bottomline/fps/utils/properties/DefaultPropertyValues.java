@@ -30,6 +30,7 @@ public class DefaultPropertyValues {
 
 	private final static String KAFKA_DEFAULT_BOOTSTRAP_SERVER = "confluent-node1:9092,confluent-node2:9092,confluent-node3:9092,confluent-node4:9092,confluent-node5:9092,confluent-node6:9092";
 	//private final static String KAFKA_DEFAULT_BOOTSTRAP_SERVER = "localhost:9092";
+	private final static String KAFKA_DEFAULT_INBOUND_TOPIC_REPLYTO  = "com.orwellg.yggdrasil.dsl.fps.inbound.payment.accounting.response.1";
 	private final static String KAFKA_DEFAULT_INBOUND_TOPIC  = "com.orwellg.yggdrasil.dsl.fps.inbound.payment.response.1";
 	private final static String KAFKA_DEFAULT_INBOUND_REJECT_TOPIC = "com.orwellg.yggdrasil.dsl.fps.inbound.payment.reject.1";
 	private final static String KAFKA_DEFAULT_OUTBOUND_TOPIC = "com.orwellg.yggdrasil.dsl.fps.inbound.payment.request.1";
@@ -71,6 +72,7 @@ public class DefaultPropertyValues {
 
 		defaultValues.put("kafka.bootstrap.host", KAFKA_DEFAULT_BOOTSTRAP_SERVER);
 		defaultValues.put("kafka.topic.inbound.response", KAFKA_DEFAULT_INBOUND_TOPIC);
+		defaultValues.put("kafka.topic.inbound.response.replyTo", KAFKA_DEFAULT_INBOUND_TOPIC_REPLYTO);
 		defaultValues.put("kafka.topic.inbound.reject", KAFKA_DEFAULT_INBOUND_REJECT_TOPIC);
 		defaultValues.put("kafka.topic.outbound.request", KAFKA_DEFAULT_OUTBOUND_TOPIC);
 		defaultValues.put("kafka.topic.outbound.reject", KAFKA_DEFAULT_OUTBOUND_REJECT_TOPIC);

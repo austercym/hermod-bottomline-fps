@@ -55,9 +55,9 @@ public class KafkaListener extends BaseListener{
         try {
             msgId002 = idGenerator.generatorID().getGeneralUniqueId();
         } catch (Exception e) {
-            LOG.error("[FPS][PmtId: {}] Error generating message identificer for response. Error Message: {}", fpsPaymentResponse.getPaymentId(), e.getMessage(), e);
+            LOG.error("[FPS][PmtId: {}] Error generating message identifier for response. Error Message: {}", fpsPaymentResponse.getPaymentId(), e.getMessage(), e);
             msgId002 = "002" + fpsPaymentResponse.getOrgnlPaymentDocument().getFIToFICstmrCdtTrf().getCdtTrfTxInf().get(0).getPmtId().getTxId() + df.format(new Date());
-            LOG.error("[FPS][PmtId: {}] generated message identificer by default. Pacs.002 MsgId: {}", fpsPaymentResponse.getPaymentId(), msgId002);
+            LOG.error("[FPS][PmtId: {}] generated message identifier by default. Pacs.002 MsgId: {}", fpsPaymentResponse.getPaymentId(), msgId002);
         }
 
         // Payment Status Report

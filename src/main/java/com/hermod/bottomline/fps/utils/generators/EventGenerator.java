@@ -23,7 +23,7 @@ public class EventGenerator {
 	
 	public static Event generateEvent(String source, String eventName, String id, String eventData, String componentEntity, String componentBrand) {
 		
-		LOG.debug("Generating event with received datas.");
+		LOG.debug("Generating event with received data.");
 		
 		String entity = Constants.IPAGOO_ENTITY;
 		if (!StringUtils.isEmpty(componentEntity)) { entity = componentEntity; }

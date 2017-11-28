@@ -65,13 +65,13 @@ public abstract class MQListener extends BaseListener implements MessageListener
     private String brand;
     @Value("${kafka.topic.outbound.request}")
     protected String outboundTopic;
-    @Value("${kafka.topic.outbound.reject}")
-    private String outboundErrorTopic;
+    @Value("${kafka.topic.inbound.response}")
+    private String outboundResponseTopic;
 
     @Value("${kafka.topic.fps.logging}")
     private String loggingTopic;
 
-    @Value("${kafka.topic.inbound.response}")
+    @Value("${kafka.topic.inbound.response.replyTo}")
     protected String replyTo;
 
     protected void onMessage(Message message, String paymentType) {
@@ -209,7 +209,7 @@ public abstract class MQListener extends BaseListener implements MessageListener
                                     brand
                             );
 
-                            sendToKafka(outboundErrorTopic, uuid, event);
+                            sendToKafka(outboundResponseTopic, uuid, event);
 
                             LOG.info("[FPS][PmtId: {}] Sent FPS Inbound payment Reject response", uuid);
                         }

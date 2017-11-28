@@ -2,6 +2,7 @@ package com.hermod.bottomline.fps.rest;
 
 import com.hermod.bottomline.fps.listeners.MQSIPListener;
 import com.hermod.bottomline.fps.listeners.MQSOPListener;
+import com.hermod.bottomline.fps.storage.InMemoryPaymentStorage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,5 +33,12 @@ public class SimulateSendEventToKafka {
         Reader reader = new StringReader(queueMessage);
         mqSOPListener.sendMessageToTopic(reader, MQSOPListener.PAYMENT_TYPE);
         return new ResponseEntity<>("Message sent ", HttpStatus.OK);
+    }
+
+    @RequestMapping(method= RequestMethod.GET, value="/resetstorage")
+    public ResponseEntity<String> cleanMemory() {
+        InMemoryPaymentStorage inmemoryStorage = InMemoryPaymentStorage.getInstance();
+        inmemoryStorage.cleanStorage();
+        return new ResponseEntity<>("Memory reset", HttpStatus.OK);
     }
 }
