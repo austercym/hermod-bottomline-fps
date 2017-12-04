@@ -1,4 +1,4 @@
-package com.hermod.bottomline.fps.listeners;
+package com.hermod.bottomline.fps.listeners.inbound;
 
 import com.orwellg.umbrella.avro.types.event.Event;
 import com.orwellg.umbrella.commons.types.utils.avro.RawMessageUtils;

@@ -25,17 +25,28 @@ public class DefaultPropertyValues {
 	private final static String MQ_DEFAULT_INBOUND_RESP_SIP_QUEUE = "IPAGOO.HOST.SIP.RECV.RESP.QR";
 	private final static String MQ_DEFAULT_INBOUND_RESP_SOP_QUEUE = "IPAGOO.HOST.SOP.RECV.RESP.QR";
 	private final static String MQ_DEFAULT_INBOUND_RESP_OTH_QUEUE = "IPAGOO.HOST.OTH.RECV.RESP.QR";
+
+
 	private final static String MQ_BOTTOMLINE1_ENVIRONMENT = "BOTTOMLINE1";
 	private final static String MQ_BOTTOMLINE2_ENVIRONMENT = "BOTTOMLINE2";
 
+	private final static String MQ_DEFAULT_OUTBOUND_SIP_QUEUE  = "IPAGOO.HOST.SIP.SEND.QR";
+	private final static String MQ_DEFAULT_OUTBOUND_SIP_RESP_QUEUE  = "IPAGOO.HOST.SIP.SEND.RESP.QR";
+
 	private final static String KAFKA_DEFAULT_BOOTSTRAP_SERVER = "confluent-node1:9092,confluent-node2:9092,confluent-node3:9092,confluent-node4:9092,confluent-node5:9092,confluent-node6:9092";
 	//private final static String KAFKA_DEFAULT_BOOTSTRAP_SERVER = "localhost:9092";
-	private final static String KAFKA_DEFAULT_INBOUND_TOPIC_REPLYTO  = "com.orwellg.yggdrasil.dsl.fps.inbound.payment.accounting.response.1";
-	private final static String KAFKA_DEFAULT_INBOUND_TOPIC  = "com.orwellg.yggdrasil.dsl.fps.inbound.payment.response.1";
-	private final static String KAFKA_DEFAULT_INBOUND_REJECT_TOPIC = "com.orwellg.yggdrasil.dsl.fps.inbound.payment.reject.1";
-	private final static String KAFKA_DEFAULT_OUTBOUND_TOPIC = "com.orwellg.yggdrasil.dsl.fps.inbound.payment.request.1";
-	private final static String KAFKA_DEFAULT_OUTBOUND_REJECT_TOPIC = "com.orwellg.yggdrasil.dsl.fps.inbound.payment.reject.1";
-	private final static String KAFKA_DEFAULT_MESSAGE_LOGGING_TOPIC = "com.orwellg.logging.message";
+
+	private final static String KAFKA_DEFAULT_INBOUND_TOPIC_REPLYTO   = "com.orwellg.yggdrasil.dsl.fps.inbound.payment.accounting.response.1";
+	private final static String KAFKA_DEFAULT_INBOUND_TOPIC           = "com.orwellg.yggdrasil.dsl.fps.inbound.payment.response.1";
+	private final static String KAFKA_DEFAULT_INBOUND_RESPONSE_TOPIC  = "com.orwellg.yggdrasil.dsl.fps.inbound.response.1";
+	private final static String KAFKA_DEFAULT_INBOUND_REJECT_TOPIC    = "com.orwellg.yggdrasil.dsl.fps.inbound.payment.reject.1";
+	private final static String KAFKA_DEFAULT_INBOUND_REQUEST_TOPIC   = "com.orwellg.yggdrasil.dsl.fps.inbound.payment.request.1";
+
+	private final static String KAFKA_DEFAULT_OUTBOUND_RESPONSE_TOPIC = "com.orwellg.yggdrasil.dsl.fps.outbound.payment.response.1";
+	private final static String KAFKA_DEFAULT_OUTBOUND_REQUEST_TOPIC  = "com.orwellg.hermod.bottomline.fps.outbound.payment.request.1";
+
+	private final static String KAFKA_DEFAULT_MESSAGE_LOGGING_TOPIC   = "com.orwellg.logging.message";
+
 	private final static Integer KAFKA_DEFAULT_OUTBOUND_TOPIC_PARTITIONS = 3;
 	private final static String KAFKA_DEFAULT_CONSUMER_GROUP_ID = "hermod-bottomline-fps-inbound";
 	private final static Integer KAFKA_DEFAULT_CONSUMER_THREADS = 3;
@@ -58,26 +69,41 @@ public class DefaultPropertyValues {
 		defaultValues.put("wq.mq.username", MQ_DEFAULT_USERNAME);
 		defaultValues.put("wq.mq.password", MQ_DEFAULT_PASSWORD);
 		defaultValues.put("wq.mq.receive.timeout", MQ_DEFAULT_RECEIVED_TIMEOUT);
+
+		//Inbound queues BOTTOMLINE
+
 		defaultValues.put("wq.mq.queue.sip.inbound", MQ_DEFAULT_INBOUND_SIP_QUEUE);
-		defaultValues.put("wq.mq.queue.sop.inbound", MQ_DEFAULT_INBOUND_SOP_QUEUE);
-		defaultValues.put("wq.mq.queue.oth.inbound", MQ_DEFAULT_INBOUND_OTH_QUEUE);
-		defaultValues.put("wq.mq.queue.usm.inbound", MQ_DEFAULT_INBOUND_USM_QUEUE);
 		defaultValues.put("wq.mq.queue.sip.inbound.resp", MQ_DEFAULT_INBOUND_RESP_SIP_QUEUE);
+		defaultValues.put("wq.mq.queue.sop.inbound", MQ_DEFAULT_INBOUND_SOP_QUEUE);
 		defaultValues.put("wq.mq.queue.sop.inbound.resp", MQ_DEFAULT_INBOUND_RESP_SOP_QUEUE);
+		defaultValues.put("wq.mq.queue.oth.inbound", MQ_DEFAULT_INBOUND_OTH_QUEUE);
 		defaultValues.put("wq.mq.queue.oth.inbound.resp", MQ_DEFAULT_INBOUND_RESP_OTH_QUEUE);
+		defaultValues.put("wq.mq.queue.usm.inbound", MQ_DEFAULT_INBOUND_USM_QUEUE);
+
+		//Outbound queues BOTTOMLINE
+		defaultValues.put("wq.mq.queue.sip.outbound", MQ_DEFAULT_OUTBOUND_SIP_QUEUE);
+		defaultValues.put("wq.mq.queue.sip.outbound.resp", MQ_DEFAULT_OUTBOUND_SIP_RESP_QUEUE);
+
 
 		defaultValues.put("wq.mq.receive.num.max.consumers", MQ_DEFAULT_NUM_MAX_CONSUMERS);
 		defaultValues.put("jms.mq.bottomline.environment.1", MQ_BOTTOMLINE1_ENVIRONMENT);
 		defaultValues.put("jms.mq.bottomline.environment.2", MQ_BOTTOMLINE2_ENVIRONMENT);
 
 		defaultValues.put("kafka.bootstrap.host", KAFKA_DEFAULT_BOOTSTRAP_SERVER);
+		// KAFKA TOPICS
+		defaultValues.put("kafka.topic.inbound.request", KAFKA_DEFAULT_INBOUND_REQUEST_TOPIC);
 		defaultValues.put("kafka.topic.inbound.response", KAFKA_DEFAULT_INBOUND_TOPIC);
 		defaultValues.put("kafka.topic.inbound.response.replyTo", KAFKA_DEFAULT_INBOUND_TOPIC_REPLYTO);
 		defaultValues.put("kafka.topic.inbound.reject", KAFKA_DEFAULT_INBOUND_REJECT_TOPIC);
-		defaultValues.put("kafka.topic.outbound.request", KAFKA_DEFAULT_OUTBOUND_TOPIC);
-		defaultValues.put("kafka.topic.outbound.reject", KAFKA_DEFAULT_OUTBOUND_REJECT_TOPIC);
+
+		defaultValues.put("kafka.topic.inbound.response.payment", KAFKA_DEFAULT_INBOUND_RESPONSE_TOPIC);
+
+		defaultValues.put("kafka.topic.outbound.request", KAFKA_DEFAULT_OUTBOUND_REQUEST_TOPIC);
+		defaultValues.put("kafka.topic.outbound.response", KAFKA_DEFAULT_OUTBOUND_RESPONSE_TOPIC);
 		defaultValues.put("kafka.topic.outbound.partitions", KAFKA_DEFAULT_OUTBOUND_TOPIC_PARTITIONS);
+
 		defaultValues.put("kafka.topic.fps.logging", KAFKA_DEFAULT_MESSAGE_LOGGING_TOPIC);
+
 		defaultValues.put("kafka.consumer.group.id", KAFKA_DEFAULT_CONSUMER_GROUP_ID);
 		defaultValues.put("kafka.consumer.threads.num", KAFKA_DEFAULT_CONSUMER_THREADS);
 		defaultValues.put("kafka.consumer.poll.timeout", KAFKA_DEFAULT_CONSUMER_POLL_TIMEOUT);

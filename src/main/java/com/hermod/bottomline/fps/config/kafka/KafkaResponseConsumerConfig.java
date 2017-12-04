@@ -14,29 +14,53 @@ import org.springframework.kafka.listener.config.ContainerProperties;
 public class KafkaResponseConsumerConfig extends KafkaConsumerConfig{
 
 	@Value("${kafka.topic.inbound.response}")
+	private String inboundTopic;
+
+	@Value("${kafka.topic.outbound.request}")
 	private String outboundTopic;
+
+
 	@Value("${kafka.consumer.poll.timeout}")
 	private Long consumerPoolTimeout;
 	@Value("${kafka.consumer.threads.num}")
 	private Integer numMaxThreads;
 	
 	@Autowired
-	private MessageListener<?, ?> kafkaResponseListener;
+	private MessageListener<?, ?> kafkaResponseInboundListener;
+
+	@Autowired
+	private MessageListener<?, ?> kafkaRequestOutboundListener;
 
 	@Bean
-	public ConcurrentMessageListenerContainer<?, ?> kafkaResponseListenerContainer() {
+	public ConcurrentMessageListenerContainer<?, ?> kafkaResponseInboundListenerContainer() {
 		
-		ContainerProperties containerProperties = new ContainerProperties(outboundTopic);
+		ContainerProperties containerProperties = new ContainerProperties(inboundTopic);
 		containerProperties.setPollTimeout(consumerPoolTimeout);
 		
-		ConcurrentMessageListenerContainer<?, ?> kafkaResponseListenerContainer = new ConcurrentMessageListenerContainer<>(
+		ConcurrentMessageListenerContainer<?, ?> kafkaResponseInboundListenerContainer = new ConcurrentMessageListenerContainer<>(
 				kafkaConsumerFactory(), 
 				containerProperties
 		);
-		kafkaResponseListenerContainer.setConcurrency(numMaxThreads);
-		kafkaResponseListenerContainer.setupMessageListener(kafkaResponseListener);
+		kafkaResponseInboundListenerContainer.setConcurrency(numMaxThreads);
+		kafkaResponseInboundListenerContainer.setupMessageListener(kafkaResponseInboundListener);
 		
-		return kafkaResponseListenerContainer;
+		return kafkaResponseInboundListenerContainer;
+	}
+
+	@Bean
+	public ConcurrentMessageListenerContainer<?, ?> kafkaRequestOutboundListenerContainer() {
+
+		ContainerProperties containerProperties = new ContainerProperties(outboundTopic);
+		containerProperties.setPollTimeout(consumerPoolTimeout);
+
+		ConcurrentMessageListenerContainer<?, ?> kafkaRequestOutboundListenerContainer = new ConcurrentMessageListenerContainer<>(
+				kafkaConsumerFactory(),
+				containerProperties
+		);
+		kafkaRequestOutboundListenerContainer.setConcurrency(numMaxThreads);
+		kafkaRequestOutboundListenerContainer.setupMessageListener(kafkaRequestOutboundListener);
+
+		return kafkaRequestOutboundListenerContainer;
 	}
 
 }

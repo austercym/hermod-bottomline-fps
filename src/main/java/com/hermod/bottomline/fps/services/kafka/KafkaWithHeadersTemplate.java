@@ -3,10 +3,12 @@ package com.hermod.bottomline.fps.services.kafka;
 import com.orwellg.umbrella.commons.utils.enums.KafkaHeaders;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.header.Header;
+import org.apache.kafka.common.header.Headers;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Component;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.concurrent.ListenableFuture;
 
 @Component
@@ -19,10 +21,17 @@ public class KafkaWithHeadersTemplate<K, V> extends KafkaTemplate {
     public ListenableFuture<SendResult<K, V>> send(String topic, V data, String key, String replyTo, String BLEnvironment, String paymentType) {
         ProducerRecord<K, V> producerRecord = new ProducerRecord(topic, key, data);
 
-        producerRecord.headers()
-                .add(KafkaHeaders.REPLY_TO.getKafkaHeader(), replyTo.getBytes())
-                .add(KafkaHeaders.FPS_SITE.getKafkaHeader(), BLEnvironment.getBytes())
-                .add(KafkaHeaders.FPS_PAYMENT_TYPE.getKafkaHeader(), paymentType.getBytes());
+        Headers headers = producerRecord.headers();
+        if(StringUtils.isNotEmpty(replyTo)){
+            headers.add(KafkaHeaders.REPLY_TO.getKafkaHeader(), replyTo.getBytes());
+        }
+        if(StringUtils.isNotEmpty(BLEnvironment)){
+            headers.add(KafkaHeaders.FPS_SITE.getKafkaHeader(), BLEnvironment.getBytes());
+        }
+        if(StringUtils.isNotEmpty(paymentType)){
+            headers.add(KafkaHeaders.FPS_PAYMENT_TYPE.getKafkaHeader(), paymentType.getBytes());
+        }
+
 
         return this.doSend(producerRecord);
     }

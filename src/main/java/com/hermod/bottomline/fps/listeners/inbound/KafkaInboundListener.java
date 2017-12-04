@@ -1,17 +1,16 @@
-package com.hermod.bottomline.fps.listeners;
+package com.hermod.bottomline.fps.listeners.inbound;
 
 import com.google.gson.Gson;
-import com.hermod.bottomline.fps.services.transform.FPSTransform;
+import com.hermod.bottomline.fps.listeners.BaseListener;
 import com.hermod.bottomline.fps.storage.InMemoryPaymentStorage;
 import com.hermod.bottomline.fps.storage.PaymentBean;
 import com.hermod.bottomline.fps.types.FPSMessage;
 import com.hermod.bottomline.fps.utils.generators.IDGeneratorBean;
-import com.orwellg.umbrella.avro.types.event.Event;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSInboundPaymentResponse;
+import com.orwellg.umbrella.avro.types.payment.fps.FPSOutboundPaymentResponse;
 import com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs002_001_06.*;
 import com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.InstructionForNextAgent1;
-import com.orwellg.umbrella.commons.types.utils.avro.RawMessageUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,9 +26,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class KafkaListener extends BaseListener{
+public class KafkaInboundListener extends BaseListener {
 
-    private static Logger LOG = LogManager.getLogger(KafkaListener.class);
+    private static Logger LOG = LogManager.getLogger(KafkaInboundListener.class);
 
     @Autowired
     protected IDGeneratorBean idGenerator;
@@ -44,7 +43,7 @@ public class KafkaListener extends BaseListener{
         return rawMessage;
     }
 
-    protected FPSAvroMessage generateFPSPacs002Response(FPSInboundPaymentResponse fpsPaymentResponse) {
+    protected FPSAvroMessage generateFPSPacs002Response(FPSOutboundPaymentResponse fpsPaymentResponse) {
         Document fpsPacs002Response = new Document();
         Gson gson = new Gson();
         DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");

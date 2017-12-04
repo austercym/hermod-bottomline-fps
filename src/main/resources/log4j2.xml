@@ -7,7 +7,7 @@
         <RollingFile name="FILE" filename="logs/hermod-bottomline-fps.log" filePattern="logs/hermod-bottomline-fps-%d{yyyy-MM-dd}-%i.log">
             <PatternLayout pattern="%d %-5p [%t] %C{2} (%F:%L) - %m%n" />
             <Policies>
-                <SizeBasedTriggeringPolicy size="10 KB"/>
+                <SizeBasedTriggeringPolicy size="10 MB"/>
                 <!--<TimeBasedTriggeringPolicy interval="1" modulate="true" />-->
             </Policies>
             <DefaultRolloverStrategy max="5" />

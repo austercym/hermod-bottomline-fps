@@ -42,7 +42,7 @@ public class EventGenerator {
 		eventType.setData(eventData);
 		
 		ProcessIdentifierType processIdentifier = new ProcessIdentifierType();
-		processIdentifier.setUuid("PROCESS-" + id);
+		processIdentifier.setUuid( id);
 		
 		EntityIdentifierType entityIdentifier = new EntityIdentifierType();
 		entityIdentifier.setEntity(entity);

@@ -15,20 +15,27 @@ public class ProjectConfig extends ComponentConfig {
 	private static final Logger LOG = LogManager.getLogger(ProjectConfig.class);
 
 	@Autowired
-	private AbstractMessageListenerContainer<?,?> kafkaResponseListenerContainer;
-	
+	private AbstractMessageListenerContainer<?,?> kafkaResponseInboundListenerContainer;
+	@Autowired
+	private AbstractMessageListenerContainer<?,?> kafkaRequestOutboundListenerContainer;
+
 	@Autowired
 	private DefaultMessageListenerContainer jmsSIPListenerContainer;
 
 	@Autowired
 	private DefaultMessageListenerContainer jmsSOPListenerContainer;
 
+	@Autowired
+	private DefaultMessageListenerContainer jmsSIPOutboundListenerContainer;
+
 	@EventListener(ApplicationReadyEvent.class)
 	public void doSomethingAfterStartup() {
 	    LOG.info("Connector to Bottomline start. Starting containers....");
-		kafkaResponseListenerContainer.start();
+		kafkaResponseInboundListenerContainer.start();
+		kafkaRequestOutboundListenerContainer.start();
 		jmsSIPListenerContainer.start();
 		jmsSOPListenerContainer.start();
+		jmsSIPOutboundListenerContainer.start();
 
 	    LOG.info("Connector started");
 	}

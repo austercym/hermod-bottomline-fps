@@ -1,4 +1,4 @@
-package com.hermod.bottomline.fps.listeners;
+package com.hermod.bottomline.fps.listeners.inbound;
 
 
 import com.google.gson.Gson;
@@ -8,6 +8,7 @@ import com.hermod.bottomline.fps.services.kafka.KafkaSender;
 import com.orwellg.umbrella.avro.types.event.Event;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSInboundPaymentResponse;
+import com.orwellg.umbrella.avro.types.payment.fps.FPSOutboundPaymentResponse;
 import com.orwellg.umbrella.commons.types.utils.avro.RawMessageUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.logging.log4j.LogManager;
@@ -23,10 +24,10 @@ import org.springframework.stereotype.Component;
 import java.io.StringWriter;
 
 
-@Component(value="kafkaResponseListener")
-public class KafkaResponseListener extends KafkaListener implements MessageListener<String, String>, KafkaDataListener<ConsumerRecord<String, String>> {
+@Component(value="kafkaResponseInboundListener")
+public class KafkaResponseInboundListener extends KafkaInboundListener implements MessageListener<String, String>, KafkaDataListener<ConsumerRecord<String, String>> {
 
-	private static Logger LOG = LogManager.getLogger(KafkaResponseListener.class);
+	private static Logger LOG = LogManager.getLogger(KafkaResponseInboundListener.class);
 	@Value("${wq.mq.queue.sip.inbound.resp}")
 	private String outboundQueue;
 
@@ -56,18 +57,18 @@ public class KafkaResponseListener extends KafkaListener implements MessageListe
 
 			// Parse FPS Inbound Payment Rejection
 			LOG.info("[FPS][PmtId: {}] parsing response for FPS inbound payment", key);
-			FPSInboundPaymentResponse fpsPayment = null;
+			FPSOutboundPaymentResponse fpsPaymentResponse = null;
 			try {
-				fpsPayment = new Gson().fromJson(eventPayment.getEvent().getData(), FPSInboundPaymentResponse.class);
+				fpsPaymentResponse = new Gson().fromJson(eventPayment.getEvent().getData(), FPSOutboundPaymentResponse.class);
 			} catch (Exception ex) {
 				LOG.error("[FPS][PmtId: {}] Error parsing response for FPS inbound payment. Error Message: {}", key, ex.getMessage(), ex);
 			}
-			LOG.info("[FPS][PmtId: {}] parsed response for FPS inbound payment. Response message: {}", key, fpsPayment.toString());
+			LOG.info("[FPS][PmtId: {}] parsed response for FPS inbound payment. Response message: {}", key, fpsPaymentResponse.toString());
 
 			// Generate Response Reject
 			FPSAvroMessage fpsPacs002Response = null;
 			try {
-				fpsPacs002Response  = generateFPSPacs002Response(fpsPayment);
+				fpsPacs002Response  = generateFPSPacs002Response(fpsPaymentResponse);
 				LOG.info("[FPS][PmtId: {}] Response generated for FPS inbound payment. Response: {}", key, fpsPacs002Response.toString());
 				// Call the correspondent transform
 				FPSTransform transform = transforms.get("transform_pacs_002_001");
@@ -79,7 +80,7 @@ public class KafkaResponseListener extends KafkaListener implements MessageListe
 					LOG.info("[FPS][PmtId: {}] XML Response generated for FPS inbound payment. Response: {}", key, rawMessage.toString());
 					kafkaSender.sendRawMessage(loggingTopic, rawMessage.toString(), key);
 
-					updatePaymentResponseInMemory(fpsPayment.getOrgnlPaymentDocument() ,rawMessage.toString(), key);
+					updatePaymentResponseInMemory(fpsPaymentResponse.getOrgnlPaymentDocument() ,rawMessage.toString(), key);
 
 					//TODO Send to MQ (Environment=Queue)
 					//jmsOperations.convertAndSend(outboundQueue, fpsMessage);

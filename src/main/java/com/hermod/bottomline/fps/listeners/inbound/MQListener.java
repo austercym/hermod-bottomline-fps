@@ -1,6 +1,7 @@
-package com.hermod.bottomline.fps.listeners;
+package com.hermod.bottomline.fps.listeners.inbound;
 
 import com.google.gson.Gson;
+import com.hermod.bottomline.fps.listeners.BaseListener;
 import com.hermod.bottomline.fps.services.transform.FPSTransform;
 import com.hermod.bottomline.fps.services.transform.helper.ConversionException;
 import com.hermod.bottomline.fps.storage.InMemoryPaymentStorage;
@@ -14,10 +15,12 @@ import com.orwellg.umbrella.avro.types.event.Event;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSInboundPayment;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSInboundPaymentResponse;
+import com.orwellg.umbrella.avro.types.payment.fps.FPSOutboundPaymentResponse;
 import com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Document;
 import com.orwellg.umbrella.commons.utils.enums.FPSEvents;
 import org.apache.activemq.util.ByteArrayInputStream;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,8 +66,10 @@ public abstract class MQListener extends BaseListener implements MessageListener
     private String entity;
     @Value("${brand.name}")
     private String brand;
-    @Value("${kafka.topic.outbound.request}")
-    protected String outboundTopic;
+
+    @Value("${kafka.topic.inbound.request}")
+    protected String inboundTopic;
+
     @Value("${kafka.topic.inbound.response}")
     private String outboundResponseTopic;
 
@@ -112,6 +117,10 @@ public abstract class MQListener extends BaseListener implements MessageListener
     }
 
     public void sendMessageToTopic(Reader reader, String paymentType) {
+        this.sendMessageToTopic(reader, paymentType, null);
+    }
+
+    public void sendMessageToTopic(Reader reader, String paymentType, String id) {
         boolean schemaValidation = true;
         SchemaFactory schemaFactory = SchemaFactory
                 .newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
@@ -119,7 +128,7 @@ public abstract class MQListener extends BaseListener implements MessageListener
             Resource xsdResource = new ClassPathResource("./xsd/pacs.008.001.05.xsd");
             String message = "";
             try {
-                String uuid = idGenerator.generatorID().getGeneralUniqueId();
+                String uuid = StringUtils.isNotEmpty(id)?id:idGenerator.generatorID().getGeneralUniqueId();
                 StringWriter writer = new StringWriter();
                 IOUtils.copy(reader, writer);
                 message = writer.toString();
@@ -155,14 +164,14 @@ public abstract class MQListener extends BaseListener implements MessageListener
 
 
                     String FPID = extractFPID((FPSAvroMessage) avroFpsMessage);
-                    String paymentTypeCode = extractParameterTypeCode((FPSAvroMessage) avroFpsMessage);
+                    String paymentTypeCode = extractPaymentTypeCode((FPSAvroMessage) avroFpsMessage);
 
                     Document paymentDocument = ((com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Document) ((FPSAvroMessage) avroFpsMessage).getMessage());
                     String originalPaymentMessage = gson.toJson(paymentDocument);
                     PaymentBean previousPaymentProcessed = checkPreviousResponse(originalPaymentMessage,uuid, FPID);
 
                     if (previousPaymentProcessed != null){
-                        //TODO send previous response to resp queue
+                        //TODO send previous response to resp queue TO BOTTOMLINE
                         LOG.info("[FPS][PmtId: {}] Payment previously processed, FPID: {}. Sending previous FPS Inbound payment response. Message: {}",
                                 uuid, FPID, previousPaymentProcessed.getResponseMessage());
                     }else {
@@ -178,19 +187,19 @@ public abstract class MQListener extends BaseListener implements MessageListener
 
                             Event event = EventGenerator.generateEvent(
                                     this.getClass().getName(),
-                                    FPSEvents.FPS_REQUEST_RECEIVED.getEventName(),
+                                    FPSEvents.FPS_INBOUND_RECEIVED.getEventName(),
                                     uuid,
                                     gson.toJson(fpsRequest),
                                     entity,
                                     brand
                             );
 
-                            sendToKafka(outboundTopic, uuid, event);
+                            sendToKafka(inboundTopic, uuid, event);
 
                             LOG.info("[FPS][PmtId: {}] Sent FPS Inbound payment request", uuid);
                         } else {
 
-                            FPSInboundPaymentResponse fpsResponse = new FPSInboundPaymentResponse();
+                            FPSOutboundPaymentResponse fpsResponse = new FPSOutboundPaymentResponse();
 
                             fpsResponse.setFPID(FPID);
                             fpsResponse.setPaymentId(uuid);
@@ -264,7 +273,7 @@ public abstract class MQListener extends BaseListener implements MessageListener
         return FPID;
     }
 
-    private String extractParameterTypeCode(FPSAvroMessage avroFpsMessage) {
+    private String extractPaymentTypeCode(FPSAvroMessage avroFpsMessage) {
         String paymentTypeCode = ((com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Document) avroFpsMessage.getMessage()).getFIToFICstmrCdtTrf().getCdtTrfTxInf()
                 .get(0).getPmtTpInf().getLclInstrm().getPrtry();
         paymentTypeCode = paymentTypeCode.substring(0, paymentTypeCode.indexOf('/'));
