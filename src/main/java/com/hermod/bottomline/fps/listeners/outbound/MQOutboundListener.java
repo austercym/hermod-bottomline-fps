@@ -17,6 +17,7 @@ import com.orwellg.umbrella.avro.types.payment.fps.FPSInboundPaymentResponse;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSOutboundPayment;
 import com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs002_001_06.AccountIdentification4Choice;
 import com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs002_001_06.Document;
+import com.orwellg.umbrella.commons.types.utils.avro.RawMessageUtils;
 import com.orwellg.umbrella.commons.utils.enums.FPSEvents;
 import org.apache.activemq.util.ByteArrayInputStream;
 import org.apache.commons.io.IOUtils;
@@ -158,9 +159,6 @@ public abstract class MQOutboundListener extends BaseListener implements Message
                     Object avroFpsMessage = transform.fps2avro(fpsMessage);
                     boolean isValid = validMessage((FPSAvroMessage)avroFpsMessage);
 
-                    //String FPID = extractFPID((FPSAvroMessage) avroFpsMessage);
-                    //String paymentTypeCode = extractPaymentTypeCode((FPSAvroMessage) avroFpsMessage);
-
                     Document paymentDocument = ((Document) ((FPSAvroMessage) avroFpsMessage).getMessage());
 
                     if (schemaValidation && isValid) {
@@ -187,10 +185,11 @@ public abstract class MQOutboundListener extends BaseListener implements Message
 
                         LOG.info("[FPS][PmtId: {}] Sending FPS Outbound payment response", uuid);
 
+
                         Event event = EventGenerator.generateEvent(
                                 this.getClass().getName(),
                                 FPSEvents.FPS_RESPONSE_RECEIVED.getEventName(),
-                                uuid,
+                                fpsResponse.getOrgnlPaymentId(),
                                 gson.toJson(fpsResponse),
                                 entity,
                                 brand
