@@ -181,6 +181,30 @@ public abstract class MQOutboundListener extends BaseListener implements Message
                             fpsResponse.setReturnedPaymentId(originalMessage.getReturnedPaymentId());
                             fpsResponse.setCdtrAccountId(originalMessage.getCdtrAccountId());
                             fpsResponse.setDbtrAccountId(originalMessage.getDbtrAccountId());
+                        }else{
+                            fpsResponse.setOrgnlPaymentId(paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxId());
+                            fpsResponse.setOrgnlPaymentType(paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getPmtTpInf().getLclInstrm().getPrtry()
+                                    .substring(0,paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getPmtTpInf().getLclInstrm().getPrtry().indexOf('/')));
+                            if (paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getRmtInf()!=null &&
+                                    paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getRmtInf().getStrd() != null &&
+                                    !paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getRmtInf().getStrd().isEmpty()) {
+                                if (paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getRmtInf().getStrd().get(0).getAddtlRmtInf() != null &&
+                                        !paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getRmtInf().getStrd().get(0).getAddtlRmtInf().isEmpty()) {
+                                    fpsResponse.setOrgnlFPID(paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getRmtInf().getStrd().get(0).getAddtlRmtInf().get(0));
+                                }
+                            }
+
+                            if (paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getCdtrAcct()!= null){
+                                if(paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getCdtrAcct().getId() != null &&
+                                        paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getCdtrAcct().getId().getIBAN()!= null){
+                                    fpsResponse.setCdtrAccountId(paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getCdtrAcct().getId().getIBAN());
+                                }
+                                if(paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getCdtrAcct().getId() != null &&
+                                        paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getCdtrAcct().getId().getOthr()!= null){
+                                    fpsResponse.setCdtrAccountId(paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getCdtrAcct().getId().getOthr().getId());
+                                }
+                            }
+
                         }
 
                         LOG.info("[FPS][PmtId: {}] Sending FPS Outbound payment response", uuid);
