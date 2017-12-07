@@ -52,7 +52,7 @@ public class KafkaInboundListener extends BaseListener {
         // Generate message identifier for response message
         String msgId002;
         try {
-            msgId002 = idGenerator.generatorID().getGeneralUniqueId();
+            msgId002 = idGenerator.generatorID().getFasterPaymentUniqueId();
         } catch (Exception e) {
             LOG.error("[FPS][PmtId: {}] Error generating message identifier for response. Error Message: {}", fpsPaymentResponse.getPaymentId(), e.getMessage(), e);
             msgId002 = "002" + fpsPaymentResponse.getOrgnlPaymentDocument().getFIToFICstmrCdtTrf().getCdtTrfTxInf().get(0).getPmtId().getTxId() + df.format(new Date());

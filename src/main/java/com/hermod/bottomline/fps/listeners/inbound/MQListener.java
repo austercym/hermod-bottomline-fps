@@ -128,7 +128,7 @@ public abstract class MQListener extends BaseListener implements MessageListener
             Resource xsdResource = new ClassPathResource("./xsd/pacs.008.001.05.xsd");
             String message = "";
             try {
-                String uuid = StringUtils.isNotEmpty(id)?id:idGenerator.generatorID().getGeneralUniqueId();
+                String uuid = StringUtils.isNotEmpty(id)?id:idGenerator.generatorID().getFasterPaymentUniqueId();
                 StringWriter writer = new StringWriter();
                 IOUtils.copy(reader, writer);
                 message = writer.toString();

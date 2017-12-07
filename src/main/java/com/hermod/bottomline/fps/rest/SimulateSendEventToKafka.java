@@ -37,7 +37,6 @@ public class SimulateSendEventToKafka {
     public ResponseEntity<String> sendSIP(@RequestBody String queueMessage,
                                           @RequestHeader("x-process-id") String key) {
         Reader reader = new StringReader(queueMessage);
-        LOG.info("Key header: {} ",key);
         mqSIPListener.sendMessageToTopic(reader, MQSIPListener.PAYMENT_TYPE, key);
         return new ResponseEntity<>("Message sent ", HttpStatus.OK);
     }
