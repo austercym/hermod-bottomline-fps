@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns1:ServiceStatusMessage xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                          xmlns:ns1="http://www.bottomline.com/directFPS/FPSUSMs"
+                          xmlns:ns2="http://www.bottomline.com/directFPS/ISO20022Types"
+                          xmlns:ns3="http://www.bottomline.com/directFPS/FPSUSMTypes"
+                          xmlns:ns4="http://www.bottomline.com/directFPS/FPSUSMElements">
+    <ns4:MessageID>1</ns4:MessageID>
+    <ns4:DateTime>2016-01-05T14:45:01</ns4:DateTime>
+    <ns4:ServiceStatus>SUSPENDED</ns4:ServiceStatus>
+</ns1:ServiceStatusMessage>

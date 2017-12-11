@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns1:FPSInst3rdPartyStatusMessage xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                                  xmlns:ns1="http://www.bottomline.com/directFPS/FPSUSMs"
+                                  xmlns:ns2="http://www.bottomline.com/directFPS/ISO20022Types"
+                                  xmlns:ns3="http://www.bottomline.com/directFPS/FPSUSMTypes"
+                                  xmlns:ns4="http://www.bottomline.com/directFPS/FPSUSMElements">
+    <ns4:MessageID>2</ns4:MessageID>
+    <ns4:DateTime>2016-01-05T14:45:02</ns4:DateTime>
+    <ns4:FPSInst3rdPartyID>01900045</ns4:FPSInst3rdPartyID>
+    <ns4:FPSInst3rdPartyName>SOME BANK</ns4:FPSInst3rdPartyName>
+    <ns4:SuspensionStatus>SUSPENDCREDIT</ns4:SuspensionStatus>
+    <ns4:PreviousSuspensionStatus>ACTIVE</ns4:PreviousSuspensionStatus>
+</ns1:FPSInst3rdPartyStatusMessage>
