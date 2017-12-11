@@ -5,34 +5,19 @@ import com.hermod.bottomline.fps.listeners.BaseListener;
 import com.hermod.bottomline.fps.storage.InMemoryPaymentStorage;
 import com.hermod.bottomline.fps.storage.PaymentBean;
 import com.hermod.bottomline.fps.types.FPSMessage;
-import com.hermod.bottomline.fps.utils.generators.IDGeneratorBean;
-import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
 
-import com.orwellg.umbrella.avro.types.payment.fps.FPSOutboundPayment;
-//import com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs002_001_06.*;
-import com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.transform.stream.StreamResult;
 import java.io.StringWriter;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 public class KafkaOutboundListener extends BaseListener {
 
     private static Logger LOG = LogManager.getLogger(KafkaOutboundListener.class);
-
-    @Autowired
-    protected IDGeneratorBean idGenerator;
-
 
     protected StringWriter transformRequestToString(FPSMessage fpsMessage) throws JAXBException {
         StringWriter rawMessage = new StringWriter();

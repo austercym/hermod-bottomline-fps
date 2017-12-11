@@ -30,10 +30,6 @@ public class KafkaInboundListener extends BaseListener {
 
     private static Logger LOG = LogManager.getLogger(KafkaInboundListener.class);
 
-    @Autowired
-    protected IDGeneratorBean idGenerator;
-
-
     protected StringWriter transformResponseToString(FPSMessage fpsMessage) throws JAXBException {
         StringWriter rawMessage = new StringWriter();
         final JAXBContext jc = JAXBContext.newInstance(iso.std.iso._20022.tech.xsd.pacs_002_001.Document.class);
@@ -52,7 +48,7 @@ public class KafkaInboundListener extends BaseListener {
         // Generate message identifier for response message
         String msgId002;
         try {
-            msgId002 = idGenerator.generatorID().getFasterPaymentUniqueId();
+            msgId002 = IDGeneratorBean.getInstance().generatorID().getFasterPaymentUniqueId();
         } catch (Exception e) {
             LOG.error("[FPS][PmtId: {}] Error generating message identifier for response. Error Message: {}", fpsPaymentResponse.getPaymentId(), e.getMessage(), e);
             msgId002 = "002" + fpsPaymentResponse.getOrgnlPaymentDocument().getFIToFICstmrCdtTrf().getCdtTrfTxInf().get(0).getPmtId().getTxId() + df.format(new Date());

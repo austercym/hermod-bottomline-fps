@@ -9,16 +9,40 @@ import org.springframework.stereotype.Component;
 
 import java.util.Properties;
 
-@Component(value = "idGenerator")
 public class IDGeneratorBean {
 
+    private static IDGeneratorBean instance = null;
+    private GeneratorIdCommandProducer generatorIDProducer;
+
+    //private constructor to avoid client applications to use constructor
+    private IDGeneratorBean(){
+        generatorIDProducer = new GeneratorIdCommandProducer(new CommandProducerConfig(getProperties()), 1, Time.SYSTEM);
+    }
+
+    // Lazy Initialization (If required then only)
+    public static IDGeneratorBean getInstance() {
+        if (instance == null) {
+            // Thread Safe. Might be costly operation in some case
+            synchronized (IDGeneratorBean.class) {
+                if (instance == null) {
+                    instance = new IDGeneratorBean();
+                }
+            }
+        }
+        return instance;
+    }
+
+
     public GeneratorIdCommandProducer generatorID(){
+        return generatorIDProducer;
+    }
+
+    private Properties getProperties() {
         Properties props  = new Properties();
         props.setProperty(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, SecurityProtocol.PLAINTEXT.name());
         props.setProperty(CommandProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "hdf-node1:2181,hdf-node2:2181,hdf-node3:2181");
         props.setProperty(CommandProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
         props.setProperty(CommandProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
-
-        return new GeneratorIdCommandProducer(new CommandProducerConfig(props), 1, Time.SYSTEM);
+        return props;
     }
 }

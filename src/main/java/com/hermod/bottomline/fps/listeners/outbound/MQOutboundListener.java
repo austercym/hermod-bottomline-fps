@@ -55,9 +55,6 @@ public abstract class MQOutboundListener extends BaseListener implements Message
     private Gson gson;
 
     @Autowired
-    private IDGeneratorBean idGenerator;
-
-    @Autowired
     private Jaxb2Marshaller marshaller;
 
     @Autowired
@@ -124,7 +121,7 @@ public abstract class MQOutboundListener extends BaseListener implements Message
             Resource xsdResource = new ClassPathResource("./xsd/pacs.002.001.06.xsd");
             String message = "";
             try {
-                String uuid = StringUtils.isNotEmpty(id)?id:idGenerator.generatorID().getFasterPaymentUniqueId();
+                String uuid = StringUtils.isNotEmpty(id)?id:IDGeneratorBean.getInstance().generatorID().getFasterPaymentUniqueId();
                 StringWriter writer = new StringWriter();
                 IOUtils.copy(reader, writer);
                 message = writer.toString();
