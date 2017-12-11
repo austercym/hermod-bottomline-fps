@@ -17,6 +17,7 @@ import com.orwellg.umbrella.avro.types.payment.fps.FPSInboundPaymentResponse;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSOutboundPayment;
 import com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs002_001_06.AccountIdentification4Choice;
 import com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs002_001_06.Document;
+import com.orwellg.umbrella.commons.types.utils.avro.DecimalTypeUtils;
 import com.orwellg.umbrella.commons.types.utils.avro.RawMessageUtils;
 import com.orwellg.umbrella.commons.utils.enums.FPSEvents;
 import org.apache.activemq.util.ByteArrayInputStream;
@@ -164,6 +165,11 @@ public abstract class MQOutboundListener extends BaseListener implements Message
                         fpsResponse.setStsDocument(paymentDocument);
                         fpsResponse.setStsRsn(paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getStsRsnInf().get(0).getRsn().getPrtry());
                         fpsResponse.setTxSts(paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getTxSts());
+                        if(paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef() != null &&
+                                paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getIntrBkSttlmAmt() != null) {
+                            fpsResponse.setIntrBkSttlmAmt(DecimalTypeUtils.toDecimal(paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getIntrBkSttlmAmt().getValue()));
+                            fpsResponse.setIntrBkSttlmAmtCcy(paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getIntrBkSttlmAmt().getCcy());
+                        }
                         fpsResponse.setPaymentId(uuid);
 
                         InMemoryOutboundPaymentStorage storage = InMemoryOutboundPaymentStorage.getInstance();
