@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xs:schema targetNamespace="http://www.bottomline.com/directFPS/FPSUSMElements"
+    xmlns="http://www.bottomline.com/directFPS/FPSUSMElements" 
+    xmlns:iso="http://www.bottomline.com/directFPS/ISO20022Types" 
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:usm="http://www.bottomline.com/directFPS/FPSUSMTypes"
+    elementFormDefault="qualified" attributeFormDefault="unqualified">
+
+	<xs:import namespace="http://www.bottomline.com/directFPS/ISO20022Types" schemaLocation="ISO20022Types.xsd"/>
+	<xs:import namespace="http://www.bottomline.com/directFPS/FPSUSMTypes" schemaLocation="FPSUSMTypes.xsd"/>
+
+	<xs:complexType name="ServiceStatusMessageType">
+		<xs:sequence>
+			<xs:element name="MessageID" type="usm:MessageIdentifier"/>
+			<xs:element name="DateTime" type="iso:ISODateTime"/>
+			<xs:element name="ServiceStatus" type="usm:ServiceStatusType"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="FPSInst3rdPartyStatusMessageType">
+		<xs:sequence>
+			<xs:element name="MessageID" type="usm:MessageIdentifier"/>
+			<xs:element name="DateTime" type="iso:ISODateTime"/>
+			<xs:element name="FPSInst3rdPartyID" type="usm:FPSOrganisationIdentifier"/>
+			<xs:element name="FPSInst3rdPartyName" type="usm:FPSOrganisationName"/>
+			<xs:element name="SuspensionStatus" type="usm:SuspensionStatusType" minOccurs="0"/>
+			<xs:element name="PreviousSuspensionStatus" type="usm:SuspensionStatusType" minOccurs="0"/>
+			<xs:element name="PaymentPriorityGroupIdentifier" type="usm:PaymentPriorityGroupIdentifierType" minOccurs="0"/>
+			<xs:element name="Availability" type="usm:AvailabilityStatusType" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="NetSenderThresholdStatusChangeMessageType">
+		<xs:sequence>
+			<xs:element name="MessageID" type="usm:MessageIdentifier"/>
+			<xs:element name="DateTime" type="iso:ISODateTime"/>
+			<xs:element name="FPSInst3rdPartyID" type="usm:FPSOrganisationIdentifier"/>
+			<xs:element name="FPSInst3rdPartyName" type="usm:FPSOrganisationName"/>
+			<xs:element name="NetSenderThresholdStatus" type="usm:NetSenderThresholdStatus"/>
+			<xs:element name="NetSenderThreshold" type="iso:CurrencyAndAmount"/>
+			<xs:element name="NetSenderThresholdPc" type="iso:PercentageRate"/>
+			<xs:element name="SettlementRiskPosition" type="usm:RiskPosition"/>
+			<xs:element name="SettlementRiskPositionPc" type="iso:PercentageRate"/>
+			<xs:element name="NetSenderCap" type="iso:CurrencyAndAmount"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="NetSenderCapStatusMessageType">
+		<xs:sequence>
+			<xs:element name="MessageID" type="usm:MessageIdentifier"/>
+			<xs:element name="DateTime" type="iso:ISODateTime"/>
+			<xs:element name="FPSInst3rdPartyID" type="usm:FPSOrganisationIdentifier"/>
+			<xs:element name="FPSInst3rdPartyName" type="usm:FPSOrganisationName"/>
+			<xs:element name="NetSenderCapStatus" type="usm:NetSenderCapStatusType"/>
+			<xs:element name="NetSenderCap" type="iso:CurrencyAndAmount"/>
+			<xs:element name="SettlementRiskPosition" type="usm:RiskPosition"/>
+			<xs:element name="FPID" type="usm:FPIDType"/>
+			<xs:element name="PaymentAmount" type="iso:CurrencyAndAmount"/>
+			<xs:element name="ResidualSettlementRiskPosition" type="iso:CurrencyAndAmount"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="SITLChangeMessageType">
+		<xs:sequence>
+			<xs:element name="MessageID" type="usm:MessageIdentifier"/>
+			<xs:element name="DateTime" type="iso:ISODateTime"/>
+			<xs:element name="SITLStatus" type="usm:SITLStatusType"/>
+			<xs:element name="NewSITL" type="iso:CurrencyAndAmount"/>
+			<xs:element name="PreviousSITL" type="iso:CurrencyAndAmount"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="STLPaymentCodeMessageType">
+		<xs:sequence>
+			<xs:element name="MessageID" type="usm:MessageIdentifier"/>
+			<xs:element name="DateTime" type="iso:ISODateTime"/>
+			<xs:element name="PaymentCode" type="usm:PaymentTypeCodeType"/>
+			<xs:element name="NewSTL" type="iso:CurrencyAndAmount"/>
+			<xs:element name="PreviousSTL" type="iso:CurrencyAndAmount"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="NetSenderThresholdMessageType">
+		<xs:sequence>
+			<xs:element name="MessageID" type="usm:MessageIdentifier"/>
+			<xs:element name="DateTime" type="iso:ISODateTime"/>
+			<xs:element name="FPSInst3rdPartyID" type="usm:FPSOrganisationIdentifier"/>
+			<xs:element name="FPSInst3rdPartyName" type="usm:FPSOrganisationName"/>
+			<xs:element name="NetSenderThresholdStatus" type="usm:NSTStatusChangedType"/>
+			<xs:element name="NewNetSenderThreshold" type="iso:CurrencyAndAmount"/>
+			<xs:element name="NewNetSenderThresholdPc" type="iso:PercentageRate"/>
+			<xs:element name="PreviousNetSenderThreshold" type="iso:CurrencyAndAmount"/>
+			<xs:element name="PreviousNetSenderThresholdPc" type="iso:PercentageRate"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="NetSenderCapChangeMessageType">
+		<xs:sequence>
+			<xs:element name="MessageID" type="usm:MessageIdentifier"/>
+			<xs:element name="DateTime" type="iso:ISODateTime"/>
+			<xs:element name="FPSInst3rdPartyID" type="usm:FPSOrganisationIdentifier"/>
+			<xs:element name="FPSInst3rdPartyName" type="usm:FPSOrganisationName"/>
+			<xs:element name="NetSenderCapChangeStatus" type="usm:NetSenderCapChangeStatusType"/>
+			<xs:element name="NewNetSenderCap" type="iso:CurrencyAndAmount"/>
+			<xs:element name="PreviousNetSenderCap" type="iso:CurrencyAndAmount"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="SettlementStatusMessageType">
+		<xs:sequence>
+			<xs:element name="MessageID" type="usm:MessageIdentifier"/>
+			<xs:element name="DateTime" type="iso:ISODateTime"/>
+			<xs:element name="SettlementCycleID" type="usm:SettlementCycleIDType"/>
+			<xs:element name="SettlementProcess" type="usm:SettlementProcessType"/>
+			<xs:element name="SettlementStatus" type="usm:USMSettlementStatusType"/>
+			<xs:element name="SettlementCutOffTime" type="iso:ISODateTime"/>
+			<xs:element name="FPSInst3rdPartyID" type="usm:FPSOrganisationIdentifier"/>
+			<xs:element name="FPSInst3rdPartyName" type="usm:FPSOrganisationName"/>
+			<xs:element name="OriginalMNSP" type="usm:NetSettlementPosition"/>
+			<xs:element name="RecalculatedMNSP" type="usm:NetSettlementPosition" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="SchemeReturnPaymentFailureType">
+		<xs:sequence>
+			<xs:element name="MessageID" type="usm:MessageIdentifier"/>
+			<xs:element name="DateTime" type="iso:ISODateTime"/>
+			<xs:element name="SendingInstitutionOrTPBID" type="usm:FPSOrganisationIdentifier"/>
+			<xs:element name="SendingInstitutionOrTPBName" type="usm:FPSOrganisationName"/>
+			<xs:element name="SubmittingMemberID" type="usm:FPSOrganisationIdentifier"/>
+			<xs:element name="SubmittingMemberName" type="usm:FPSOrganisationName"/>
+			<xs:element name="ReceivingMemberID" type="usm:FPSOrganisationIdentifier"/>
+			<xs:element name="ReceivingMemberName" type="usm:FPSOrganisationName"/>
+			<xs:element name="OriginalPaymentFPID" type="usm:FPIDType"/>
+			<xs:element name="Reason" type="usm:SchemeReturnPaymentFailureReasonType"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="FreeFormatMessageType">
+		<xs:sequence>
+			<xs:element name="MessageID" type="usm:MessageIdentifier"/>
+			<xs:element name="DateTime" type="iso:ISODateTime"/>
+			<xs:element name="FreeFormat" type="usm:FreeFormatTextType"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="ASPMAlertMessageType">
+		<xs:sequence>
+			<xs:element name="MessageID" type="usm:MessageIdentifier"/>
+			<xs:element name="DateTime" type="iso:ISODateTime"/>
+			<xs:element name="ASPMAlertReason" type="usm:ASPMAlertReasonType"/>
+			<xs:element name="ASPMAlertLevel" type="usm:ASPMAlertLevelType"/>
+			<xs:element name="ASPMAlertFeature" type="usm:ASPMAlertFeatureType"/>
+			<xs:element name="ASPMAlertRole" type="usm:ASPMAlertRoleType"/>
+			<xs:element name="FPSInst3rdPartyID" type="usm:FPSOrganisationIdentifier"/>
+			<xs:element name="Value1" type="usm:ASPMAlertMetric"/>
+			<xs:element name="Value2" type="usm:ASPMAlertMetric"/>
+			<xs:element name="ASPMMessage" type="usm:ASPMMessageType"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="ProprietaryMessageType">
+		<xs:sequence>
+			<xs:element name="MessageID" type="usm:MessageIdentifier"/>
+			<xs:element name="DateTime" type="iso:ISODateTime"/>
+			<xs:element name="FreeFormat" type="usm:FreeFormatTextType"/>
+			<xs:element name="ProprietaryInfo" type="usm:ProprietaryInfoType"/>
+		</xs:sequence>
+	</xs:complexType>
+
+</xs:schema>

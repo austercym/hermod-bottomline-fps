@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xs:schema targetNamespace="http://www.bottomline.com/directFPS/FPSUSMs"
+    xmlns="http://www.bottomline.com/directFPS/FPSUSMs" 
+    xmlns:iso="http://www.bottomline.com/directFPS/ISO20022Types" 
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:usm="http://www.bottomline.com/directFPS/FPSUSMTypes"
+    xmlns:usmmsg="http://www.bottomline.com/directFPS/FPSUSMElements"
+    elementFormDefault="qualified" attributeFormDefault="unqualified">
+
+	<xs:import namespace="http://www.bottomline.com/directFPS/ISO20022Types" schemaLocation="ISO20022Types.xsd"/>
+	<xs:import namespace="http://www.bottomline.com/directFPS/FPSUSMTypes" schemaLocation="FPSUSMTypes.xsd"/>
+	<xs:import namespace="http://www.bottomline.com/directFPS/FPSUSMElements" schemaLocation="FPSUSMElements.xsd"/>
+
+	<xs:element name="ServiceStatusMessage" type="usmmsg:ServiceStatusMessageType"/>
+
+	<xs:element name="FPSInst3rdPartyStatusMessage" type="usmmsg:FPSInst3rdPartyStatusMessageType"/>
+
+	<xs:element name="NetSenderThresholdStatusChangeMessage" type="usmmsg:NetSenderThresholdStatusChangeMessageType"/>
+
+	<xs:element name="NetSenderCapStatusMessage" type="usmmsg:NetSenderCapStatusMessageType"/>
+
+	<xs:element name="SITLChangeMessage" type="usmmsg:SITLChangeMessageType"/>
+
+	<xs:element name="STLPaymentCodeMessage" type="usmmsg:STLPaymentCodeMessageType"/>
+
+	<xs:element name="NetSenderThresholdMessage" type="usmmsg:NetSenderThresholdMessageType"/>
+
+	<xs:element name="NetSenderCapChangeMessage" type="usmmsg:NetSenderCapChangeMessageType"/>
+
+	<xs:element name="SettlementStatusMessage" type="usmmsg:SettlementStatusMessageType"/>
+
+	<xs:element name="SchemeReturnPaymentFailure" type="usmmsg:SchemeReturnPaymentFailureType"/>
+
+	<xs:element name="FreeFormatMessage" type="usmmsg:FreeFormatMessageType"/>
+
+	<xs:element name="ASPMAlertMessage" type="usmmsg:ASPMAlertMessageType"/>
+
+	<xs:element name="ProprietaryMessage" type="usmmsg:ProprietaryMessageType"/>
+
+</xs:schema>

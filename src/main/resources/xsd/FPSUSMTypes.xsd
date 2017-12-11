@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xs:schema targetNamespace="http://www.bottomline.com/directFPS/FPSUSMTypes"
+    xmlns="http://www.bottomline.com/directFPS/FPSUSMTypes" 
+    xmlns:iso="http://www.bottomline.com/directFPS/ISO20022Types" 
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    >
+
+	<xs:import namespace="http://www.bottomline.com/directFPS/ISO20022Types" schemaLocation="ISO20022Types.xsd"/>
+
+	<xs:simpleType name="MessageIdentifier">
+		<xs:restriction base="iso:Number"/>
+	</xs:simpleType>
+
+	<xs:simpleType name="ServiceStatusType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="SUSPENDED"/>
+			<xs:enumeration value="ACTIVE"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="FPSOrganisationIdentifier">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="\d{8}"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="FPSOrganisationName">
+		<xs:restriction base="iso:Max40Text"/>
+	</xs:simpleType>
+
+	<xs:simpleType name="SuspensionStatusType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="SUSPENDCREDIT"/>
+			<xs:enumeration value="SUSPENDDEBIT"/>
+			<xs:enumeration value="SUSPENDBOTH"/>
+			<xs:enumeration value="ACTIVE"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="PaymentPriorityGroupIdentifierType">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="\d{2}"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="AvailabilityStatusType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="AVAILABLE"/>
+			<xs:enumeration value="UNAVAILABLE"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="NetSenderThresholdStatus">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="NORMAL"/>
+			<xs:enumeration value="EXCEEDED"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:complexType name="RiskPosition">
+		<xs:simpleContent>
+			<xs:extension base="iso:CurrencyAndAmount">
+				<xs:attribute name="DRCR" type="iso:CreditDebitCode" use="required"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+
+	<xs:simpleType name="NetSenderCapStatusType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="PAYMENTSBLOCKED"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="FPIDType">
+		<xs:restriction base="Exact42Text"/>
+	</xs:simpleType>
+
+	<xs:simpleType name="SITLStatusType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="CHANGED"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="PaymentTypeCodeType">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="\d{2}"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="NSTStatusChangedType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="CHANGED"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="NetSenderCapChangeStatusType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="CHANGED"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="SettlementCycleIDType">
+		<xs:restriction base="iso:Number">
+			<xs:pattern value="\d{11}"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="SettlementProcessType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="AUTOMATED"/>
+			<xs:enumeration value="MANUAL"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="USMSettlementStatusType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="PROCESSING"/>
+			<xs:enumeration value="DELAYED"/>
+			<xs:enumeration value="COMPLETE"/>
+			<xs:enumeration value="FAILED"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:complexType name="NetSettlementPosition">
+		<xs:simpleContent>
+			<xs:extension base="iso:CurrencyAndAmount">
+				<xs:attribute name="DRCR" type="iso:CreditDebitCode" use="required"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+
+	<xs:simpleType name="SchemeReturnPaymentFailureReasonType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="TBD"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="FreeFormatTextType">
+		<xs:restriction base="xs:string">
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ProprietaryInfoType">
+		<xs:restriction base="xs:string">
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="Exact42Text">
+		<xs:restriction base="xs:string">
+			<xs:minLength value="42"/>
+			<xs:maxLength value="42"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ASPMAlertReasonType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="REJECTED_SIPS_RECEIVED"/>
+			<xs:enumeration value="REJECTED_SOPS_RECEIVED"/>
+			<xs:enumeration value="REJECTED_FDPS_RECEIVED"/>
+			<xs:enumeration value="REJECTED_CBPS_RECEIVED"/>
+			<xs:enumeration value="REJECTED_SIPS_SENT"/>
+			<xs:enumeration value="REJECTED_SOPS_SENT"/>
+			<xs:enumeration value="REJECTED_FDPS_SENT"/>
+			<xs:enumeration value="RETURN_SUBMISSIONS"/>
+			<xs:enumeration value="SIP_RESPONSE_TIMES"/>
+			<xs:enumeration value="OTHER_ASPM_ALERT"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ASPMAlertLevelType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="WARNING"/>
+			<xs:enumeration value="ALERT"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ASPMAlertFeatureType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="SIP"/>
+			<xs:enumeration value="RTN"/>
+			<xs:enumeration value="SOP"/>
+			<xs:enumeration value="FDP"/>
+			<xs:enumeration value="CBP"/>
+			<xs:enumeration value="PPG1"/>
+			<xs:enumeration value="PPG2"/>
+			<xs:enumeration value="PPG9"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ASPMAlertRoleType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="RECEIVER"/>
+			<xs:enumeration value="SENDER"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ASPMAlertMetric">
+		<xs:restriction base="xs:decimal">
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ASPMMessageType">
+		<xs:restriction base="xs:string">
+		</xs:restriction>
+	</xs:simpleType>
+
+			
+</xs:schema>

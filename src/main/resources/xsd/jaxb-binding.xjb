@@ -49,4 +49,122 @@
 		</annox:annotate>
       </jxb:bindings>
     </jxb:bindings>
+
+    <jxb:bindings schemaLocation="FPSUSMElements.xsd">
+        <jxb:bindings node="//xs:complexType[@name='ServiceStatusMessageType']">
+            <inheritance:implements>com.hermod.bottomline.fps.types.FPSMessage</inheritance:implements>
+            <annox:annotate target="class">
+                <annox:annotate annox:class="javax.xml.bind.annotation.XmlRootElement" name="ServiceStatusMessage"/>
+            </annox:annotate>
+        </jxb:bindings>
+    </jxb:bindings>
+
+    <jxb:bindings schemaLocation="FPSUSMElements.xsd">
+        <jxb:bindings node="//xs:complexType[@name='FPSInst3rdPartyStatusMessageType']">
+            <inheritance:implements>com.hermod.bottomline.fps.types.FPSMessage</inheritance:implements>
+            <annox:annotate target="class">
+                <annox:annotate annox:class="javax.xml.bind.annotation.XmlRootElement" name="FPSInst3rdPartyStatusMessage"/>
+            </annox:annotate>
+        </jxb:bindings>
+    </jxb:bindings>
+
+    <jxb:bindings schemaLocation="FPSUSMElements.xsd">
+        <jxb:bindings node="//xs:complexType[@name='NetSenderThresholdStatusChangeMessageType']">
+            <inheritance:implements>com.hermod.bottomline.fps.types.FPSMessage</inheritance:implements>
+            <annox:annotate target="class">
+                <annox:annotate annox:class="javax.xml.bind.annotation.XmlRootElement" name="NetSenderThresholdStatusChangeMessage"/>
+            </annox:annotate>
+        </jxb:bindings>
+    </jxb:bindings>
+
+    <jxb:bindings schemaLocation="FPSUSMElements.xsd">
+        <jxb:bindings node="//xs:complexType[@name='NetSenderCapStatusMessageType']">
+            <inheritance:implements>com.hermod.bottomline.fps.types.FPSMessage</inheritance:implements>
+            <annox:annotate target="class">
+                <annox:annotate annox:class="javax.xml.bind.annotation.XmlRootElement" name="NetSenderCapStatusMessage"/>
+            </annox:annotate>
+        </jxb:bindings>
+    </jxb:bindings>
+
+    <jxb:bindings schemaLocation="FPSUSMElements.xsd">
+        <jxb:bindings node="//xs:complexType[@name='SITLChangeMessageType']">
+            <inheritance:implements>com.hermod.bottomline.fps.types.FPSMessage</inheritance:implements>
+            <annox:annotate target="class">
+                <annox:annotate annox:class="javax.xml.bind.annotation.XmlRootElement" name="SITLChangeMessage"/>
+            </annox:annotate>
+        </jxb:bindings>
+    </jxb:bindings>
+
+    <jxb:bindings schemaLocation="FPSUSMElements.xsd">
+        <jxb:bindings node="//xs:complexType[@name='STLPaymentCodeMessageType']">
+            <inheritance:implements>com.hermod.bottomline.fps.types.FPSMessage</inheritance:implements>
+            <annox:annotate target="class">
+                <annox:annotate annox:class="javax.xml.bind.annotation.XmlRootElement" name="STLPaymentCodeMessage"/>
+            </annox:annotate>
+        </jxb:bindings>
+    </jxb:bindings>
+
+    <jxb:bindings schemaLocation="FPSUSMElements.xsd">
+        <jxb:bindings node="//xs:complexType[@name='NetSenderThresholdMessageType']">
+            <inheritance:implements>com.hermod.bottomline.fps.types.FPSMessage</inheritance:implements>
+            <annox:annotate target="class">
+                <annox:annotate annox:class="javax.xml.bind.annotation.XmlRootElement" name="NetSenderThresholdMessage"/>
+            </annox:annotate>
+        </jxb:bindings>
+    </jxb:bindings>
+
+    <jxb:bindings schemaLocation="FPSUSMElements.xsd">
+        <jxb:bindings node="//xs:complexType[@name='NetSenderCapChangeMessageType']">
+            <inheritance:implements>com.hermod.bottomline.fps.types.FPSMessage</inheritance:implements>
+            <annox:annotate target="class">
+                <annox:annotate annox:class="javax.xml.bind.annotation.XmlRootElement" name="NetSenderCapChangeMessage"/>
+            </annox:annotate>
+        </jxb:bindings>
+    </jxb:bindings>
+
+    <jxb:bindings schemaLocation="FPSUSMElements.xsd">
+        <jxb:bindings node="//xs:complexType[@name='SettlementStatusMessageType']">
+            <inheritance:implements>com.hermod.bottomline.fps.types.FPSMessage</inheritance:implements>
+            <annox:annotate target="class">
+                <annox:annotate annox:class="javax.xml.bind.annotation.XmlRootElement" name="SettlementStatusMessage"/>
+            </annox:annotate>
+        </jxb:bindings>
+    </jxb:bindings>
+
+    <jxb:bindings schemaLocation="FPSUSMElements.xsd">
+        <jxb:bindings node="//xs:complexType[@name='SchemeReturnPaymentFailureType']">
+            <inheritance:implements>com.hermod.bottomline.fps.types.FPSMessage</inheritance:implements>
+            <annox:annotate target="class">
+                <annox:annotate annox:class="javax.xml.bind.annotation.XmlRootElement" name="SchemeReturnPaymentFailure"/>
+            </annox:annotate>
+        </jxb:bindings>
+    </jxb:bindings>
+
+    <jxb:bindings schemaLocation="FPSUSMElements.xsd">
+        <jxb:bindings node="//xs:complexType[@name='FreeFormatMessageType']">
+            <inheritance:implements>com.hermod.bottomline.fps.types.FPSMessage</inheritance:implements>
+            <annox:annotate target="class">
+                <annox:annotate annox:class="javax.xml.bind.annotation.XmlRootElement" name="FreeFormatMessage"/>
+            </annox:annotate>
+        </jxb:bindings>
+    </jxb:bindings>
+
+    <jxb:bindings schemaLocation="FPSUSMElements.xsd">
+        <jxb:bindings node="//xs:complexType[@name='ASPMAlertMessageType']">
+            <inheritance:implements>com.hermod.bottomline.fps.types.FPSMessage</inheritance:implements>
+            <annox:annotate target="class">
+                <annox:annotate annox:class="javax.xml.bind.annotation.XmlRootElement" name="ASPMAlertMessage"/>
+            </annox:annotate>
+        </jxb:bindings>
+    </jxb:bindings>
+
+    <jxb:bindings schemaLocation="FPSUSMElements.xsd">
+        <jxb:bindings node="//xs:complexType[@name='ProprietaryMessageType']">
+            <inheritance:implements>com.hermod.bottomline.fps.types.FPSMessage</inheritance:implements>
+            <annox:annotate target="class">
+                <annox:annotate annox:class="javax.xml.bind.annotation.XmlRootElement" name="ProprietaryMessage"/>
+            </annox:annotate>
+        </jxb:bindings>
+    </jxb:bindings>
+
 </jxb:bindings>
