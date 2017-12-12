@@ -15,7 +15,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jms.JmsException;
 import org.springframework.jms.core.JmsOperations;
+import org.springframework.jms.support.converter.MessageType;
 import org.springframework.kafka.listener.KafkaDataListener;
 import org.springframework.kafka.listener.MessageListener;
 import org.springframework.messaging.converter.MessageConversionException;
@@ -68,7 +70,7 @@ public class KafkaResponseInboundListener extends KafkaInboundListener implement
 			// Generate Response Reject
 			FPSAvroMessage fpsPacs002Response = null;
 			try {
-				fpsPacs002Response  = generateFPSPacs002Response(fpsPaymentResponse);
+				fpsPacs002Response = generateFPSPacs002Response(fpsPaymentResponse);
 				LOG.info("[FPS][PmtId: {}] Response generated for FPS inbound payment. Response: {}", key, fpsPacs002Response.toString());
 				// Call the correspondent transform
 				FPSTransform transform = transforms.get("transform_pacs_002_001");
@@ -80,13 +82,20 @@ public class KafkaResponseInboundListener extends KafkaInboundListener implement
 					LOG.info("[FPS][PmtId: {}] XML Response generated for FPS inbound payment. Response: {}", key, rawMessage.toString());
 					kafkaSender.sendRawMessage(loggingTopic, rawMessage.toString(), key);
 
-					updatePaymentResponseInMemory(fpsPaymentResponse.getOrgnlPaymentDocument() ,rawMessage.toString(), key);
+					updatePaymentResponseInMemory(fpsPaymentResponse.getOrgnlPaymentDocument(), rawMessage.toString(), key);
 
-					//TODO Send to MQ (Environment=Queue)
-					//jmsOperations.convertAndSend(outboundQueue, fpsMessage);
+					//Send to MQ (Environment=Queue)
+					jmsOperations.convertAndSend(outboundQueue, fpsMessage, messageToSend -> {
+						messageToSend.setJMSType(MessageType.TEXT.toString());
+						LOG.info("[FPS][PmtId: {}] Message of type {} to be sent to Test queue: {}",key,
+								messageToSend.getJMSType(), messageToSend.toString());
+						return messageToSend;
+					});
 				} else {
 					throw new MessageConversionException("Exception in message emission. The transform for pacs_002_001 is null");
 				}
+			}catch(JmsException jmsex){
+				LOG.error("[FPS][PmtId: {}] Error sending response for FPS inbound payment to Bottomline. Error Message: {}", key, jmsex.getMessage(), jmsex);
 			} catch (Exception ex) {
 				LOG.error("[FPS][PmtId: {}] Error generating response for FPS inbound payment. Error Message: {}", key, ex.getMessage(), ex);
 			}

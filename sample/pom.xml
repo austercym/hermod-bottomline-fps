@@ -8,8 +8,70 @@
     <artifactId>TestJMS</artifactId>
     <version>1.0-SNAPSHOT</version>
 
+    <!-- Output to jar format -->
+    <packaging>jar</packaging>
+    <name>TestJMS</name>
+    <url>http://maven.apache.org</url>
+
+    <properties>
+        <com.ibm.mq.version>9.0.3.0</com.ibm.mq.version>
+        <javax.jms.version>2.0.1</javax.jms.version>
+    </properties>
+
     <dependencies>
+        <dependency>
+            <groupId>javax.jms</groupId>
+            <artifactId>javax.jms-api</artifactId>
+            <version>${javax.jms.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.ibm.mq</groupId>
+            <artifactId>allclient</artifactId>
+            <version>${com.ibm.mq.version}</version>
+        </dependency>
 
     </dependencies>
+
+    <build>
+        <!-- Make this jar executable -->
+        <plugins>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-jar-plugin</artifactId>
+            <configuration>
+                <!-- DO NOT include log4j.properties file in your Jar -->
+                <excludes>
+                    <exclude>**/log4j.properties</exclude>
+                </excludes>
+                <archive>
+                    <manifest>
+                        <!-- Jar file entry point -->
+                        <mainClass>send</mainClass>
+                    </manifest>
+                </archive>
+            </configuration>
+        </plugin>
+            <!-- Copy project dependency -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.5.1</version>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <!-- exclude junit, we need runtime dependency only -->
+                            <includeScope>runtime</includeScope>
+                            <outputDirectory>${project.build.directory}/dependency-jars/</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+    </plugins>
+    </build>
 
 </project>

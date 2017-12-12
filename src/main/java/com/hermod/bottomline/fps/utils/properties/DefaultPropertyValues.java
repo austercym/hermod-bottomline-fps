@@ -10,28 +10,29 @@ public class DefaultPropertyValues {
 	private final static String APP_DEFAULT_ORWELLG_ENTITY = Constants.IPAGOO_ENTITY;
 	private final static String APP_DEFAULT_ORWELLG_BRAND  = Constants.IPAGOO_BRAND;
 	
-	private final static String MQ_DEFAULT_HOST  = "localhost";
-	private final static Integer MQ_DEFAULT_PORT = 1414;
-	private final static String MQ_DEFAULT_QUEUE_MANAGER = "QM1";
-	private final static String MQ_DEFAULT_CHANNEL  = "DEV.APP.SVRCONN";
-	private final static String MQ_DEFAULT_USERNAME = "root";
+	private final static String MQ_DEFAULT_HOST  = "80.169.11.104";
+	private final static Integer MQ_DEFAULT_PORT = 49178;
+	private final static String MQ_DEFAULT_QUEUE_MANAGER = "BT.ORUN.UA.FPS.02";
+	private final static String MQ_DEFAULT_CHANNEL  = "IPAGOO.CONNECT";
+	private final static String MQ_DEFAULT_USERNAME = "ipagoo";
 	private final static String MQ_DEFAULT_PASSWORD = "";
 	private final static Long MQ_DEFAULT_RECEIVED_TIMEOUT = 2000L;
 	private final static Integer MQ_DEFAULT_NUM_MAX_CONSUMERS = 1;
-	private final static String MQ_DEFAULT_INBOUND_SIP_QUEUE  = "IPAGOO.HOST.SIP.RECV.QR";
-	private final static String MQ_DEFAULT_INBOUND_SOP_QUEUE  = "IPAGOO.HOST.SOP.RECV.QR";
-	private final static String MQ_DEFAULT_INBOUND_OTH_QUEUE  = "IPAGOO.HOST.OTH.RECV.QR";
-	private final static String MQ_DEFAULT_INBOUND_USM_QUEUE  = "IPAGOO.HOST.USM.RECV.QR";
-	private final static String MQ_DEFAULT_INBOUND_RESP_SIP_QUEUE = "IPAGOO.HOST.SIP.RECV.RESP.QR";
-	private final static String MQ_DEFAULT_INBOUND_RESP_SOP_QUEUE = "IPAGOO.HOST.SOP.RECV.RESP.QR";
-	private final static String MQ_DEFAULT_INBOUND_RESP_OTH_QUEUE = "IPAGOO.HOST.OTH.RECV.RESP.QR";
+
+	private final static String MQ_DEFAULT_TEST_QUEUE = "ORUN.TEST.INB.RECV.QR";
+
+	private final static String MQ_DEFAULT_INBOUND_SIP_QUEUE  = "ORUN.HOST.SYNC.RECV.QL";
+	private final static String MQ_DEFAULT_INBOUND_SOP_QUEUE  = "ORUN.HOST.ASYN.RECV.QL";
+	private final static String MQ_DEFAULT_INBOUND_USM_QUEUE  = "ORUN.HOST.USM.RECV.QR";
+	private final static String MQ_DEFAULT_INBOUND_RESP_SIP_QUEUE = "ORUN.HOST.SYNC.RECV.RESP.QR";
+	private final static String MQ_DEFAULT_INBOUND_RESP_SOP_QUEUE = "ORUN.HOST.ASYN.RECV.RESP.QR";
 
 
 	private final static String MQ_BOTTOMLINE1_ENVIRONMENT = "BOTTOMLINE1";
 	private final static String MQ_BOTTOMLINE2_ENVIRONMENT = "BOTTOMLINE2";
 
-	private final static String MQ_DEFAULT_OUTBOUND_SIP_QUEUE  = "IPAGOO.HOST.SIP.SEND.QR";
-	private final static String MQ_DEFAULT_OUTBOUND_SIP_RESP_QUEUE  = "IPAGOO.HOST.SIP.SEND.RESP.QR";
+	private final static String MQ_DEFAULT_OUTBOUND_SIP_QUEUE  = "ORUN.HOST.SYNC.SEND.QR";
+	private final static String MQ_DEFAULT_OUTBOUND_SIP_RESP_QUEUE  = "ORUN.HOST.SYNC.SEND.RESP.QL";
 
 	private final static String KAFKA_DEFAULT_BOOTSTRAP_SERVER = "confluent-node1:9092,confluent-node2:9092,confluent-node3:9092,confluent-node4:9092,confluent-node5:9092,confluent-node6:9092";
 	//private final static String KAFKA_DEFAULT_BOOTSTRAP_SERVER = "localhost:9092";
@@ -70,14 +71,14 @@ public class DefaultPropertyValues {
 		defaultValues.put("wq.mq.password", MQ_DEFAULT_PASSWORD);
 		defaultValues.put("wq.mq.receive.timeout", MQ_DEFAULT_RECEIVED_TIMEOUT);
 
+		// Test queues
+		defaultValues.put("wq.mq.queue.test", MQ_DEFAULT_TEST_QUEUE);
 		//Inbound queues BOTTOMLINE
 
 		defaultValues.put("wq.mq.queue.sip.inbound", MQ_DEFAULT_INBOUND_SIP_QUEUE);
 		defaultValues.put("wq.mq.queue.sip.inbound.resp", MQ_DEFAULT_INBOUND_RESP_SIP_QUEUE);
 		defaultValues.put("wq.mq.queue.sop.inbound", MQ_DEFAULT_INBOUND_SOP_QUEUE);
 		defaultValues.put("wq.mq.queue.sop.inbound.resp", MQ_DEFAULT_INBOUND_RESP_SOP_QUEUE);
-		defaultValues.put("wq.mq.queue.oth.inbound", MQ_DEFAULT_INBOUND_OTH_QUEUE);
-		defaultValues.put("wq.mq.queue.oth.inbound.resp", MQ_DEFAULT_INBOUND_RESP_OTH_QUEUE);
 		defaultValues.put("wq.mq.queue.usm.inbound", MQ_DEFAULT_INBOUND_USM_QUEUE);
 
 		//Outbound queues BOTTOMLINE

@@ -10,7 +10,6 @@ import com.hermod.bottomline.fps.utils.generators.EventGenerator;
 import com.orwellg.umbrella.avro.types.event.Event;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSOutboundPayment;
-import com.orwellg.umbrella.avro.types.payment.fps.FPSOutboundPaymentResponse;
 import com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Document;
 import com.orwellg.umbrella.commons.types.utils.avro.RawMessageUtils;
 import com.orwellg.umbrella.commons.utils.enums.FPSEvents;
@@ -22,12 +21,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.jms.core.JmsOperations;
+import org.springframework.jms.support.converter.MessageType;
 import org.springframework.kafka.listener.KafkaDataListener;
 import org.springframework.kafka.listener.MessageListener;
 import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.stereotype.Component;
 import org.xml.sax.SAXException;
 
+import javax.jms.TextMessage;
 import javax.xml.XMLConstants;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
@@ -143,8 +144,12 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
 
 					if (schemaValidation && isValid) {
 
-						//TODO Send to MQ (Environment=Queue)
-						//jmsOperations.convertAndSend(outboundQueue, fpsMessage);
+						//Send to MQ (Environment=Queue)
+						jmsOperations.convertAndSend(outboundQueue, fpsMessage, messageToSend -> {
+							messageToSend.setJMSType(MessageType.TEXT.toString());
+							LOG.info("[FPS][PmtId: {}] Message of type {} to be sent to Test queue: {}",key, messageToSend.getJMSType(), messageToSend.toString());
+							return messageToSend;
+						});
 
 						fpsOutboundPayment.setTxSts("SENT");
 
