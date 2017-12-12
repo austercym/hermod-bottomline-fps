@@ -6,6 +6,7 @@ import com.hermod.bottomline.fps.services.kafka.KafkaSender;
 import com.hermod.bottomline.fps.services.transform.FPSTransform;
 import com.hermod.bottomline.fps.storage.*;
 import com.hermod.bottomline.fps.types.FPSMessage;
+import com.hermod.bottomline.fps.utils.Constants;
 import com.hermod.bottomline.fps.utils.generators.EventGenerator;
 import com.orwellg.umbrella.avro.types.event.Event;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
@@ -38,6 +39,7 @@ import javax.xml.validation.Validator;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.Date;
 
 
 @Component(value="kafkaRequestOutboundListener")
@@ -170,8 +172,9 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
 
 					}else{
 
-						fpsOutboundPayment.setTxSts("RJCT");
-						fpsOutboundPayment.setStsRsn("9999");
+						fpsOutboundPayment.setTxSts(Constants.REJECT_CODE);
+						fpsOutboundPayment.setStsRsn(Constants.NO_VALIDATION_CODE);
+						fpsOutboundPayment.setPaymentTimestamp(new Date().getTime());
 
 						event = EventGenerator.generateEvent(
 								this.getClass().getName(),

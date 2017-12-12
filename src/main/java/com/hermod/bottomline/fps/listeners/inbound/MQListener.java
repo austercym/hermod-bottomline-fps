@@ -8,6 +8,7 @@ import com.hermod.bottomline.fps.storage.InMemoryPaymentStorage;
 import com.hermod.bottomline.fps.storage.PaymentBean;
 import com.hermod.bottomline.fps.storage.PaymentStatus;
 import com.hermod.bottomline.fps.types.FPSMessage;
+import com.hermod.bottomline.fps.utils.Constants;
 import com.hermod.bottomline.fps.utils.generators.EventGenerator;
 import com.hermod.bottomline.fps.services.kafka.KafkaSender;
 import com.hermod.bottomline.fps.utils.generators.IDGeneratorBean;
@@ -43,12 +44,11 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 import java.io.*;
+import java.util.Date;
 
 public abstract class MQListener extends BaseListener implements MessageListener {
 
     private static Logger LOG = LogManager.getLogger(MQListener.class);
-    public static final String REJECT_CODE = "RJCT";
-    public static final String NO_VALIDATION_CODE = "9999";
 
     @Autowired
     private Gson gson;
@@ -201,8 +201,9 @@ public abstract class MQListener extends BaseListener implements MessageListener
                             fpsResponse.setFPID(FPID);
                             fpsResponse.setPaymentId(uuid);
                             fpsResponse.setOrgnlPaymentDocument(paymentDocument);
-                            fpsResponse.setTxSts(REJECT_CODE);
-                            fpsResponse.setStsRsn(NO_VALIDATION_CODE);
+                            fpsResponse.setTxSts(Constants.REJECT_CODE);
+                            fpsResponse.setStsRsn(Constants.NO_VALIDATION_CODE);
+                            fpsResponse.setPaymentTimestamp(new Date().getTime());
 
 
                             LOG.info("[FPS][PmtId: {}] Sending FPS Inbound payment Reject response", uuid);
