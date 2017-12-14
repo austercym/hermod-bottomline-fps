@@ -40,11 +40,10 @@
 	</parent>
 
 	<dependencies>
-  
-  		<dependency>
+		<dependency>
 			<groupId>com.ibm.mq</groupId>
-    		<artifactId>allclient</artifactId>
-    		<version>${com.ibm.mq.version}</version>
+			<artifactId>allclient</artifactId>
+			<version>${com.ibm.mq.version}</version>
 		</dependency>
     	<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -164,6 +163,28 @@
               <target>${java.version}</target>
           </configuration>
       </plugin>
+
+		 <plugin>
+		 <groupId>org.apache.maven.plugins</groupId>
+		 <artifactId>maven-install-plugin</artifactId>
+		 <version>2.5.2</version>
+		 <executions>
+		 <execution>
+			 <id>install-1</id>
+			 <phase>initialize</phase>
+			 <goals>
+				 <goal>install-file</goal>
+			 </goals>
+			 <configuration>
+				 <groupId>com.ibm.mq</groupId>
+				 <artifactId>allclient</artifactId>
+				 <version>${com.ibm.mq.version}</version>
+				 <packaging>jar</packaging>
+				 <file>${project.dependency.directory}/allclient-9.0.3.0.jar</file>
+			 </configuration>
+		 </execution>
+		 </executions>
+		 </plugin>
     
     <plugin>
 		<groupId>org.jvnet.jaxb2.maven2</groupId>
@@ -200,7 +221,7 @@
 				<plugin>
                 		<groupId>org.jvnet.jaxb2_commons</groupId>
                 		<artifactId>jaxb2-basics-annotate</artifactId>
-                		<version>1.0.3</version>
+                		<version>1.0.4</version>
             		</plugin>
 			</plugins>
 			<verbose>true</verbose>

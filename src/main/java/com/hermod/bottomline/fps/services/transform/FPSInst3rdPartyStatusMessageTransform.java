@@ -7,7 +7,7 @@ import com.hermod.bottomline.fps.types.FPSMessage;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
 import org.springframework.stereotype.Component;
 
-@Component(value="transform_FPSInst3rdPartyStatusMessage")
+@Component(value="transform_FPSInst3RdPartyStatusMessageType")
 public class FPSInst3rdPartyStatusMessageTransform implements FPSTransform {
 
 	static {

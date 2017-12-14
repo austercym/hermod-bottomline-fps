@@ -175,3 +175,4 @@ local.properties
 hs_err_pid*
 /main/
 /src/main/generated/
+/FFDC/

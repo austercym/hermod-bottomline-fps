@@ -6,7 +6,6 @@ import com.hermod.bottomline.fps.services.kafka.KafkaSender;
 import com.hermod.bottomline.fps.services.transform.FPSTransform;
 import com.hermod.bottomline.fps.services.transform.helper.ConversionException;
 import com.hermod.bottomline.fps.storage.InMemoryOutboundPaymentStorage;
-import com.hermod.bottomline.fps.storage.PaymentBean;
 import com.hermod.bottomline.fps.storage.PaymentOutboundBean;
 import com.hermod.bottomline.fps.types.FPSMessage;
 import com.hermod.bottomline.fps.utils.generators.EventGenerator;
@@ -15,10 +14,8 @@ import com.orwellg.umbrella.avro.types.event.Event;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSInboundPaymentResponse;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSOutboundPayment;
-import com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs002_001_06.AccountIdentification4Choice;
 import com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs002_001_06.Document;
 import com.orwellg.umbrella.commons.types.utils.avro.DecimalTypeUtils;
-import com.orwellg.umbrella.commons.types.utils.avro.RawMessageUtils;
 import com.orwellg.umbrella.commons.utils.enums.FPSEvents;
 import org.apache.activemq.util.ByteArrayInputStream;
 import org.apache.commons.io.IOUtils;
@@ -49,8 +46,6 @@ import java.io.*;
 public abstract class MQOutboundListener extends BaseListener implements MessageListener {
 
     private static Logger LOG = LogManager.getLogger(MQOutboundListener.class);
-    public static final String REJECT_CODE = "RJCT";
-    public static final String NO_VALIDATION_CODE = "9999";
 
     @Autowired
     private Gson gson;
@@ -75,7 +70,7 @@ public abstract class MQOutboundListener extends BaseListener implements Message
 
     protected void onMessage(Message message, String paymentType) {
 
-        LOG.info("[FPS][PaymentType: {}] Getting outbound payment response message...............", paymentType);
+        LOG.info("[FPS] Receiving outbound payment response message from Bottomline", paymentType);
         InputStream stream = null;
         Reader reader = null;
 
@@ -115,14 +110,11 @@ public abstract class MQOutboundListener extends BaseListener implements Message
     }
 
     public void sendMessageToTopic(Reader reader, String paymentType, String id) {
-        boolean schemaValidation = true;
-        SchemaFactory schemaFactory = SchemaFactory
-                .newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
         if (reader != null) {
-            Resource xsdResource = new ClassPathResource("./xsd/pacs.002.001.06.xsd");
             String message = "";
             try {
-                String uuid = StringUtils.isNotEmpty(id)?id:IDGeneratorBean.getInstance().generatorID().getFasterPaymentUniqueId();
+                LOG.info("[FPS] Transform MQ message to raw message");
+                String uuid = StringUtils.isNotEmpty(id) ? id : IDGeneratorBean.getInstance().generatorID().getFasterPaymentUniqueId();
                 StringWriter writer = new StringWriter();
                 IOUtils.copy(reader, writer);
                 message = writer.toString();
@@ -130,21 +122,24 @@ public abstract class MQOutboundListener extends BaseListener implements Message
                 //Send mq message to logging topic
                 kafkaSender.sendRawMessage(loggingTopic, message, uuid);
 
+                boolean schemaValidation = true;
                 try {
+                    SchemaFactory schemaFactory = SchemaFactory
+                            .newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+                    Resource xsdResource = new ClassPathResource("./xsd/pacs.002.001.06.xsd");
                     Source src = new StreamSource(new StringReader(message));
                     // Validate against scheme
-
                     Schema schema = schemaFactory.newSchema(new StreamSource(xsdResource.getInputStream()));
                     Validator validator = schema.newValidator();
                     validator.validate(src);
                 } catch (SAXException ex) {
                     schemaValidation = false;
                     LOG.error("[FPS][PaymentType: {}] Error Validating message against scheme. Error:{} Message: {}",
-                            paymentType,  ex.getMessage(), message);
+                            paymentType, ex.getMessage(), message);
                 } catch (IOException e) {
                     schemaValidation = false;
                     LOG.error("[FPS][PaymentType: {}] I/O Error. Error:{} Message: {}",
-                            paymentType,  e.getMessage(), message);
+                            paymentType, e.getMessage(), message);
                 }
                 // Getting Avro
                 Source src = new StreamSource(new StringReader(message));
@@ -155,19 +150,19 @@ public abstract class MQOutboundListener extends BaseListener implements Message
                 FPSTransform transform = getTransform(fpsMessage.getClass().getPackage().getName());
                 if (transform != null) {
                     Object avroFpsMessage = transform.fps2avro(fpsMessage);
-                    boolean isValid = validMessage((FPSAvroMessage)avroFpsMessage);
+                    boolean isValid = validMessage((FPSAvroMessage) avroFpsMessage);
 
                     Document paymentDocument = ((Document) ((FPSAvroMessage) avroFpsMessage).getMessage());
 
                     if (schemaValidation && isValid) {
                         // Send avro message to Kafka
-                        FPSInboundPaymentResponse fpsResponse = new FPSInboundPaymentResponse ();
+                        FPSInboundPaymentResponse fpsResponse = new FPSInboundPaymentResponse();
                         fpsResponse.setStsDocument(paymentDocument);
                         fpsResponse.setStsRsn(paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getStsRsnInf().get(0).getRsn().getPrtry());
                         fpsResponse.setTxSts(paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getTxSts());
-                        if(paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef() != null &&
+                        if (paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef() != null &&
                                 paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getIntrBkSttlmAmt() != null) {
-                            if(paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getIntrBkSttlmAmt().getValue()!= null &&
+                            if (paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getIntrBkSttlmAmt().getValue() != null &&
                                     paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getIntrBkSttlmAmt().getValue().getValue() != null) {
                                 fpsResponse.setIntrBkSttlmAmt(DecimalTypeUtils.toDecimal(paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getIntrBkSttlmAmt().getValue().getValue()));
                             }
@@ -177,7 +172,7 @@ public abstract class MQOutboundListener extends BaseListener implements Message
 
                         InMemoryOutboundPaymentStorage storage = InMemoryOutboundPaymentStorage.getInstance();
                         PaymentOutboundBean paymentBean = storage.findPayment(paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxId());
-                        if(paymentBean != null ) {
+                        if (paymentBean != null) {
                             FPSOutboundPayment originalMessage = paymentBean.getOutboundPayment();
 
                             fpsResponse.setOrgnlFPID(originalMessage.getFPID());
@@ -187,15 +182,15 @@ public abstract class MQOutboundListener extends BaseListener implements Message
                             fpsResponse.setReturnedPaymentId(originalMessage.getReturnedPaymentId());
                             fpsResponse.setCdtrAccountId(originalMessage.getCdtrAccountId());
                             fpsResponse.setDbtrAccountId(originalMessage.getDbtrAccountId());
-                        }else{
+                        } else {
                             fpsResponse.setOrgnlPaymentId(paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxId());
-                            if(paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getPmtTpInf().getLclInstrm().getPrtry().indexOf('/') > 0) {
+                            if (paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getPmtTpInf().getLclInstrm().getPrtry().indexOf('/') > 0) {
                                 fpsResponse.setOrgnlPaymentType(paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getPmtTpInf().getLclInstrm().getPrtry()
                                         .substring(0, paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getPmtTpInf().getLclInstrm().getPrtry().indexOf('/')));
-                            }else{
+                            } else {
                                 fpsResponse.setOrgnlPaymentType(paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getPmtTpInf().getLclInstrm().getPrtry());
                             }
-                            if (paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getRmtInf()!=null &&
+                            if (paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getRmtInf() != null &&
                                     paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getRmtInf().getStrd() != null &&
                                     !paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getRmtInf().getStrd().isEmpty()) {
                                 if (paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getRmtInf().getStrd().get(0).getAddtlRmtInf() != null &&
@@ -204,13 +199,13 @@ public abstract class MQOutboundListener extends BaseListener implements Message
                                 }
                             }
 
-                            if (paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getCdtrAcct()!= null){
-                                if(paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getCdtrAcct().getId() != null &&
-                                        paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getCdtrAcct().getId().getIBAN()!= null){
+                            if (paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getCdtrAcct() != null) {
+                                if (paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getCdtrAcct().getId() != null &&
+                                        paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getCdtrAcct().getId().getIBAN() != null) {
                                     fpsResponse.setCdtrAccountId(paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getCdtrAcct().getId().getIBAN());
                                 }
-                                if(paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getCdtrAcct().getId() != null &&
-                                        paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getCdtrAcct().getId().getOthr()!= null){
+                                if (paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getCdtrAcct().getId() != null &&
+                                        paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getCdtrAcct().getId().getOthr() != null) {
                                     fpsResponse.setCdtrAccountId(paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getCdtrAcct().getId().getOthr().getId());
                                 }
                             }
@@ -238,32 +233,32 @@ public abstract class MQOutboundListener extends BaseListener implements Message
                 } else {
                     throw new MessageConversionException("Exception in message reception. The transform for the class " + fpsMessage.getClass().getName() + " is null");
                 }
-            }catch (ConversionException convEx){
+            } catch (ConversionException convEx) {
                 LOG.error("[FPS][PaymentType: {}]Error generating Avro file. Error: {} Message: {}",
                         paymentType, convEx.getMessage(), message);
-            }catch(IOException e) {
+            } catch (IOException e) {
                 LOG.error("[FPS][PaymentType: {}] IO Error {}",
                         paymentType, e.getMessage());
-            }catch(MessageConversionException conversionEx){
+            } catch (MessageConversionException conversionEx) {
                 LOG.error("[FPS][PaymentType: {}] Error transforming message {}",
                         paymentType, conversionEx.getMessage());
             } catch (Exception ex) {
                 LOG.error("[FPS][PaymentType: {}] Error getting response from payment. Message error {}",
-                        paymentType,  ex.getMessage(), ex);
+                        paymentType, ex.getMessage(), ex);
             }
         }
     }
 
     private String getCdtrAccountId(com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Document paymentDocument) {
         String cdtrAccountId = null;
-        if (paymentDocument.getFIToFICstmrCdtTrf().getCdtTrfTxInf().get(0).getCdtrAcct() != null){
+        if (paymentDocument.getFIToFICstmrCdtTrf().getCdtTrfTxInf().get(0).getCdtrAcct() != null) {
             com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.AccountIdentification4Choice id =
                     paymentDocument.getFIToFICstmrCdtTrf().getCdtTrfTxInf().get(0).getCdtrAcct().getId();
-            if(id.getIBAN() != null ){
+            if (id.getIBAN() != null) {
                 cdtrAccountId = id.getIBAN();
-            }else{
-                if(id.getOthr() != null)
-                cdtrAccountId  = id.getOthr().getId();
+            } else {
+                if (id.getOthr() != null)
+                    cdtrAccountId = id.getOthr().getId();
             }
 
         }
@@ -272,14 +267,14 @@ public abstract class MQOutboundListener extends BaseListener implements Message
 
     private String getDbtrAccountId(com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Document paymentDocument) {
         String cdtrAccountId = null;
-        if (paymentDocument.getFIToFICstmrCdtTrf().getCdtTrfTxInf().get(0).getDbtrAcct() != null){
+        if (paymentDocument.getFIToFICstmrCdtTrf().getCdtTrfTxInf().get(0).getDbtrAcct() != null) {
             com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.AccountIdentification4Choice id =
                     paymentDocument.getFIToFICstmrCdtTrf().getCdtTrfTxInf().get(0).getDbtrAcct().getId();
-            if(id.getIBAN() != null ){
+            if (id.getIBAN() != null) {
                 cdtrAccountId = id.getIBAN();
-            }else{
-                if(id.getOthr() != null)
-                    cdtrAccountId  = id.getOthr().getId();
+            } else {
+                if (id.getOthr() != null)
+                    cdtrAccountId = id.getOthr().getId();
             }
 
         }

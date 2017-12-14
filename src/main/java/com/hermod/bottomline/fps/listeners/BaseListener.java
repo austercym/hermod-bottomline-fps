@@ -14,4 +14,9 @@ public class BaseListener {
 		String beanKey = "transform_" + packageName.substring(packageName.lastIndexOf(".")+1);
 		return (transforms.containsKey(beanKey)) ? transforms.get(beanKey) : null;
 	}
+
+	protected FPSTransform getTransformsUML(String className) {
+		String beanKey = "transform_" + className.substring(className.lastIndexOf(".")+1);
+		return (transforms.containsKey(beanKey)) ? transforms.get(beanKey) : null;
+	}
 }

@@ -85,12 +85,18 @@ public class KafkaResponseInboundListener extends KafkaInboundListener implement
 					updatePaymentResponseInMemory(fpsPaymentResponse.getOrgnlPaymentDocument(), rawMessage.toString(), key);
 
 					//Send to MQ (Environment=Queue)
+					jmsOperations.send(outboundQueue, session -> {
+						LOG.info("[FPS][PmtId: {}] Message to be sent to Bottomline: {}",key, rawMessage.toString());
+						return session.createTextMessage(rawMessage.toString());
+					});
+					/*
 					jmsOperations.convertAndSend(outboundQueue, fpsMessage, messageToSend -> {
 						messageToSend.setJMSType(MessageType.TEXT.toString());
 						LOG.info("[FPS][PmtId: {}] Message of type {} to be sent to Test queue: {}",key,
 								messageToSend.getJMSType(), messageToSend.toString());
 						return messageToSend;
 					});
+					*/
 				} else {
 					throw new MessageConversionException("Exception in message emission. The transform for pacs_002_001 is null");
 				}

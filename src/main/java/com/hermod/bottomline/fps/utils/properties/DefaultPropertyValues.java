@@ -15,6 +15,15 @@ public class DefaultPropertyValues {
 	private final static String MQ_DEFAULT_QUEUE_MANAGER = "BT.ORUN.UA.FPS.02";
 	private final static String MQ_DEFAULT_CHANNEL  = "IPAGOO.CONNECT";
 	private final static String MQ_DEFAULT_USERNAME = "ipagoo";
+	/*
+	private final static String MQ_DEFAULT_HOST  = "localhost";
+	private final static Integer MQ_DEFAULT_PORT = 1414;
+	private final static String MQ_DEFAULT_QUEUE_MANAGER = "QM1";
+	private final static String MQ_DEFAULT_CHANNEL  = "DEV.APP.SVRCONN";
+	private final static String MQ_DEFAULT_USERNAME = "root";
+	 */
+
+
 	private final static String MQ_DEFAULT_PASSWORD = "";
 	private final static Long MQ_DEFAULT_RECEIVED_TIMEOUT = 2000L;
 	private final static Integer MQ_DEFAULT_NUM_MAX_CONSUMERS = 1;
