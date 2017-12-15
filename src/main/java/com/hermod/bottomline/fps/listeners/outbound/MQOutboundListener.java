@@ -45,6 +45,7 @@ import java.io.*;
 
 public abstract class MQOutboundListener extends BaseListener implements MessageListener {
 
+    public static final String RESP_SUFFIX = "_RESP";
     private static Logger LOG = LogManager.getLogger(MQOutboundListener.class);
 
     @Autowired
@@ -168,13 +169,13 @@ public abstract class MQOutboundListener extends BaseListener implements Message
                             }
                             fpsResponse.setIntrBkSttlmAmtCcy(paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getIntrBkSttlmAmt().getCcy());
                         }
-                        fpsResponse.setPaymentId(uuid);
 
                         InMemoryOutboundPaymentStorage storage = InMemoryOutboundPaymentStorage.getInstance();
                         PaymentOutboundBean paymentBean = storage.findPayment(paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxId());
                         if (paymentBean != null) {
                             FPSOutboundPayment originalMessage = paymentBean.getOutboundPayment();
-
+                            uuid = getResponsePaymentId(originalMessage);
+                            fpsResponse.setPaymentId(uuid);
                             fpsResponse.setOrgnlFPID(originalMessage.getFPID());
                             fpsResponse.setOrgnlPaymentId(originalMessage.getPaymentId());
                             fpsResponse.setOrgnlPaymentType(originalMessage.getPaymentType());
@@ -247,6 +248,11 @@ public abstract class MQOutboundListener extends BaseListener implements Message
                         paymentType, ex.getMessage(), ex);
             }
         }
+    }
+
+    private String getResponsePaymentId(FPSOutboundPayment originalMessage) {
+
+        return originalMessage.getPaymentId()+ RESP_SUFFIX;
     }
 
     private String getCdtrAccountId(com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Document paymentDocument) {
