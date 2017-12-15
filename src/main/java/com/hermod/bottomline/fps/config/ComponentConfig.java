@@ -1,9 +1,8 @@
 package com.hermod.bottomline.fps.config;
 
+import com.google.gson.Gson;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import com.google.gson.Gson;
 
 @Configuration
 public abstract class ComponentConfig {

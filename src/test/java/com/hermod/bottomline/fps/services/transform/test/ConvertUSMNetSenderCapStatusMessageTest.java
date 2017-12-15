@@ -1,8 +1,6 @@
 package com.hermod.bottomline.fps.services.transform.test;
 
-import com.bottomline.directfps.fpsusmelements.ASPMAlertMessageType;
 import com.bottomline.directfps.fpsusmelements.NetSenderCapStatusMessageType;
-import com.hermod.bottomline.fps.services.transform.ASPMAlertMessageTransform;
 import com.hermod.bottomline.fps.services.transform.NetSenderCapStatusMessageTransform;
 import com.hermod.bottomline.fps.types.FPSMessage;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;

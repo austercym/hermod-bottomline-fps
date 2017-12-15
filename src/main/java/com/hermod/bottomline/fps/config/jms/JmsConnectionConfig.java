@@ -1,9 +1,8 @@
 package com.hermod.bottomline.fps.config.jms;
 
-import javax.jms.ConnectionFactory;
-import javax.jms.QueueConnectionFactory;
-
 import com.hermod.bottomline.fps.config.ComponentConfig;
+import com.ibm.mq.jms.MQQueueConnectionFactory;
+import com.ibm.msg.client.wmq.WMQConstants;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,8 +15,8 @@ import org.springframework.jms.connection.UserCredentialsConnectionFactoryAdapte
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import com.ibm.mq.jms.MQQueueConnectionFactory;
-import com.ibm.msg.client.wmq.WMQConstants;
+import javax.jms.ConnectionFactory;
+import javax.jms.QueueConnectionFactory;
 
 @Configuration
 @EnableTransactionManagement

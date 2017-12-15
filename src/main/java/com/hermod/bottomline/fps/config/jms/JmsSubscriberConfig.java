@@ -1,8 +1,5 @@
 package com.hermod.bottomline.fps.config.jms;
 
-import javax.jms.ConnectionFactory;
-import javax.jms.MessageListener;
-
 import com.hermod.bottomline.fps.config.ComponentConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,6 +8,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.listener.DefaultMessageListenerContainer;
+
+import javax.jms.ConnectionFactory;
+import javax.jms.MessageListener;
 
 @Configuration
 @EnableJms

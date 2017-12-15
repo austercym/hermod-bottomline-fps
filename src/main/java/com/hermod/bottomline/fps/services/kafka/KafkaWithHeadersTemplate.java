@@ -1,14 +1,13 @@
 package com.hermod.bottomline.fps.services.kafka;
 
 import com.orwellg.umbrella.commons.utils.enums.KafkaHeaders;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.Headers;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Component;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.concurrent.ListenableFuture;
 
 @Component

@@ -1,7 +1,6 @@
 package com.hermod.bottomline.fps.storage;
 
 import com.orwellg.umbrella.avro.types.payment.fps.FPSOutboundPayment;
-import org.springframework.util.DigestUtils;
 
 import java.util.Date;
 import java.util.HashMap;

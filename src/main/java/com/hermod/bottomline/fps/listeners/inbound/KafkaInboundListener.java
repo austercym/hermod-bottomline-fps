@@ -7,13 +7,11 @@ import com.hermod.bottomline.fps.storage.PaymentBean;
 import com.hermod.bottomline.fps.types.FPSMessage;
 import com.hermod.bottomline.fps.utils.generators.IDGeneratorBean;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
-import com.orwellg.umbrella.avro.types.payment.fps.FPSInboundPaymentResponse;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSOutboundPaymentResponse;
 import com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs002_001_06.*;
 import com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.InstructionForNextAgent1;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;

@@ -1,10 +1,9 @@
 package com.hermod.bottomline.fps;
 
+import com.hermod.bottomline.fps.spring.context.SpringProfileSettingApplicationContextInitializer;
 import com.hermod.bottomline.fps.utils.properties.DefaultPropertyValues;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-
-import com.hermod.bottomline.fps.spring.context.SpringProfileSettingApplicationContextInitializer;
 
 @SpringBootApplication
 public class FpsBootApplication {

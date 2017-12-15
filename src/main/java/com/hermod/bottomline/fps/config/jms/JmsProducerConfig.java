@@ -29,9 +29,7 @@ public class JmsProducerConfig extends ComponentConfig {
 	    		iso.std.iso._20022.tech.xsd.pacs_002_001.Document.class,
 	    		iso.std.iso._20022.tech.xsd.pacs_004_001.Document.class,
 	    		iso.std.iso._20022.tech.xsd.pacs_007_001.Document.class,
-	    		iso.std.iso._20022.tech.xsd.pacs_009_001.Document.class,
-				com.bottomline.directfps.fpsusmelements.FPSInst3RdPartyStatusMessageType.class
-
+	    		iso.std.iso._20022.tech.xsd.pacs_009_001.Document.class
 	    	);
 	    return marshaller;
 	}

@@ -2,6 +2,7 @@ package com.hermod.bottomline.fps.listeners.inbound;
 
 import com.google.gson.Gson;
 import com.hermod.bottomline.fps.listeners.BaseListener;
+import com.hermod.bottomline.fps.services.kafka.KafkaSender;
 import com.hermod.bottomline.fps.services.transform.FPSTransform;
 import com.hermod.bottomline.fps.services.transform.helper.ConversionException;
 import com.hermod.bottomline.fps.storage.InMemoryPaymentStorage;
@@ -10,12 +11,10 @@ import com.hermod.bottomline.fps.storage.PaymentStatus;
 import com.hermod.bottomline.fps.types.FPSMessage;
 import com.hermod.bottomline.fps.utils.Constants;
 import com.hermod.bottomline.fps.utils.generators.EventGenerator;
-import com.hermod.bottomline.fps.services.kafka.KafkaSender;
 import com.hermod.bottomline.fps.utils.generators.IDGeneratorBean;
 import com.orwellg.umbrella.avro.types.event.Event;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSInboundPayment;
-import com.orwellg.umbrella.avro.types.payment.fps.FPSInboundPaymentResponse;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSOutboundPaymentResponse;
 import com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Document;
 import com.orwellg.umbrella.commons.utils.enums.FPSEvents;
@@ -132,8 +131,8 @@ public abstract class MQListener extends BaseListener implements MessageListener
 
                 //Send mq message to logging topic
                 kafkaSender.sendRawMessage(loggingTopic, message, uuid);
+                Source src = new StreamSource(new StringReader(message));
                 try {
-                    Source src = new StreamSource(new StringReader(message));
                     // Validate against scheme
 
                     Schema schema = schemaFactory.newSchema(new StreamSource(xsdResource.getInputStream()));
@@ -149,7 +148,6 @@ public abstract class MQListener extends BaseListener implements MessageListener
                             paymentType,  e.getMessage(), message);
                 }
                 // Getting Avro
-                Source src = new StreamSource(new StringReader(message));
                 final JAXBElement result = (JAXBElement) marshaller.unmarshal(src);
                 FPSMessage fpsMessage = (FPSMessage) result.getValue();
 

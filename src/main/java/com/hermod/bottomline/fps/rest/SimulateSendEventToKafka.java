@@ -2,20 +2,16 @@ package com.hermod.bottomline.fps.rest;
 
 import com.hermod.bottomline.fps.listeners.inbound.MQSIPListener;
 import com.hermod.bottomline.fps.listeners.inbound.MQSOPListener;
-import com.hermod.bottomline.fps.listeners.outbound.MQOutboundListener;
 import com.hermod.bottomline.fps.listeners.outbound.MQSIPOutboundRecvListener;
 import com.hermod.bottomline.fps.listeners.usm.MQUSMListener;
 import com.hermod.bottomline.fps.storage.InMemoryPaymentStorage;
-
-
 import com.hermod.bottomline.fps.utils.mq.MessageTestQueueSender;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.io.Reader;
 import java.io.StringReader;

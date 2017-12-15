@@ -1,9 +1,9 @@
 package com.hermod.bottomline.fps.utils.properties;
 
+import com.orwellg.umbrella.commons.utils.constants.Constants;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import com.orwellg.umbrella.commons.utils.constants.Constants;
 
 public class DefaultPropertyValues {
 
@@ -54,6 +54,8 @@ public class DefaultPropertyValues {
 
 	private final static String KAFKA_DEFAULT_OUTBOUND_RESPONSE_TOPIC = "com.orwellg.yggdrasil.dsl.fps.outbound.payment.response.1";
 	private final static String KAFKA_DEFAULT_OUTBOUND_REQUEST_TOPIC  = "com.orwellg.hermod.bottomline.fps.outbound.payment.request.1";
+
+	private final static String KAFKA_DEFAULT_USM_TOPIC_PARTITIONS  = "com.orwellg.hermod.bottomline.fps.usm.request.1";
 
 	private final static String KAFKA_DEFAULT_MESSAGE_LOGGING_TOPIC   = "com.orwellg.logging.message";
 
@@ -111,6 +113,9 @@ public class DefaultPropertyValues {
 		defaultValues.put("kafka.topic.outbound.request", KAFKA_DEFAULT_OUTBOUND_REQUEST_TOPIC);
 		defaultValues.put("kafka.topic.outbound.response", KAFKA_DEFAULT_OUTBOUND_RESPONSE_TOPIC);
 		defaultValues.put("kafka.topic.outbound.partitions", KAFKA_DEFAULT_OUTBOUND_TOPIC_PARTITIONS);
+
+		defaultValues.put("kafka.topic.usm.message", KAFKA_DEFAULT_USM_TOPIC_PARTITIONS);
+
 
 		defaultValues.put("kafka.topic.fps.logging", KAFKA_DEFAULT_MESSAGE_LOGGING_TOPIC);
 

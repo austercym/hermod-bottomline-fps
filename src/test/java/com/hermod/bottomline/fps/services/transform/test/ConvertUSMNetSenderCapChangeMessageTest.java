@@ -1,9 +1,7 @@
 package com.hermod.bottomline.fps.services.transform.test;
 
 import com.bottomline.directfps.fpsusmelements.NetSenderCapChangeMessageType;
-import com.bottomline.directfps.fpsusmelements.NetSenderCapStatusMessageType;
 import com.hermod.bottomline.fps.services.transform.NetSenderCapChangeMessageTransform;
-import com.hermod.bottomline.fps.services.transform.NetSenderCapStatusMessageTransform;
 import com.hermod.bottomline.fps.types.FPSMessage;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
 import org.junit.Test;

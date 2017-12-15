@@ -1,11 +1,10 @@
 package com.hermod.bottomline.fps.services.transform;
 
 import com.hermod.bottomline.fps.services.transform.helper.ConversionException;
-import org.springframework.stereotype.Component;
-
 import com.hermod.bottomline.fps.services.transform.helper.TransformationHelper;
 import com.hermod.bottomline.fps.types.FPSMessage;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
+import org.springframework.stereotype.Component;
 
 @Component(value="transform_pacs_004_001")
 public class Pasc004Transform implements FPSTransform {

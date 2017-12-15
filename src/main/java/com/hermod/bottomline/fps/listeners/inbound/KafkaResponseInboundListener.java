@@ -2,12 +2,11 @@ package com.hermod.bottomline.fps.listeners.inbound;
 
 
 import com.google.gson.Gson;
+import com.hermod.bottomline.fps.services.kafka.KafkaSender;
 import com.hermod.bottomline.fps.services.transform.FPSTransform;
 import com.hermod.bottomline.fps.types.FPSMessage;
-import com.hermod.bottomline.fps.services.kafka.KafkaSender;
 import com.orwellg.umbrella.avro.types.event.Event;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
-import com.orwellg.umbrella.avro.types.payment.fps.FPSInboundPaymentResponse;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSOutboundPaymentResponse;
 import com.orwellg.umbrella.commons.types.utils.avro.RawMessageUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -17,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jms.JmsException;
 import org.springframework.jms.core.JmsOperations;
-import org.springframework.jms.support.converter.MessageType;
 import org.springframework.kafka.listener.KafkaDataListener;
 import org.springframework.kafka.listener.MessageListener;
 import org.springframework.messaging.converter.MessageConversionException;
@@ -89,14 +87,7 @@ public class KafkaResponseInboundListener extends KafkaInboundListener implement
 						LOG.info("[FPS][PmtId: {}] Message to be sent to Bottomline: {}",key, rawMessage.toString());
 						return session.createTextMessage(rawMessage.toString());
 					});
-					/*
-					jmsOperations.convertAndSend(outboundQueue, fpsMessage, messageToSend -> {
-						messageToSend.setJMSType(MessageType.TEXT.toString());
-						LOG.info("[FPS][PmtId: {}] Message of type {} to be sent to Test queue: {}",key,
-								messageToSend.getJMSType(), messageToSend.toString());
-						return messageToSend;
-					});
-					*/
+
 				} else {
 					throw new MessageConversionException("Exception in message emission. The transform for pacs_002_001 is null");
 				}

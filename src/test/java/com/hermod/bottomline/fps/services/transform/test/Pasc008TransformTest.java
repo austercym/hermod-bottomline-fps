@@ -1,23 +1,20 @@
 package com.hermod.bottomline.fps.services.transform.test;
 
 
-import java.io.File;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.Unmarshaller;
-
+import com.hermod.bottomline.fps.services.transform.Pasc008Transform;
+import com.hermod.bottomline.fps.types.FPSMessage;
+import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
+import iso.std.iso._20022.tech.xsd.pacs_008_001.Document;
 import org.apache.avro.Schema;
 import org.apache.avro.file.DataFileReader;
 import org.apache.avro.io.DatumReader;
 import org.apache.avro.specific.SpecificDatumReader;
 import org.junit.Test;
 
-import com.hermod.bottomline.fps.services.transform.Pasc008Transform;
-import com.hermod.bottomline.fps.types.FPSMessage;
-import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
-
-import iso.std.iso._20022.tech.xsd.pacs_008_001.Document;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.Unmarshaller;
+import java.io.File;
 
 public class Pasc008TransformTest {
 

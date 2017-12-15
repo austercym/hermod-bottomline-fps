@@ -1,17 +1,16 @@
 package com.hermod.bottomline.fps.utils.generators;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.util.StringUtils;
-
 import com.orwellg.umbrella.avro.types.event.EntityIdentifierType;
 import com.orwellg.umbrella.avro.types.event.Event;
 import com.orwellg.umbrella.avro.types.event.EventType;
 import com.orwellg.umbrella.avro.types.event.ProcessIdentifierType;
 import com.orwellg.umbrella.commons.utils.constants.Constants;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.util.StringUtils;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class EventGenerator {
 

@@ -1,15 +1,15 @@
 package com.hermod.bottomline.fps.services.transform.test;
 
 import com.bottomline.directfps.fpsusmelements.ASPMAlertMessageType;
-import com.bottomline.directfps.fpsusmelements.ServiceStatusMessageType;
 import com.hermod.bottomline.fps.services.transform.ASPMAlertMessageTransform;
-import com.hermod.bottomline.fps.services.transform.ServiceStatusMessageTransform;
 import com.hermod.bottomline.fps.types.FPSMessage;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
 import org.junit.Test;
 
 import javax.xml.bind.JAXB;
+import javax.xml.transform.stream.StreamSource;
 import java.io.File;
+import java.io.StringReader;
 
 public class ConvertUSMASPMAlertMessageTest {
 

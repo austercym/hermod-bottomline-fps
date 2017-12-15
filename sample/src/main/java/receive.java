@@ -1,10 +1,9 @@
+import com.ibm.mq.jms.MQQueueReceiver;
+import com.ibm.msg.client.wmq.WMQConstants;
+
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Session;
-
-import com.ibm.mq.jms.*;
-import com.ibm.mq.jms.MQQueueReceiver;
-import com.ibm.msg.client.wmq.WMQConstants;
 
 public class receive {
 

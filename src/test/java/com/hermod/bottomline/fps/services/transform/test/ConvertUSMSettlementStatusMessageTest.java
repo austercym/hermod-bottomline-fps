@@ -1,8 +1,6 @@
 package com.hermod.bottomline.fps.services.transform.test;
 
-import com.bottomline.directfps.fpsusmelements.ServiceStatusMessageType;
 import com.bottomline.directfps.fpsusmelements.SettlementStatusMessageType;
-import com.hermod.bottomline.fps.services.transform.ServiceStatusMessageTransform;
 import com.hermod.bottomline.fps.services.transform.SettlementStatusMessageTransform;
 import com.hermod.bottomline.fps.types.FPSMessage;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;

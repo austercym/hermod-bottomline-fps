@@ -1,6 +1,5 @@
 package com.hermod.bottomline.fps.listeners.outbound;
 
-import com.hermod.bottomline.fps.listeners.inbound.MQListener;
 import com.orwellg.umbrella.avro.types.event.Event;
 import com.orwellg.umbrella.commons.types.utils.avro.RawMessageUtils;
 import org.apache.logging.log4j.LogManager;

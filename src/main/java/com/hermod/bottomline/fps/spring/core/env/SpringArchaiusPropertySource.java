@@ -1,15 +1,14 @@
 package com.hermod.bottomline.fps.spring.core.env;
 
-import java.util.Map;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.core.env.PropertySource;
-
 import com.netflix.config.DynamicPropertyFactory;
 import com.orwellg.umbrella.commons.beans.config.zookeeper.ZkConfigurationParams;
 import com.orwellg.umbrella.commons.utils.config.PropertiesUtils;
 import com.orwellg.umbrella.commons.utils.config.ZookeeperUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.core.env.PropertySource;
+
+import java.util.Map;
 
 public class SpringArchaiusPropertySource extends PropertySource<Void> {
 

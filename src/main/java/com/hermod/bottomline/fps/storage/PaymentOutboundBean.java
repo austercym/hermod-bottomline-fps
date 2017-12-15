@@ -1,7 +1,6 @@
 package com.hermod.bottomline.fps.storage;
 
 import com.orwellg.umbrella.avro.types.payment.fps.FPSOutboundPayment;
-import com.orwellg.umbrella.avro.types.payment.fps.FPSOutboundPaymentResponse;
 
 import java.io.Serializable;
 import java.util.Date;

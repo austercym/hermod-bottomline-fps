@@ -1,10 +1,10 @@
 package com.hermod.bottomline.fps.services.transform.helper.converter;
 
-import java.util.Arrays;
-import java.util.Optional;
-
 import com.hermod.bottomline.fps.services.transform.helper.BuilderContext;
 import com.hermod.bottomline.fps.services.transform.helper.ConversionException;
+
+import java.util.Arrays;
+import java.util.Optional;
 
 public class StringToEnumConverter implements ConverterEntryIf {
 

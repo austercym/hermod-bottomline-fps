@@ -1,11 +1,10 @@
 package com.hermod.bottomline.fps.services.jms;
 
+import com.hermod.bottomline.fps.types.FPSMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.hermod.bottomline.fps.types.FPSMessage;
 
 @Component
 public class MQServiceImpl implements JmsService {

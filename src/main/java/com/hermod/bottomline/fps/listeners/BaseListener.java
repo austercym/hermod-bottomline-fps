@@ -1,9 +1,9 @@
 package com.hermod.bottomline.fps.listeners;
 
-import java.util.Map;
-
 import com.hermod.bottomline.fps.services.transform.FPSTransform;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Map;
 
 public class BaseListener {
 

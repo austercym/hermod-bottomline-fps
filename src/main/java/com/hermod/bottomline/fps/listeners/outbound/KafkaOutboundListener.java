@@ -5,7 +5,6 @@ import com.hermod.bottomline.fps.listeners.BaseListener;
 import com.hermod.bottomline.fps.storage.InMemoryPaymentStorage;
 import com.hermod.bottomline.fps.storage.PaymentBean;
 import com.hermod.bottomline.fps.types.FPSMessage;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

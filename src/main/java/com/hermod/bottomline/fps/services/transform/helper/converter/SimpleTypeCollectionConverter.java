@@ -1,10 +1,10 @@
 package com.hermod.bottomline.fps.services.transform.helper.converter;
 
-import java.lang.reflect.ParameterizedType;
-import java.util.Collection;
-
 import com.hermod.bottomline.fps.services.transform.helper.BuilderContext;
 import com.hermod.bottomline.fps.services.transform.helper.ConversionException;
+
+import java.lang.reflect.ParameterizedType;
+import java.util.Collection;
 
 public class SimpleTypeCollectionConverter implements ConverterEntryIf {
 

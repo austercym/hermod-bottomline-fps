@@ -1,9 +1,9 @@
 package com.hermod.bottomline.fps.services.transform.test;
 
+import com.bottomline.directfps.fpsusmelements.ServiceStatusMessageType;
 import com.hermod.bottomline.fps.services.transform.ServiceStatusMessageTransform;
 import com.hermod.bottomline.fps.types.FPSMessage;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
-import com.bottomline.directfps.fpsusmelements.ServiceStatusMessageType;
 import org.junit.Test;
 
 import javax.xml.bind.JAXB;
