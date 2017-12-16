@@ -233,7 +233,7 @@ public abstract class MQListener extends BaseListener implements MessageListener
                 LOG.error("[FPS][PaymentType: {}] Error transforming message {}", 
                         paymentType, conversionEx.getMessage());
             } catch (Exception ex) {
-                LOG.error("[FPS][PaymentType: {}] Error getting unique ID", 
+                LOG.error("[FPS][PaymentType: {}] Error getting unique ID {}",
                         paymentType,  ex.getMessage());
             }
         }

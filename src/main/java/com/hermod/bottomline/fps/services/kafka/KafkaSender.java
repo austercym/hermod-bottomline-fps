@@ -17,7 +17,7 @@ public class KafkaSender {
 	}
 
 	public void sendRawMessage(String topic, String payload, String key) {
-		LOG.info("[FPS][PmtId: {} Sending payload='{}' to topic='{}'", payload, topic);
+		LOG.info("[FPS][PmtId: {}] Sending payload='{}' to topic='{}'",key, payload, topic);
 		kafkaTemplate.sendRawMessage(topic, payload, key);
 	}
 }

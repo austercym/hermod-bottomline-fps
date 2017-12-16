@@ -7,7 +7,7 @@ import com.hermod.bottomline.fps.types.FPSMessage;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
 import org.springframework.stereotype.Component;
 
-@Component(value="transform_SchemeReturnPaymentFailure")
+@Component(value="transform_SchemeReturnPaymentFailureType")
 public class SchemeReturnPaymentFailureTransform implements FPSTransform {
 
 	static {

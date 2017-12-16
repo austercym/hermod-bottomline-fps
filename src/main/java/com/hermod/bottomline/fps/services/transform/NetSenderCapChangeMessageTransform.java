@@ -7,7 +7,7 @@ import com.hermod.bottomline.fps.types.FPSMessage;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
 import org.springframework.stereotype.Component;
 
-@Component(value="transform_NetSenderCapChangeMessage")
+@Component(value="transform_NetSenderCapChangeMessageType")
 public class NetSenderCapChangeMessageTransform implements FPSTransform {
 
 	static {

@@ -9,12 +9,14 @@ public class DefaultPropertyValues {
 
 	private final static String APP_DEFAULT_ORWELLG_ENTITY = Constants.IPAGOO_ENTITY;
 	private final static String APP_DEFAULT_ORWELLG_BRAND  = Constants.IPAGOO_BRAND;
-	
+
 	private final static String MQ_DEFAULT_HOST  = "80.169.11.104";
+	private final static String MQ_DEFAULT_HOST2  = "213.129.75.120";
 	private final static Integer MQ_DEFAULT_PORT = 49178;
 	private final static String MQ_DEFAULT_QUEUE_MANAGER = "BT.ORUN.UA.FPS.02";
 	private final static String MQ_DEFAULT_CHANNEL  = "IPAGOO.CONNECT";
 	private final static String MQ_DEFAULT_USERNAME = "ipagoo";
+
 	/*
 	private final static String MQ_DEFAULT_HOST  = "localhost";
 	private final static Integer MQ_DEFAULT_PORT = 1414;
@@ -55,7 +57,7 @@ public class DefaultPropertyValues {
 	private final static String KAFKA_DEFAULT_OUTBOUND_RESPONSE_TOPIC = "com.orwellg.yggdrasil.dsl.fps.outbound.payment.response.1";
 	private final static String KAFKA_DEFAULT_OUTBOUND_REQUEST_TOPIC  = "com.orwellg.hermod.bottomline.fps.outbound.payment.request.1";
 
-	private final static String KAFKA_DEFAULT_USM_TOPIC_PARTITIONS  = "com.orwellg.hermod.bottomline.fps.usm.request.1";
+	private final static String KAFKA_DEFAULT_USM_TOPIC_PARTITIONS  = "com.orwellg.yggdrasil.dsl.fps.inbound.usm.received.1";
 
 	private final static String KAFKA_DEFAULT_MESSAGE_LOGGING_TOPIC   = "com.orwellg.logging.message";
 

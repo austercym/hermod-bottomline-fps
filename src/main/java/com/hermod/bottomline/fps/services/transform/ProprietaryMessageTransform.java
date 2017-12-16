@@ -7,7 +7,7 @@ import com.hermod.bottomline.fps.types.FPSMessage;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
 import org.springframework.stereotype.Component;
 
-@Component(value="transform_ProprietaryMessage")
+@Component(value="transform_ProprietaryMessageType")
 public class ProprietaryMessageTransform implements FPSTransform {
 
 	static {
