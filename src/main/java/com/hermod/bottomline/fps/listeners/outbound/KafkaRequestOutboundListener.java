@@ -152,10 +152,13 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
                         });
 
                         fpsOutboundPayment.setTxSts("SENT");
-
+                        String eventName = FPSEvents.FPS_PAYMENT_SENT.getEventName();
+                        if(eventPayment.getEvent().getName().equalsIgnoreCase(FPSEvents.FPS_SEND_RETURN.getEventName())){
+                            eventName = FPSEvents.FPS_RETURN_SENT.getEventName();
+                        }
                         event = EventGenerator.generateEvent(
                                 this.getClass().getName(),
-                                FPSEvents.FPS_PAYMENT_SENT.getEventName(),
+                                eventName,
                                 paymentId,
                                 gson.toJson(fpsOutboundPayment),
                                 entity,

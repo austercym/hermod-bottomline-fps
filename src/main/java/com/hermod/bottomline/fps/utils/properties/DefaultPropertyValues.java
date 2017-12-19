@@ -33,10 +33,10 @@ public class DefaultPropertyValues {
 	private final static String MQ_DEFAULT_TEST_QUEUE = "ORUN.TEST.INB.RECV.QR";
 
 	private final static String MQ_DEFAULT_INBOUND_SIP_QUEUE  = "ORUN.HOST.SYNC.RECV.QL";
-	private final static String MQ_DEFAULT_INBOUND_SOP_QUEUE  = "ORUN.HOST.ASYN.RECV.QL";
+	private final static String MQ_DEFAULT_INBOUND_ASYN_QUEUE  = "ORUN.HOST.ASYN.RECV.QL";
 	private final static String MQ_DEFAULT_INBOUND_USM_QUEUE  = "ORUN.HOST.USM.RECV.QR";
 	private final static String MQ_DEFAULT_INBOUND_RESP_SIP_QUEUE = "ORUN.HOST.SYNC.RECV.RESP.QR";
-	private final static String MQ_DEFAULT_INBOUND_RESP_SOP_QUEUE = "ORUN.HOST.ASYN.RECV.RESP.QR";
+	private final static String MQ_DEFAULT_INBOUND_RESP_ASYN_QUEUE = "ORUN.HOST.ASYN.RECV.RESP.QR";
 
 
 	private final static String MQ_BOTTOMLINE1_ENVIRONMENT = "BOTTOMLINE1";
@@ -58,6 +58,7 @@ public class DefaultPropertyValues {
 	private final static String KAFKA_DEFAULT_OUTBOUND_REQUEST_TOPIC  = "com.orwellg.hermod.bottomline.fps.outbound.payment.request.1";
 
 	private final static String KAFKA_DEFAULT_USM_TOPIC_PARTITIONS  = "com.orwellg.yggdrasil.dsl.fps.inbound.usm.received.1";
+	private final static String KAFKA_DEFAULT_REVERSAL_TOPIC_PARTITIONS  = "com.orwellg.yggdrasil.dsl.fps.inbound.reversal.request.1";
 
 	private final static String KAFKA_DEFAULT_MESSAGE_LOGGING_TOPIC   = "com.orwellg.logging.message";
 
@@ -90,8 +91,8 @@ public class DefaultPropertyValues {
 
 		defaultValues.put("wq.mq.queue.sip.inbound", MQ_DEFAULT_INBOUND_SIP_QUEUE);
 		defaultValues.put("wq.mq.queue.sip.inbound.resp", MQ_DEFAULT_INBOUND_RESP_SIP_QUEUE);
-		defaultValues.put("wq.mq.queue.sop.inbound", MQ_DEFAULT_INBOUND_SOP_QUEUE);
-		defaultValues.put("wq.mq.queue.sop.inbound.resp", MQ_DEFAULT_INBOUND_RESP_SOP_QUEUE);
+		defaultValues.put("wq.mq.queue.asyn.inbound", MQ_DEFAULT_INBOUND_ASYN_QUEUE);
+		defaultValues.put("wq.mq.queue.asyn.inbound.resp", MQ_DEFAULT_INBOUND_RESP_ASYN_QUEUE);
 		defaultValues.put("wq.mq.queue.usm.inbound", MQ_DEFAULT_INBOUND_USM_QUEUE);
 
 		//Outbound queues BOTTOMLINE
@@ -117,6 +118,7 @@ public class DefaultPropertyValues {
 		defaultValues.put("kafka.topic.outbound.partitions", KAFKA_DEFAULT_OUTBOUND_TOPIC_PARTITIONS);
 
 		defaultValues.put("kafka.topic.usm.message", KAFKA_DEFAULT_USM_TOPIC_PARTITIONS);
+		defaultValues.put("kafka.topic.reversal.request", KAFKA_DEFAULT_REVERSAL_TOPIC_PARTITIONS);
 
 
 		defaultValues.put("kafka.topic.fps.logging", KAFKA_DEFAULT_MESSAGE_LOGGING_TOPIC);

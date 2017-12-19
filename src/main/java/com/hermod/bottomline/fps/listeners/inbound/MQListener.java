@@ -10,13 +10,15 @@ import com.hermod.bottomline.fps.storage.PaymentBean;
 import com.hermod.bottomline.fps.storage.PaymentStatus;
 import com.hermod.bottomline.fps.types.FPSMessage;
 import com.hermod.bottomline.fps.utils.Constants;
+import com.hermod.bottomline.fps.utils.CurrencyCodes;
 import com.hermod.bottomline.fps.utils.generators.EventGenerator;
 import com.hermod.bottomline.fps.utils.generators.IDGeneratorBean;
 import com.orwellg.umbrella.avro.types.event.Event;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSInboundPayment;
+import com.orwellg.umbrella.avro.types.payment.fps.FPSInboundReversal;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSOutboundPaymentResponse;
-import com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Document;
+import com.orwellg.umbrella.commons.types.fps.PaymentType;
 import com.orwellg.umbrella.commons.utils.enums.FPSEvents;
 import org.apache.activemq.util.ByteArrayInputStream;
 import org.apache.commons.io.IOUtils;
@@ -65,6 +67,9 @@ public abstract class MQListener extends BaseListener implements MessageListener
 
     @Value("${kafka.topic.inbound.request}")
     protected String inboundTopic;
+
+    @Value("${kafka.topic.reversal.request}")
+    protected String inboundReversalTopic;
 
     @Value("${kafka.topic.inbound.response}")
     private String outboundResponseTopic;
@@ -121,7 +126,6 @@ public abstract class MQListener extends BaseListener implements MessageListener
         SchemaFactory schemaFactory = SchemaFactory
                 .newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
         if (reader != null) {
-            Resource xsdResource = new ClassPathResource("./xsd/pacs.008.001.05.xsd");
             String message = "";
             try {
                 String uuid = StringUtils.isNotEmpty(id)?id:IDGeneratorBean.getInstance().generatorID().getFasterPaymentUniqueId();
@@ -131,23 +135,55 @@ public abstract class MQListener extends BaseListener implements MessageListener
 
                 //Send mq message to logging topic
                 kafkaSender.sendRawMessage(loggingTopic, message, uuid);
-                Source src = new StreamSource(new StringReader(message));
+
+                String errorMessage = "";
+                boolean isReversal = false;
                 try {
                     // Validate against scheme
-
+                    Source src = new StreamSource(new StringReader(message));
+                    Resource xsdResource = new ClassPathResource("./xsd/pacs.008.001.05.xsd");
                     Schema schema = schemaFactory.newSchema(new StreamSource(xsdResource.getInputStream()));
                     Validator validator = schema.newValidator();
                     validator.validate(src);
+
                 } catch (SAXException ex) {
                     schemaValidation = false;
+                    errorMessage = ex.getMessage();
                     LOG.error("[FPS][PaymentType: {}] Error Validating message against scheme. Error:{} Message: {}", 
                             paymentType,  ex.getMessage(), message);
                 } catch (IOException e) {
                     schemaValidation = false;
+                    errorMessage = e.getMessage();
                     LOG.error("[FPS][PaymentType: {}] I/O Error. Error:{} Message: {}", 
                             paymentType,  e.getMessage(), message);
                 }
+                if(!schemaValidation) {
+                    try {
+                        // Validate against scheme
+                        Source src = new StreamSource(new StringReader(message));
+                        Resource xsdResource = new ClassPathResource("./xsd/pacs.007.001.05.xsd");
+                        Schema schema = schemaFactory.newSchema(new StreamSource(xsdResource.getInputStream()));
+                        Validator validator = schema.newValidator();
+                        validator.validate(src);
+                        schemaValidation = true;
+                        isReversal = true;
+                    } catch (SAXException ex) {
+                        schemaValidation = false;
+                        errorMessage = ex.getMessage();
+                        LOG.error("[FPS][PaymentType: {}] Error Validating message against scheme. Error:{} Message: {}", paymentType, ex.getMessage(), message);
+                    } catch (IOException e) {
+                        schemaValidation = false;
+                        errorMessage = e.getMessage();
+                        LOG.error("[FPS][PaymentType: {}] I/O Error. Error:{} Message: {}", paymentType, e.getMessage(), message);
+                    }
+                }
+
+                if(!schemaValidation){
+                    LOG.error("[FPS][PaymentType: {}] Error Validating message against scheme. Error:{}", paymentType, errorMessage);
+                }
+
                 // Getting Avro
+                Source src = new StreamSource(new StringReader(message));
                 final JAXBElement result = (JAXBElement) marshaller.unmarshal(src);
                 FPSMessage fpsMessage = (FPSMessage) result.getValue();
 
@@ -155,14 +191,23 @@ public abstract class MQListener extends BaseListener implements MessageListener
                 FPSTransform transform = getTransform(fpsMessage.getClass().getPackage().getName());
                 if (transform != null) {
                     Object avroFpsMessage = transform.fps2avro(fpsMessage);
+
                     boolean isValid = validMessage((FPSAvroMessage)avroFpsMessage);
 
 
-                    String FPID = extractFPID((FPSAvroMessage) avroFpsMessage);
-                    String paymentTypeCode = extractPaymentTypeCode((FPSAvroMessage) avroFpsMessage);
+                    String FPID = extractFPID((FPSAvroMessage) avroFpsMessage, isReversal);
+                    String paymentTypeCode = extractPaymentTypeCode((FPSAvroMessage) avroFpsMessage, isReversal);
 
-                    Document paymentDocument = ((com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Document) ((FPSAvroMessage) avroFpsMessage).getMessage());
-                    String originalPaymentMessage = gson.toJson(paymentDocument);
+                    com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Document paymentDocument = null;
+                    com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs007_001_05.Document paymentreversalDocument = null;
+                    String originalPaymentMessage;
+                    if(!isReversal){
+                        paymentDocument = ((com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Document) ((FPSAvroMessage) avroFpsMessage).getMessage());
+                        originalPaymentMessage = gson.toJson(paymentDocument);
+                    }else{
+                        paymentreversalDocument = ((com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs007_001_05.Document) ((FPSAvroMessage) avroFpsMessage).getMessage());
+                        originalPaymentMessage = gson.toJson(paymentreversalDocument);
+                    }
                     PaymentBean previousPaymentProcessed = checkPreviousResponse(originalPaymentMessage,uuid, FPID);
 
                     if (previousPaymentProcessed != null){
@@ -172,24 +217,46 @@ public abstract class MQListener extends BaseListener implements MessageListener
                     }else {
                         if (schemaValidation && isValid) {
                             // Send avro message to Kafka
-                            FPSInboundPayment fpsRequest = new FPSInboundPayment();
-                            fpsRequest.setPaymentDocument(paymentDocument);
-                            fpsRequest.setFPID(FPID);
-                            fpsRequest.setPaymentId(uuid);
-                            fpsRequest.setPaymentType(paymentTypeCode);
+                            if(!isReversal) {
+                                FPSInboundPayment fpsRequest = new FPSInboundPayment();
+                                fpsRequest.setPaymentDocument(paymentDocument);
+                                fpsRequest.setFPID(FPID);
+                                fpsRequest.setPaymentId(uuid);
+                                fpsRequest.setPaymentType(paymentTypeCode);
+                                String eventName = FPSEvents.FPS_PAYMENT_RECEIVED.getEventName();
+                                if(paymentTypeCode.equalsIgnoreCase("RTN")){
+                                    eventName = FPSEvents.FPS_RETURN_RECEIVED.getEventName();
+                                }
+                                Event event = EventGenerator.generateEvent(this.getClass().getName(),
+                                        eventName, uuid, gson.toJson(fpsRequest), entity, brand
+                                );
+                                LOG.info("[FPS][PmtId: {}] Sending FPS Inbound payment request", uuid);
+                                sendToKafka(inboundTopic, uuid, event);
+                            }else{
+                                FPSInboundReversal fpsInboundReversal = new FPSInboundReversal();
+                                fpsInboundReversal.setPaymentId(uuid);
+                                fpsInboundReversal.setFPID(FPID);
+                                fpsInboundReversal.setRvsdDocument(paymentreversalDocument);
+                                fpsInboundReversal.setRvsdIntrBkSttlmAmt(paymentreversalDocument.getFIToFIPmtRvsl().getTxInf().get(0).getRvsdIntrBkSttlmAmt().getValue());
+                                fpsInboundReversal.setRvsdIntrBkSttlmAmtCcy(paymentreversalDocument.getFIToFIPmtRvsl().getTxInf().get(0).getRvsdIntrBkSttlmAmt().getCcy());
+                                fpsInboundReversal.setOrgnlPaymentId(paymentreversalDocument.getFIToFIPmtRvsl().getTxInf().get(0).getOrgnlTxId());
+                                fpsInboundReversal.setOrgnlPaymentType(paymentTypeCode);
 
-                            LOG.info("[FPS][PmtId: {}] Sending FPS Inbound payment request", uuid);
+                                fpsInboundReversal.setPaymentTimestamp(new Date().getTime());
+                                Event event = EventGenerator.generateEvent(
+                                        this.getClass().getName(),
+                                        FPSEvents.FPS_REVERSAL_RECEIVED.getEventName(),
+                                        uuid,
+                                        gson.toJson(fpsInboundReversal),
+                                        entity,
+                                        brand
+                                );
 
-                            Event event = EventGenerator.generateEvent(
-                                    this.getClass().getName(),
-                                    FPSEvents.FPS_INBOUND_RECEIVED.getEventName(),
-                                    uuid,
-                                    gson.toJson(fpsRequest),
-                                    entity,
-                                    brand
-                            );
+                                LOG.info("[FPS][PmtId: {}] Sending FPS Inbound reversal request", uuid);
+                                sendToKafka(inboundReversalTopic, uuid, event);
+                            }
 
-                            sendToKafka(inboundTopic, uuid, event);
+
 
                             LOG.info("[FPS][PmtId: {}] Sent FPS Inbound payment request", uuid);
                         } else {
@@ -233,8 +300,8 @@ public abstract class MQListener extends BaseListener implements MessageListener
                 LOG.error("[FPS][PaymentType: {}] Error transforming message {}", 
                         paymentType, conversionEx.getMessage());
             } catch (Exception ex) {
-                LOG.error("[FPS][PaymentType: {}] Error getting unique ID {}",
-                        paymentType,  ex.getMessage());
+                LOG.error("[FPS][PaymentType: {}] Error {}",
+                        paymentType,  ex.getMessage(), ex);
             }
         }
     }
@@ -251,27 +318,54 @@ public abstract class MQListener extends BaseListener implements MessageListener
         return resendPreviousResponse;
     }
 
-    private String extractFPID(FPSAvroMessage avroFpsMessage) {
+    private String extractFPID(FPSAvroMessage avroFpsMessage, boolean isReversal) {
         String FPID = "";
-        com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.CreditTransferTransaction19 creditTransferTransaction = ((com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Document) avroFpsMessage.getMessage())
-                .getFIToFICstmrCdtTrf().getCdtTrfTxInf().get(0);
-        if(!creditTransferTransaction.getInstrForNxtAgt().isEmpty()){
-            FPID = creditTransferTransaction.getInstrForNxtAgt().get(0).getInstrInf();
-            FPID = FPID.substring(FPID.lastIndexOf('/')+1);
-        } else{
-            String txId = creditTransferTransaction.getPmtId().getTxId();
-            String paymentTypeCode = creditTransferTransaction.getPmtTpInf().getLclInstrm().getPrtry();
-            String currency = creditTransferTransaction.getIntrBkSttlmAmt().getCcy();
-            String sendingFPSInstitution = creditTransferTransaction.getInstgAgt().getFinInstnId().getClrSysMmbId().getMmbId();
-            String dateSent = creditTransferTransaction.getIntrBkSttlmDt().replaceAll("-","");
-            FPID = txId+paymentTypeCode+dateSent+currency+sendingFPSInstitution;
+
+        if(!isReversal){
+            com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.CreditTransferTransaction19 creditTransferTransaction;
+            creditTransferTransaction = ((com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Document) avroFpsMessage.getMessage())
+                    .getFIToFICstmrCdtTrf().getCdtTrfTxInf().get(0);
+            if(!creditTransferTransaction.getInstrForNxtAgt().isEmpty()){
+                FPID = creditTransferTransaction.getInstrForNxtAgt().get(0).getInstrInf();
+                FPID = FPID.substring(FPID.lastIndexOf('/')+1);
+            } else{
+                String txId = StringUtils.rightPad(creditTransferTransaction.getPmtId().getTxId(), 18);
+                String localInstrument = creditTransferTransaction.getPmtTpInf().getLclInstrm().getPrtry();
+                int slashIndex = localInstrument.lastIndexOf('/');
+                String paymentTypeCode = localInstrument.substring(slashIndex+1, slashIndex+3);
+                String currency = CurrencyCodes.getInstance().getCurrencyCode(creditTransferTransaction.getIntrBkSttlmAmt().getCcy());
+                String sendingFPSInstitution = creditTransferTransaction.getInstgAgt().getFinInstnId().getClrSysMmbId().getMmbId();
+                String dateSent = creditTransferTransaction.getIntrBkSttlmDt().replaceAll("-","");
+                FPID = StringUtils.rightPad(txId+paymentTypeCode+dateSent+currency+sendingFPSInstitution, 42);
+            }
+        }else {
+            com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs007_001_05.Document document = (com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs007_001_05.Document) avroFpsMessage.getMessage();
+
+            if (document.getFIToFIPmtRvsl().getTxInf() != null && !document.getFIToFIPmtRvsl().getTxInf().isEmpty() && document.getFIToFIPmtRvsl().getTxInf().get(0) != null && document.getFIToFIPmtRvsl().getTxInf().get(0).getOrgnlTxRef() != null && document.getFIToFIPmtRvsl().getTxInf().get(0).getOrgnlTxRef().getRmtInf() != null && document.getFIToFIPmtRvsl().getTxInf().get(0).getOrgnlTxRef().getRmtInf().getStrd() != null && !document.getFIToFIPmtRvsl().getTxInf().get(0).getOrgnlTxRef().getRmtInf().getStrd().isEmpty() && document.getFIToFIPmtRvsl().getTxInf().get(0).getOrgnlTxRef().getRmtInf().getStrd().get(0) != null && document.getFIToFIPmtRvsl().getTxInf().get(0).getOrgnlTxRef().getRmtInf().getStrd().get(0).getAddtlRmtInf() != null && !document.getFIToFIPmtRvsl().getTxInf().get(0).getOrgnlTxRef().getRmtInf().getStrd().get(0).getAddtlRmtInf().isEmpty()) {
+                String addtlRmtInf = document.getFIToFIPmtRvsl().getTxInf().get(0).getOrgnlTxRef().getRmtInf().getStrd().get(0).getAddtlRmtInf().get(0);
+                FPID = addtlRmtInf.substring(addtlRmtInf.lastIndexOf('/') + 1);
+            } else {
+                String txId = StringUtils.rightPad(document.getFIToFIPmtRvsl().getTxInf().get(0).getOrgnlTxId(), 18);
+                String localInstrument = document.getFIToFIPmtRvsl().getTxInf().get(0).getOrgnlTxRef().getPmtTpInf().getLclInstrm().getPrtry();
+                int slashIndex = localInstrument.lastIndexOf('/');
+                String paymentTypeCode = localInstrument.substring(slashIndex + 1, slashIndex + 3);
+                String currency = CurrencyCodes.getInstance().getCurrencyCode(document.getFIToFIPmtRvsl().getTxInf().get(0).getOrgnlTxRef().getIntrBkSttlmAmt().getCcy());
+
+                String sendingFPSInstitution = document.getFIToFIPmtRvsl().getTxInf().get(0).getInstgAgt().getFinInstnId().getClrSysMmbId().getMmbId();
+                String dateSent = document.getFIToFIPmtRvsl().getTxInf().get(0).getOrgnlTxRef().getIntrBkSttlmDt().replaceAll("-", "");
+                FPID = StringUtils.rightPad(txId + paymentTypeCode + dateSent + currency + sendingFPSInstitution, 42);
+            }
         }
         return FPID;
     }
 
-    private String extractPaymentTypeCode(FPSAvroMessage avroFpsMessage) {
-        String paymentTypeCode = ((com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Document) avroFpsMessage.getMessage()).getFIToFICstmrCdtTrf().getCdtTrfTxInf()
-                .get(0).getPmtTpInf().getLclInstrm().getPrtry();
+    private String extractPaymentTypeCode(FPSAvroMessage avroFpsMessage, boolean isReversal) {
+        String paymentTypeCode = "";
+        if(!isReversal) {
+            paymentTypeCode = ((com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Document) avroFpsMessage.getMessage()).getFIToFICstmrCdtTrf().getCdtTrfTxInf().get(0).getPmtTpInf().getLclInstrm().getPrtry();
+        }else{
+            paymentTypeCode = ((com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs007_001_05.Document) avroFpsMessage.getMessage()).getFIToFIPmtRvsl().getTxInf().get(0).getOrgnlTxRef().getPmtTpInf().getLclInstrm().getPrtry();
+        }
         paymentTypeCode = paymentTypeCode.substring(0, paymentTypeCode.indexOf('/'));
         return paymentTypeCode;
     }

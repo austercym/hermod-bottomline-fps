@@ -5,6 +5,7 @@ import com.hermod.bottomline.fps.listeners.BaseListener;
 import com.hermod.bottomline.fps.storage.InMemoryPaymentStorage;
 import com.hermod.bottomline.fps.storage.PaymentBean;
 import com.hermod.bottomline.fps.types.FPSMessage;
+import com.hermod.bottomline.fps.utils.CurrencyCodes;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -56,7 +57,7 @@ public class KafkaOutboundListener extends BaseListener {
         } else{
             String txId = creditTransferTransaction.getPmtId().getTxId();
             String paymentTypeCode = creditTransferTransaction.getPmtTpInf().getLclInstrm().getPrtry();
-            String currency = creditTransferTransaction.getIntrBkSttlmAmt().getCcy();
+            String currency = CurrencyCodes.getInstance().getCurrencyCode(creditTransferTransaction.getIntrBkSttlmAmt().getCcy());
             String sendingFPSInstitution = creditTransferTransaction.getInstgAgt().getFinInstnId().getClrSysMmbId().getMmbId();
             String dateSent = creditTransferTransaction.getIntrBkSttlmDt().replaceAll("-","");
             FPID = txId+paymentTypeCode+dateSent+currency+sendingFPSInstitution;

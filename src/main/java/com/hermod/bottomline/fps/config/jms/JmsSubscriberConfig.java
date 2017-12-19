@@ -20,7 +20,7 @@ public class JmsSubscriberConfig extends ComponentConfig {
 	@Autowired
 	private MessageListener mqSIPListener;
     @Autowired
-    private MessageListener mqSOPListener;
+    private MessageListener mqASYNListener;
 
     /*
     @Autowired
@@ -30,8 +30,8 @@ public class JmsSubscriberConfig extends ComponentConfig {
     // INBOUND QUEUES TO RETRIEVE MESSAGES FROM BOTTOMLINE
 	@Value("${wq.mq.queue.sip.inbound}")
 	private String sipQueue;
-    @Value("${wq.mq.queue.sop.inbound}")
-    private String sopQueue;
+    @Value("${wq.mq.queue.asyn.inbound}")
+    private String asynQueue;
 
     // OUTBOUND QUEUES TO RETRIEVE RESP  MESSAGES FROM BOTTOMLINE
     @Value("${wq.mq.queue.sip.outbound.resp}")
@@ -56,13 +56,13 @@ public class JmsSubscriberConfig extends ComponentConfig {
     }
 
     @Bean
-    public DefaultMessageListenerContainer jmsSOPListenerContainer(ConnectionFactory connectionFactory)
+    public DefaultMessageListenerContainer jmsASYNCListenerContainer(ConnectionFactory connectionFactory)
     {
         DefaultMessageListenerContainer listenerContainer = new DefaultMessageListenerContainer();
         listenerContainer.setConnectionFactory((ConnectionFactory)(applicationContext.getBean("mqQueueConnectionFactory")));
         listenerContainer.setSessionTransacted(true);
-        listenerContainer.setDestinationName(sopQueue);
-        listenerContainer.setMessageListener(applicationContext.getBean("mqSOPListener"));
+        listenerContainer.setDestinationName(asynQueue);
+        listenerContainer.setMessageListener(applicationContext.getBean("mqASYNCListener"));
         listenerContainer.setMaxConcurrentConsumers(maxConcurrentConsumers);
         listenerContainer.setSessionTransacted(true);
 

@@ -23,7 +23,7 @@ public class ProjectConfig extends ComponentConfig {
 	private DefaultMessageListenerContainer jmsSIPListenerContainer;
 
 	@Autowired
-	private DefaultMessageListenerContainer jmsSOPListenerContainer;
+	private DefaultMessageListenerContainer jmsASYNCListenerContainer;
 
 	@Autowired
 	private DefaultMessageListenerContainer jmsSIPOutboundListenerContainer;
@@ -34,7 +34,7 @@ public class ProjectConfig extends ComponentConfig {
 		kafkaResponseInboundListenerContainer.start();
 		kafkaRequestOutboundListenerContainer.start();
 		jmsSIPListenerContainer.start();
-		jmsSOPListenerContainer.start();
+		jmsASYNCListenerContainer.start();
 		jmsSIPOutboundListenerContainer.start();
 
 	    LOG.info("Connector started");

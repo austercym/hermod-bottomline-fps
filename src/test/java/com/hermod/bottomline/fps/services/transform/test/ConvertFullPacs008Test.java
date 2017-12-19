@@ -36,7 +36,7 @@ public class ConvertFullPacs008Test {
 	
 
 	private final static FPSMessage readMessage() throws Exception {
-		
+
 		final JAXBContext jc = JAXBContext.newInstance(Document.class);
 		final Unmarshaller u = jc.createUnmarshaller();
 

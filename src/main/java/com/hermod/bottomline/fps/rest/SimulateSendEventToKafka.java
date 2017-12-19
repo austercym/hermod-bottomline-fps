@@ -1,7 +1,7 @@
 package com.hermod.bottomline.fps.rest;
 
 import com.hermod.bottomline.fps.listeners.inbound.MQSIPListener;
-import com.hermod.bottomline.fps.listeners.inbound.MQSOPListener;
+import com.hermod.bottomline.fps.listeners.inbound.MQASYNCListener;
 import com.hermod.bottomline.fps.listeners.outbound.MQSIPOutboundRecvListener;
 import com.hermod.bottomline.fps.listeners.usm.MQUSMListener;
 import com.hermod.bottomline.fps.storage.InMemoryPaymentStorage;
@@ -26,7 +26,7 @@ public class SimulateSendEventToKafka {
     MQSIPListener mqSIPListener;
 
     @Autowired
-    MQSOPListener mqSOPListener;
+    MQASYNCListener mqASYNCListener;
 
     @Autowired
     MQUSMListener mqUSMListener;
@@ -49,7 +49,7 @@ public class SimulateSendEventToKafka {
     public ResponseEntity<String> sendMQSOP(@RequestBody String queueMessage,
                                             @RequestHeader("x-process-id") String key) {
         Reader reader = new StringReader(queueMessage);
-        mqSOPListener.sendMessageToTopic(reader, MQSOPListener.PAYMENT_TYPE, key);
+        mqASYNCListener.sendMessageToTopic(reader, MQASYNCListener.PAYMENT_TYPE, key);
         return new ResponseEntity<>("Message sent ", HttpStatus.OK);
     }
 

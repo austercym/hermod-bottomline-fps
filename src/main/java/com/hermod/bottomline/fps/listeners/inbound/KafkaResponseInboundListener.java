@@ -54,7 +54,6 @@ public class KafkaResponseInboundListener extends KafkaInboundListener implement
 			} catch (Exception ex) {
 				LOG.error("[FPS][PmtId: {}] Error parsing event response for FPS inbound payment. Error Message: {}", key, ex.getMessage(), ex);
 			}
-
 			// Parse FPS Inbound Payment Rejection
 			LOG.info("[FPS][PmtId: {}] parsing response for FPS inbound payment", key);
 			FPSOutboundPaymentResponse fpsPaymentResponse = null;
