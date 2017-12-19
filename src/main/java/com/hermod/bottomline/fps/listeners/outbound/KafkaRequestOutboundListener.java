@@ -14,6 +14,7 @@ import com.orwellg.umbrella.avro.types.event.Event;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSOutboundPayment;
 import com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Document;
+import com.orwellg.umbrella.commons.types.fps.PaymentType;
 import com.orwellg.umbrella.commons.types.utils.avro.RawMessageUtils;
 import com.orwellg.umbrella.commons.utils.enums.FPSEvents;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -49,6 +50,9 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
 
     @Value("${wq.mq.queue.sip.outbound}")
     private String outboundQueue;
+
+    @Value("${wq.mq.queue.asyn.outbound}")
+    private String outboundAsyncQueue;
 
     @Value("${kafka.topic.outbound.response}")
     private String outboundResponseTopic;
@@ -146,8 +150,13 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
                     if (schemaValidation && isValid) {
 
                         //Send to MQ (Environment=Queue)
-                        jmsOperations.send(outboundQueue, session -> {
-                            LOG.info("[FPS][PmtId: {}] Sending Message to Bottomline: {}", key, rawMessage.toString());
+                        String queueToSend = outboundAsyncQueue;
+
+                        if(paymentType.equalsIgnoreCase("SIP")){
+                            queueToSend = outboundQueue;
+                        }
+                        LOG.info("[FPS][PaymentType: {}][PmtId: {}] Message to be sent to queue {} to Bottomline: {}",key, paymentType, queueToSend, rawMessage.toString());
+                        jmsOperations.send(queueToSend, session -> {
                             return session.createTextMessage(rawMessage.toString());
                         });
 

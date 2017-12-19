@@ -37,6 +37,9 @@ public class JmsSubscriberConfig extends ComponentConfig {
     @Value("${wq.mq.queue.sip.outbound.resp}")
     private String sipOutboundRecvQueue;
 
+    @Value("${wq.mq.queue.asyn.outbound.resp}")
+    private String asyncOutboundRecvQueue;
+
 
 	@Value("${wq.mq.receive.num.max.consumers}")
 	private Integer maxConcurrentConsumers;
@@ -78,6 +81,20 @@ public class JmsSubscriberConfig extends ComponentConfig {
         listenerContainer.setSessionTransacted(true);
         listenerContainer.setDestinationName(sipOutboundRecvQueue);
         listenerContainer.setMessageListener(applicationContext.getBean("mqSIPOutboundRecvListener"));
+        listenerContainer.setMaxConcurrentConsumers(maxConcurrentConsumers);
+        listenerContainer.setSessionTransacted(true);
+
+        return listenerContainer;
+    }
+
+    @Bean
+    public DefaultMessageListenerContainer jmsAsynOutboundListenerContainer(ConnectionFactory connectionFactory)
+    {
+        DefaultMessageListenerContainer listenerContainer = new DefaultMessageListenerContainer();
+        listenerContainer.setConnectionFactory((ConnectionFactory)(applicationContext.getBean("mqQueueConnectionFactory")));
+        listenerContainer.setSessionTransacted(true);
+        listenerContainer.setDestinationName(asyncOutboundRecvQueue);
+        listenerContainer.setMessageListener(applicationContext.getBean("mqAsynOutboundRecvListener"));
         listenerContainer.setMaxConcurrentConsumers(maxConcurrentConsumers);
         listenerContainer.setSessionTransacted(true);
 

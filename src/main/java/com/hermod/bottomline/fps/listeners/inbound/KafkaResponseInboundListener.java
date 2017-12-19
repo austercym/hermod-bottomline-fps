@@ -2,6 +2,11 @@ package com.hermod.bottomline.fps.listeners.inbound;
 
 
 import com.google.gson.Gson;
+import com.orwellg.umbrella.avro.types.event.EventType;
+import com.orwellg.umbrella.commons.utils.enums.FPSEvents;
+import com.orwellg.umbrella.commons.utils.enums.KafkaHeaders;
+import org.apache.kafka.common.header.Header;
+import org.apache.kafka.common.header.Headers;
 import com.hermod.bottomline.fps.services.kafka.KafkaSender;
 import com.hermod.bottomline.fps.services.transform.FPSTransform;
 import com.hermod.bottomline.fps.types.FPSMessage;
@@ -31,6 +36,9 @@ public class KafkaResponseInboundListener extends KafkaInboundListener implement
 	@Value("${wq.mq.queue.sip.inbound.resp}")
 	private String outboundQueue;
 
+	@Value("${wq.mq.queue.asyn.inbound.resp}")
+	private String outboundAsynQueue;
+
 	@Value("${kafka.topic.fps.logging}")
 	private String loggingTopic;
 	
@@ -54,48 +62,62 @@ public class KafkaResponseInboundListener extends KafkaInboundListener implement
 			} catch (Exception ex) {
 				LOG.error("[FPS][PmtId: {}] Error parsing event response for FPS inbound payment. Error Message: {}", key, ex.getMessage(), ex);
 			}
-			// Parse FPS Inbound Payment Rejection
-			LOG.info("[FPS][PmtId: {}] parsing response for FPS inbound payment", key);
-			FPSOutboundPaymentResponse fpsPaymentResponse = null;
-			try {
-				fpsPaymentResponse = new Gson().fromJson(eventPayment.getEvent().getData(), FPSOutboundPaymentResponse.class);
-			} catch (Exception ex) {
-				LOG.error("[FPS][PmtId: {}] Error parsing response for FPS inbound payment. Error Message: {}", key, ex.getMessage(), ex);
-			}
-			LOG.info("[FPS][PmtId: {}] parsed response for FPS inbound payment. Response message: {}", key, fpsPaymentResponse.toString());
 
-			// Generate Response Reject
-			FPSAvroMessage fpsPacs002Response = null;
-			try {
-				fpsPacs002Response = generateFPSPacs002Response(fpsPaymentResponse);
-				LOG.info("[FPS][PmtId: {}] Response generated for FPS inbound payment. Response: {}", key, fpsPacs002Response.toString());
-				// Call the correspondent transform
-				FPSTransform transform = transforms.get("transform_pacs_002_001");
-				if (transform != null) {
-					FPSMessage fpsMessage = transform.avro2fps(fpsPacs002Response);
-
-					StringWriter rawMessage = transformResponseToString(fpsMessage);
-
-					LOG.info("[FPS][PmtId: {}] XML Response generated for FPS inbound payment. Response: {}", key, rawMessage.toString());
-					kafkaSender.sendRawMessage(loggingTopic, rawMessage.toString(), key);
-
-					updatePaymentResponseInMemory(fpsPaymentResponse.getOrgnlPaymentDocument(), rawMessage.toString(), key);
-
-					//Send to MQ (Environment=Queue)
-					jmsOperations.send(outboundQueue, session -> {
-						LOG.info("[FPS][PmtId: {}] Message to be sent to Bottomline: {}",key, rawMessage.toString());
-						return session.createTextMessage(rawMessage.toString());
-					});
-
-				} else {
-					throw new MessageConversionException("Exception in message emission. The transform for pacs_002_001 is null");
+			if(!eventPayment.getEvent().getName().equalsIgnoreCase(FPSEvents.FPS_RETURN_PROCESSED.getEventName())){
+				// Parse FPS Inbound Payment Rejection
+				LOG.info("[FPS][PmtId: {}] parsing response for FPS inbound payment", key);
+				FPSOutboundPaymentResponse fpsPaymentResponse = null;
+				try {
+					fpsPaymentResponse = new Gson().fromJson(eventPayment.getEvent().getData(), FPSOutboundPaymentResponse.class);
+				} catch (Exception ex) {
+					LOG.error("[FPS][PmtId: {}] Error parsing response for FPS inbound payment. Error Message: {}", key, ex.getMessage(), ex);
 				}
-			}catch(JmsException jmsex){
-				LOG.error("[FPS][PmtId: {}] Error sending response for FPS inbound payment to Bottomline. Error Message: {}", key, jmsex.getMessage(), jmsex);
-			} catch (Exception ex) {
-				LOG.error("[FPS][PmtId: {}] Error generating response for FPS inbound payment. Error Message: {}", key, ex.getMessage(), ex);
-			}
+				LOG.info("[FPS][PmtId: {}] parsed response for FPS inbound payment. Response message: {}", key, fpsPaymentResponse.toString());
 
+				// Generate Response Reject
+				FPSAvroMessage fpsPacs002Response = null;
+				try {
+					fpsPacs002Response = generateFPSPacs002Response(fpsPaymentResponse);
+					LOG.info("[FPS][PmtId: {}] Response generated for FPS inbound payment. Response: {}", key, fpsPacs002Response.toString());
+					// Call the correspondent transform
+					FPSTransform transform = transforms.get("transform_pacs_002_001");
+					if (transform != null) {
+						FPSMessage fpsMessage = transform.avro2fps(fpsPacs002Response);
+
+						StringWriter rawMessage = transformResponseToString(fpsMessage);
+
+						LOG.info("[FPS][PmtId: {}] XML Response generated for FPS inbound payment. Response: {}", key, rawMessage.toString());
+						kafkaSender.sendRawMessage(loggingTopic, rawMessage.toString(), key);
+
+						updatePaymentResponseInMemory(fpsPaymentResponse.getOrgnlPaymentDocument(), rawMessage.toString(), key);
+
+						//Send to MQ (Environment=Queue)
+						String queueToSend = outboundAsynQueue;
+						Headers headers = message.headers();
+						Header header = headers.lastHeader(KafkaHeaders.FPS_PAYMENT_TYPE.getKafkaHeader());
+						String paymentType = "SIP";
+						if (header != null) {
+							paymentType = new String(header.value(), "UTF-8");
+						}
+						if (paymentType.equalsIgnoreCase("SIP")) {
+							queueToSend = outboundQueue;
+						}
+						LOG.info("[FPS][PaymentType: {}][PmtId: {}] Message to be sent to queue {} to Bottomline: {}", key, paymentType, queueToSend, rawMessage.toString());
+						jmsOperations.send(queueToSend, session -> {
+							return session.createTextMessage(rawMessage.toString());
+						});
+
+					} else {
+						throw new MessageConversionException("Exception in message emission. The transform for pacs_002_001 is null");
+					}
+				}catch(JmsException jmsex){
+					LOG.error("[FPS][PmtId: {}] Error sending response for FPS inbound payment to Bottomline. Error Message: {}", key, jmsex.getMessage(), jmsex);
+				} catch (Exception ex) {
+					LOG.error("[FPS][PmtId: {}] Error generating response for FPS inbound payment. Error Message: {}", key, ex.getMessage(), ex);
+				}
+			}else{
+				LOG.info("[FPS][PmtId: {}] Finish no sending return message processed ", key);
+			}
 		 } catch (Exception e) {
      		throw new MessageConversionException("Exception in message emission. Message: " + e.getMessage(), e);
 		 }

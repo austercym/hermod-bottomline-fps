@@ -73,7 +73,7 @@ public abstract class MQOutboundListener extends BaseListener implements Message
 
     protected void onMessage(Message message, String paymentType) {
 
-        LOG.info("[FPS] Receiving outbound payment response message from Bottomline", paymentType);
+        LOG.info("[FPS][PaymentType: {}] Receiving outbound payment response message from Bottomline", paymentType);
         InputStream stream = null;
         Reader reader = null;
 
@@ -152,6 +152,8 @@ public abstract class MQOutboundListener extends BaseListener implements Message
 
                         Document paymentDocument = ((Document) ((FPSAvroMessage) avroFpsMessage).getMessage());
 
+                        paymentType = getPaymentType(paymentDocument);
+
                         if (schemaValidation && isValid) {
                             // Send avro message to Kafka
                             FPSInboundPaymentResponse fpsResponse = new FPSInboundPaymentResponse();
@@ -208,7 +210,7 @@ public abstract class MQOutboundListener extends BaseListener implements Message
                             LOG.info("[FPS][PmtId: {}] Sending FPS Outbound payment response", uuid);
                             Event event = EventGenerator.generateEvent(this.getClass().getName(), FPSEvents.FPS_RESPONSE_RECEIVED.getEventName(), fpsResponse.getOrgnlPaymentId(), gson.toJson(fpsResponse), entity, brand);
 
-                            sendToKafka(inboundTopic, uuid, event);
+                            sendToKafka(inboundTopic, uuid, event, paymentType);
 
                             LOG.info("[FPS][PmtId: {}] Sent FPS Outbound payment response", uuid);
                         }
@@ -230,6 +232,17 @@ public abstract class MQOutboundListener extends BaseListener implements Message
                 LOG.error("[FPS][PaymentType: {}] Error getting response from payment. Message error {}", paymentType, ex.getMessage(), ex);
             }
         }
+    }
+
+    private String getPaymentType(Document paymentDocument) {
+        String paymentType = "";
+        if(paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts() != null &&
+                !paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().isEmpty() &&
+                paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0) != null) {
+            String prtry = paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getPmtTpInf().getLclInstrm().getPrtry();
+            paymentType = prtry.substring(0, prtry.indexOf('/'));
+        }
+        return paymentType;
     }
 
     private String getResponsePaymentId(FPSOutboundPayment originalMessage) {
@@ -274,6 +287,6 @@ public abstract class MQOutboundListener extends BaseListener implements Message
         return true;
     }
 
-    protected abstract void sendToKafka(String topic, String uuid, Event event);
+    protected abstract void sendToKafka(String topic, String uuid, Event event, String paymentType);
 
 }

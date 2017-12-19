@@ -45,6 +45,9 @@ public class DefaultPropertyValues {
 	private final static String MQ_DEFAULT_OUTBOUND_SIP_QUEUE  = "ORUN.HOST.SYNC.SEND.QR";
 	private final static String MQ_DEFAULT_OUTBOUND_SIP_RESP_QUEUE  = "ORUN.HOST.SYNC.SEND.RESP.QL";
 
+	private final static String MQ_DEFAULT_OUTBOUND_ASYN_QUEUE  = "ORUN.HOST.ASYN.SEND.QR";
+	private final static String MQ_DEFAULT_OUTBOUND_ASYN_RESP_QUEUE  = "ORUN.HOST.ASYN.SEND.RESP.QL";
+
 	private final static String KAFKA_DEFAULT_BOOTSTRAP_SERVER = "confluent-node1:9092,confluent-node2:9092,confluent-node3:9092,confluent-node4:9092,confluent-node5:9092,confluent-node6:9092";
 	//private final static String KAFKA_DEFAULT_BOOTSTRAP_SERVER = "localhost:9092";
 
@@ -98,6 +101,9 @@ public class DefaultPropertyValues {
 		//Outbound queues BOTTOMLINE
 		defaultValues.put("wq.mq.queue.sip.outbound", MQ_DEFAULT_OUTBOUND_SIP_QUEUE);
 		defaultValues.put("wq.mq.queue.sip.outbound.resp", MQ_DEFAULT_OUTBOUND_SIP_RESP_QUEUE);
+
+		defaultValues.put("wq.mq.queue.asyn.outbound", MQ_DEFAULT_OUTBOUND_ASYN_QUEUE);
+		defaultValues.put("wq.mq.queue.asyn.outbound.resp", MQ_DEFAULT_OUTBOUND_ASYN_RESP_QUEUE);
 
 
 		defaultValues.put("wq.mq.receive.num.max.consumers", MQ_DEFAULT_NUM_MAX_CONSUMERS);

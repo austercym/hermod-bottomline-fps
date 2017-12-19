@@ -10,12 +10,12 @@ import org.springframework.stereotype.Component;
 
 import javax.jms.Message;
 
-@Component(value = "mqSIPOutboundRecvListener")
+@Component(value = "mqAsynOutboundRecvListener")
 @Scope("prototype")
-public class MQSIPOutboundRecvListener extends MQOutboundListener {
+public class MQAsynOutboundRecvListener extends MQOutboundListener {
 
-    public static final String PAYMENT_TYPE = "SIP";
-    private static Logger LOG = LogManager.getLogger(MQSIPOutboundRecvListener.class);
+    public static final String PAYMENT_TYPE = "ASYN";
+    private static Logger LOG = LogManager.getLogger(MQAsynOutboundRecvListener.class);
 
     @Value("${jms.mq.bottomline.environment.1}")
     private String bottomlineEnv;
