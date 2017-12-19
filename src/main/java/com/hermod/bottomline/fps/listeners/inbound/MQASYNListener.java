@@ -10,12 +10,12 @@ import org.springframework.stereotype.Component;
 
 import javax.jms.Message;
 
-@Component(value = "mqASYNCListener")
+@Component(value = "mqASYNListener")
 @Scope("prototype")
-public class MQASYNCListener extends MQListener {
+public class MQASYNListener extends MQListener {
 
     public static String PAYMENT_TYPE = "SOP";
-    public static Logger LOG = LogManager.getLogger(MQASYNCListener.class);
+    public static Logger LOG = LogManager.getLogger(MQASYNListener.class);
 
     @Value("${jms.mq.bottomline.environment.1}")
     private String bottomlineEnv;

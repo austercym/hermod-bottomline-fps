@@ -51,7 +51,7 @@ public class JmsSubscriberConfig extends ComponentConfig {
         listenerContainer.setConnectionFactory((ConnectionFactory)(applicationContext.getBean("mqQueueConnectionFactory")));
         listenerContainer.setSessionTransacted(true);
         listenerContainer.setDestinationName(sipQueue);
-        listenerContainer.setMessageListener(applicationContext.getBean("mqSIPListener"));
+        listenerContainer.setMessageListener(mqSIPListener);
         listenerContainer.setMaxConcurrentConsumers(maxConcurrentConsumers);
         listenerContainer.setSessionTransacted(true);
 
@@ -65,7 +65,7 @@ public class JmsSubscriberConfig extends ComponentConfig {
         listenerContainer.setConnectionFactory((ConnectionFactory)(applicationContext.getBean("mqQueueConnectionFactory")));
         listenerContainer.setSessionTransacted(true);
         listenerContainer.setDestinationName(asynQueue);
-        listenerContainer.setMessageListener(applicationContext.getBean("mqASYNCListener"));
+        listenerContainer.setMessageListener(mqASYNListener);
         listenerContainer.setMaxConcurrentConsumers(maxConcurrentConsumers);
         listenerContainer.setSessionTransacted(true);
 
