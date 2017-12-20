@@ -14,7 +14,7 @@ import javax.jms.Message;
 @Scope("prototype")
 public class MQASYNListener extends MQListener {
 
-    public static String PAYMENT_TYPE = "SOP";
+    public static String PAYMENT_TYPE = "ASYN";
     public static Logger LOG = LogManager.getLogger(MQASYNListener.class);
 
     @Value("${jms.mq.bottomline.environment.1}")
@@ -26,12 +26,12 @@ public class MQASYNListener extends MQListener {
     }
 
     @Override
-    protected void sendToKafka(String topic, String uuid, Event event){
+    protected void sendToKafka(String topic, String uuid, Event event, String paymentType){
         kafkaSender.send(
                 topic,
                 RawMessageUtils.encodeToString(Event.SCHEMA$, event),
                 uuid,
-                replyTo, bottomlineEnv, PAYMENT_TYPE
+                replyTo, bottomlineEnv, paymentType
         );
 
     }

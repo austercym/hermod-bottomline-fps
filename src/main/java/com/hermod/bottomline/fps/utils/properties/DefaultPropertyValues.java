@@ -29,11 +29,14 @@ public class DefaultPropertyValues {
 	private final static String MQ_DEFAULT_PASSWORD = "";
 	private final static Long MQ_DEFAULT_RECEIVED_TIMEOUT = 2000L;
 	private final static Integer MQ_DEFAULT_NUM_MAX_CONSUMERS = 1;
+	private final static Integer MQ_DEFAULT_NUM_MAX_ATTEMPTS = 5;
 
 	private final static String MQ_DEFAULT_TEST_QUEUE = "ORUN.TEST.INB.RECV.QR";
 
 	private final static String MQ_DEFAULT_INBOUND_SIP_QUEUE  = "ORUN.HOST.SYNC.RECV.QL";
 	private final static String MQ_DEFAULT_INBOUND_ASYN_QUEUE  = "ORUN.HOST.ASYN.RECV.QL";
+	private final static String MQ_DEFAULT_INBOUND_POO_QUEUE  = "ORUN.HOST.POO.RECV.QL";
+
 	private final static String MQ_DEFAULT_INBOUND_USM_QUEUE  = "ORUN.HOST.USM.RECV.QR";
 	private final static String MQ_DEFAULT_INBOUND_RESP_SIP_QUEUE = "ORUN.HOST.SYNC.RECV.RESP.QR";
 	private final static String MQ_DEFAULT_INBOUND_RESP_ASYN_QUEUE = "ORUN.HOST.ASYN.RECV.RESP.QR";
@@ -95,6 +98,7 @@ public class DefaultPropertyValues {
 		defaultValues.put("wq.mq.queue.sip.inbound", MQ_DEFAULT_INBOUND_SIP_QUEUE);
 		defaultValues.put("wq.mq.queue.sip.inbound.resp", MQ_DEFAULT_INBOUND_RESP_SIP_QUEUE);
 		defaultValues.put("wq.mq.queue.asyn.inbound", MQ_DEFAULT_INBOUND_ASYN_QUEUE);
+		defaultValues.put("wq.mq.queue.poo.inbound", MQ_DEFAULT_INBOUND_POO_QUEUE);
 		defaultValues.put("wq.mq.queue.asyn.inbound.resp", MQ_DEFAULT_INBOUND_RESP_ASYN_QUEUE);
 		defaultValues.put("wq.mq.queue.usm.inbound", MQ_DEFAULT_INBOUND_USM_QUEUE);
 
@@ -107,6 +111,7 @@ public class DefaultPropertyValues {
 
 
 		defaultValues.put("wq.mq.receive.num.max.consumers", MQ_DEFAULT_NUM_MAX_CONSUMERS);
+		defaultValues.put("wq.mq.num.max.attempts", MQ_DEFAULT_NUM_MAX_ATTEMPTS);
 		defaultValues.put("jms.mq.bottomline.environment.1", MQ_BOTTOMLINE1_ENVIRONMENT);
 		defaultValues.put("jms.mq.bottomline.environment.2", MQ_BOTTOMLINE2_ENVIRONMENT);
 

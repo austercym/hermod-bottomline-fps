@@ -10,12 +10,12 @@ import org.springframework.stereotype.Component;
 
 import javax.jms.Message;
 
-@Component(value = "mqSIPListener")
+@Component(value = "mqPOOListener")
 @Scope("prototype")
-public class MQSIPListener extends MQListener {
+public class MQPOOListener extends MQListener {
 
-    public static final String PAYMENT_TYPE = "SIP";
-    private static Logger LOG = LogManager.getLogger(MQSIPListener.class);
+    public static String PAYMENT_TYPE = "POO";
+    public static Logger LOG = LogManager.getLogger(MQPOOListener.class);
 
     @Value("${jms.mq.bottomline.environment.1}")
     private String bottomlineEnv;
@@ -31,7 +31,7 @@ public class MQSIPListener extends MQListener {
                 topic,
                 RawMessageUtils.encodeToString(Event.SCHEMA$, event),
                 uuid,
-                replyTo, bottomlineEnv, paymentType
+                replyTo, bottomlineEnv, PAYMENT_TYPE
         );
 
     }

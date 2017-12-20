@@ -6,15 +6,12 @@ import com.hermod.bottomline.fps.listeners.BaseListener;
 import com.hermod.bottomline.fps.services.kafka.KafkaSender;
 import com.hermod.bottomline.fps.services.transform.FPSTransform;
 import com.hermod.bottomline.fps.services.transform.helper.ConversionException;
-import com.hermod.bottomline.fps.types.FPSMessage;
 import com.hermod.bottomline.fps.utils.USMMessage;
 import com.hermod.bottomline.fps.utils.generators.EventGenerator;
 import com.hermod.bottomline.fps.utils.generators.IDGeneratorBean;
 import com.orwellg.umbrella.avro.types.event.Event;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSInboundUSM;
-import com.orwellg.umbrella.avro.types.usm.type0;
-import com.orwellg.umbrella.commons.types.utils.avro.DecimalTypeUtils;
 import com.orwellg.umbrella.commons.types.utils.avro.RawMessageUtils;
 import com.orwellg.umbrella.commons.utils.enums.FPSEvents;
 import com.orwellg.umbrella.commons.utils.enums.fps.USMMessageTypes;
@@ -40,14 +37,12 @@ import javax.jms.MessageListener;
 import javax.jms.TextMessage;
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXB;
-import javax.xml.bind.JAXBElement;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 import java.io.*;
-import java.util.Date;
 
 @Component(value = "mqUSMListener")
 @Scope("prototype")

@@ -6,7 +6,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jms.core.JmsOperations;
-import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.stereotype.Component;
 
 @Component(value="messageTestQueueSender")
@@ -16,24 +15,28 @@ public class MessageTestQueueSender extends BaseListener {
 
     @Value("${wq.mq.queue.test}")
     private String testQueue;
+    @Value("${wq.mq.num.max.attempts}")
+    private int numMaxAttempts;
 
     @Autowired
     private JmsOperations jmsOperations;
 
-    @Autowired
-    private Jaxb2Marshaller marshaller;
-
     public void sendMessage(String message, String key) {
 
-        try {
+        boolean messageSent = false;
 
-            jmsOperations.send(testQueue, session -> {
-                LOG.info("[FPS][PmtId: {}] Message to be sent to Test queue: {}",key, message);
-                return session.createTextMessage(message);
-            });
+        while (!messageSent && numMaxAttempts>0) {
+            try {
 
-        } catch (Exception ex) {
-            LOG.error("[FPS] Error sending message for testing. Error Message: {}", ex.getMessage());
+                jmsOperations.send(testQueue, session -> {
+                    LOG.info("[FPS][PmtId: {}] Message to be sent to Test queue: {}", key, message);
+                    return session.createTextMessage(message);
+                });
+                messageSent = true;
+            } catch (Exception ex) {
+                LOG.error("[FPS] Error sending message for testing. Error Message: {}", ex.getMessage());
+                numMaxAttempts--;
+            }
         }
 
     }

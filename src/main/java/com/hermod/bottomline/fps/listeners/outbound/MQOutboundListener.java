@@ -8,14 +8,12 @@ import com.hermod.bottomline.fps.services.transform.helper.ConversionException;
 import com.hermod.bottomline.fps.storage.InMemoryOutboundPaymentStorage;
 import com.hermod.bottomline.fps.storage.PaymentOutboundBean;
 import com.hermod.bottomline.fps.types.FPSMessage;
-import com.hermod.bottomline.fps.utils.CurrencyCodes;
 import com.hermod.bottomline.fps.utils.generators.EventGenerator;
 import com.hermod.bottomline.fps.utils.generators.IDGeneratorBean;
 import com.orwellg.umbrella.avro.types.event.Event;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSInboundPaymentResponse;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSOutboundPayment;
-import com.orwellg.umbrella.avro.types.payment.iso20022.commons.CurrencyCode;
 import com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs002_001_06.Document;
 import com.orwellg.umbrella.commons.types.utils.avro.DecimalTypeUtils;
 import com.orwellg.umbrella.commons.utils.enums.FPSEvents;
@@ -240,7 +238,10 @@ public abstract class MQOutboundListener extends BaseListener implements Message
                 !paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().isEmpty() &&
                 paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0) != null) {
             String prtry = paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getPmtTpInf().getLclInstrm().getPrtry();
-            paymentType = prtry.substring(0, prtry.indexOf('/'));
+            LOG.info("[FPS] Payment Type {}", prtry);
+            if(prtry.indexOf('/')> 0) {
+                paymentType = prtry.substring(0, prtry.indexOf('/'));
+            }
         }
         return paymentType;
     }

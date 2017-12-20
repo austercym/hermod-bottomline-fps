@@ -26,6 +26,9 @@ public class ProjectConfig extends ComponentConfig {
 	private DefaultMessageListenerContainer jmsASYNCListenerContainer;
 
 	@Autowired
+	private DefaultMessageListenerContainer jmsPOOListenerContainer;
+
+	@Autowired
 	private DefaultMessageListenerContainer jmsSIPOutboundListenerContainer;
 	@Autowired
 	private DefaultMessageListenerContainer jmsAsynOutboundListenerContainer;
@@ -39,6 +42,7 @@ public class ProjectConfig extends ComponentConfig {
 		jmsASYNCListenerContainer.start();
 		jmsSIPOutboundListenerContainer.start();
 		jmsAsynOutboundListenerContainer.start();
+		jmsPOOListenerContainer.start();
 
 	    LOG.info("Connector started");
 	}

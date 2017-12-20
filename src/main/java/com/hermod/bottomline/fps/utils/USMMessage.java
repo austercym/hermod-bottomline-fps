@@ -1,7 +1,6 @@
 package com.hermod.bottomline.fps.utils;
 
 import com.hermod.bottomline.fps.types.FPSMessage;
-import com.orwellg.umbrella.avro.types.usm.type0;
 import com.orwellg.umbrella.commons.utils.enums.fps.USMMessageTypes;
 
 import javax.xml.datatype.XMLGregorianCalendar;

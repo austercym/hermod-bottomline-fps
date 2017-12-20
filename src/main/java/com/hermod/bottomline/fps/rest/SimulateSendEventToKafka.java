@@ -1,7 +1,7 @@
 package com.hermod.bottomline.fps.rest;
 
-import com.hermod.bottomline.fps.listeners.inbound.MQSIPListener;
 import com.hermod.bottomline.fps.listeners.inbound.MQASYNListener;
+import com.hermod.bottomline.fps.listeners.inbound.MQSIPListener;
 import com.hermod.bottomline.fps.listeners.outbound.MQSIPOutboundRecvListener;
 import com.hermod.bottomline.fps.listeners.usm.MQUSMListener;
 import com.hermod.bottomline.fps.storage.InMemoryPaymentStorage;

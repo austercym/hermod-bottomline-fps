@@ -18,7 +18,6 @@ import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSInboundPayment;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSInboundReversal;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSOutboundPaymentResponse;
-import com.orwellg.umbrella.commons.types.fps.PaymentType;
 import com.orwellg.umbrella.commons.utils.enums.FPSEvents;
 import org.apache.activemq.util.ByteArrayInputStream;
 import org.apache.commons.io.IOUtils;
@@ -231,7 +230,7 @@ public abstract class MQListener extends BaseListener implements MessageListener
                                         eventName, uuid, gson.toJson(fpsRequest), entity, brand
                                 );
                                 LOG.info("[FPS][PmtId: {}] Sending FPS Inbound payment request", uuid);
-                                sendToKafka(inboundTopic, uuid, event);
+                                sendToKafka(inboundTopic, uuid, event, paymentTypeCode);
                             }else{
                                 FPSInboundReversal fpsInboundReversal = new FPSInboundReversal();
                                 fpsInboundReversal.setPaymentId(uuid);
@@ -253,7 +252,7 @@ public abstract class MQListener extends BaseListener implements MessageListener
                                 );
 
                                 LOG.info("[FPS][PmtId: {}] Sending FPS Inbound reversal request", uuid);
-                                sendToKafka(inboundReversalTopic, uuid, event);
+                                sendToKafka(inboundReversalTopic, uuid, event, paymentTypeCode);
                             }
 
 
@@ -281,7 +280,7 @@ public abstract class MQListener extends BaseListener implements MessageListener
                                     brand
                             );
 
-                            sendToKafka(outboundResponseTopic, uuid, event);
+                            sendToKafka(outboundResponseTopic, uuid, event, paymentTypeCode);
 
                             LOG.info("[FPS][PmtId: {}] Sent FPS Inbound payment Reject response", uuid);
                         }
@@ -341,7 +340,15 @@ public abstract class MQListener extends BaseListener implements MessageListener
         }else {
             com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs007_001_05.Document document = (com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs007_001_05.Document) avroFpsMessage.getMessage();
 
-            if (document.getFIToFIPmtRvsl().getTxInf() != null && !document.getFIToFIPmtRvsl().getTxInf().isEmpty() && document.getFIToFIPmtRvsl().getTxInf().get(0) != null && document.getFIToFIPmtRvsl().getTxInf().get(0).getOrgnlTxRef() != null && document.getFIToFIPmtRvsl().getTxInf().get(0).getOrgnlTxRef().getRmtInf() != null && document.getFIToFIPmtRvsl().getTxInf().get(0).getOrgnlTxRef().getRmtInf().getStrd() != null && !document.getFIToFIPmtRvsl().getTxInf().get(0).getOrgnlTxRef().getRmtInf().getStrd().isEmpty() && document.getFIToFIPmtRvsl().getTxInf().get(0).getOrgnlTxRef().getRmtInf().getStrd().get(0) != null && document.getFIToFIPmtRvsl().getTxInf().get(0).getOrgnlTxRef().getRmtInf().getStrd().get(0).getAddtlRmtInf() != null && !document.getFIToFIPmtRvsl().getTxInf().get(0).getOrgnlTxRef().getRmtInf().getStrd().get(0).getAddtlRmtInf().isEmpty()) {
+            if (document.getFIToFIPmtRvsl().getTxInf() != null && !document.getFIToFIPmtRvsl().getTxInf().isEmpty()
+                    && document.getFIToFIPmtRvsl().getTxInf().get(0) != null
+                    && document.getFIToFIPmtRvsl().getTxInf().get(0).getOrgnlTxRef() != null
+                    && document.getFIToFIPmtRvsl().getTxInf().get(0).getOrgnlTxRef().getRmtInf() != null
+                    && document.getFIToFIPmtRvsl().getTxInf().get(0).getOrgnlTxRef().getRmtInf().getStrd() != null
+                    && !document.getFIToFIPmtRvsl().getTxInf().get(0).getOrgnlTxRef().getRmtInf().getStrd().isEmpty()
+                    && document.getFIToFIPmtRvsl().getTxInf().get(0).getOrgnlTxRef().getRmtInf().getStrd().get(0) != null
+                    && document.getFIToFIPmtRvsl().getTxInf().get(0).getOrgnlTxRef().getRmtInf().getStrd().get(0).getAddtlRmtInf() != null
+                    && !document.getFIToFIPmtRvsl().getTxInf().get(0).getOrgnlTxRef().getRmtInf().getStrd().get(0).getAddtlRmtInf().isEmpty()) {
                 String addtlRmtInf = document.getFIToFIPmtRvsl().getTxInf().get(0).getOrgnlTxRef().getRmtInf().getStrd().get(0).getAddtlRmtInf().get(0);
                 FPID = addtlRmtInf.substring(addtlRmtInf.lastIndexOf('/') + 1);
             } else {
@@ -374,6 +381,6 @@ public abstract class MQListener extends BaseListener implements MessageListener
         return true;
     }
 
-    protected abstract void sendToKafka(String topic, String uuid, Event event);
+    protected abstract void sendToKafka(String topic, String uuid, Event event, String paymentType);
 
 }
