@@ -225,6 +225,7 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
                 jmsOperations.send(queueToSend, session -> {
                     return session.createTextMessage(rawMessage.toString());
                 });
+                messageSent = true;
             } catch (Exception ex) {
                 LOG.error("[FPS] Error sending message for testing. Error Message: {}", ex.getMessage());
                 numMaxAttempts--;
