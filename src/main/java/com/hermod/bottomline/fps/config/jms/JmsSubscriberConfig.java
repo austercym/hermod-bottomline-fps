@@ -48,7 +48,6 @@ public class JmsSubscriberConfig extends ComponentConfig {
     {
         DefaultMessageListenerContainer listenerContainer = new DefaultMessageListenerContainer();
         listenerContainer.setConnectionFactory((ConnectionFactory)(applicationContext.getBean("mqQueueConnectionFactory")));
-        listenerContainer.setSessionTransacted(true);
         listenerContainer.setDestinationName(sipQueue);
         listenerContainer.setMessageListener(mqSIPListener);
         listenerContainer.setMaxConcurrentConsumers(maxConcurrentConsumers);
@@ -62,7 +61,6 @@ public class JmsSubscriberConfig extends ComponentConfig {
     {
         DefaultMessageListenerContainer listenerContainer = new DefaultMessageListenerContainer();
         listenerContainer.setConnectionFactory((ConnectionFactory)(applicationContext.getBean("mqQueueConnectionFactory")));
-        listenerContainer.setSessionTransacted(true);
         listenerContainer.setDestinationName(asynQueue);
         listenerContainer.setMessageListener(mqASYNListener);
         listenerContainer.setMaxConcurrentConsumers(maxConcurrentConsumers);
@@ -76,7 +74,6 @@ public class JmsSubscriberConfig extends ComponentConfig {
     {
         DefaultMessageListenerContainer listenerContainer = new DefaultMessageListenerContainer();
         listenerContainer.setConnectionFactory((ConnectionFactory)(applicationContext.getBean("mqQueueConnectionFactory")));
-        listenerContainer.setSessionTransacted(true);
         listenerContainer.setDestinationName(pooQueue);
         listenerContainer.setMessageListener(mqPOOListener);
         listenerContainer.setMaxConcurrentConsumers(maxConcurrentConsumers);
@@ -91,7 +88,6 @@ public class JmsSubscriberConfig extends ComponentConfig {
     {
         DefaultMessageListenerContainer listenerContainer = new DefaultMessageListenerContainer();
         listenerContainer.setConnectionFactory((ConnectionFactory)(applicationContext.getBean("mqQueueConnectionFactory")));
-        listenerContainer.setSessionTransacted(true);
         listenerContainer.setDestinationName(sipOutboundRecvQueue);
         listenerContainer.setMessageListener(applicationContext.getBean("mqSIPOutboundRecvListener"));
         listenerContainer.setMaxConcurrentConsumers(maxConcurrentConsumers);
