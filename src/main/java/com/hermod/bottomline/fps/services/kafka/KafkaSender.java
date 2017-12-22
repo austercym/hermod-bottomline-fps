@@ -11,9 +11,10 @@ public class KafkaSender {
 	@Autowired
 	private KafkaWithHeadersTemplate<String, String> kafkaTemplate;
 
-	public void send(String topic, String payload, String key, String replayTo, String environment, String paymentType) {
+	public void send(String topic, String payload, String key, String replayTo, String environment, String paymentType,
+					 boolean isPOO) {
 		LOG.info("[FPS][PmtId: {}] Sending payload='{}' to topic='{}'", key, payload, topic);
-		kafkaTemplate.send(topic, payload, key, replayTo, environment, paymentType);
+		kafkaTemplate.send(topic, payload, key, replayTo, environment, paymentType, isPOO);
 	}
 
 	public void sendRawMessage(String topic, String payload, String key) {

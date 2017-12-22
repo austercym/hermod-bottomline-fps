@@ -17,7 +17,8 @@ public class KafkaWithHeadersTemplate<K, V> extends KafkaTemplate {
         super(producerFactory);
     }
 
-    public ListenableFuture<SendResult<K, V>> send(String topic, V data, String key, String replyTo, String BLEnvironment, String paymentType) {
+    public ListenableFuture<SendResult<K, V>> send(String topic, V data, String key, String replyTo, String BLEnvironment,
+                                                   String paymentType, boolean isPOO) {
         ProducerRecord<K, V> producerRecord = new ProducerRecord(topic, key, data);
 
         Headers headers = producerRecord.headers();
@@ -30,6 +31,8 @@ public class KafkaWithHeadersTemplate<K, V> extends KafkaTemplate {
         if(StringUtils.isNotEmpty(paymentType)){
             headers.add(KafkaHeaders.FPS_PAYMENT_TYPE.getKafkaHeader(), paymentType.getBytes());
         }
+        headers.add(KafkaHeaders.FPS_PAYMENT_POO.getKafkaHeader(), Boolean.toString(isPOO).getBytes());
+
 
 
         return this.doSend(producerRecord);

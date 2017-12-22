@@ -31,7 +31,7 @@ public class MQPOOListener extends MQListener {
                 topic,
                 RawMessageUtils.encodeToString(Event.SCHEMA$, event),
                 uuid,
-                replyTo, bottomlineEnv, PAYMENT_TYPE
+                replyTo, bottomlineEnv, PAYMENT_TYPE, true
         );
 
     }

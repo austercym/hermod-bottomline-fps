@@ -221,7 +221,7 @@ public class MQUSMListener extends BaseListener implements MessageListener {
                 topic,
                 RawMessageUtils.encodeToString(Event.SCHEMA$, event),
                 uuid,
-                null, "bottomlineEnv", "USM"
+                null, "bottomlineEnv", "USM", false
         );
     }
 
