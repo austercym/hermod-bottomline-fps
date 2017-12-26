@@ -235,7 +235,7 @@ public abstract class MQListener extends BaseListener implements MessageListener
                                 FPSInboundReversal fpsInboundReversal = new FPSInboundReversal();
                                 fpsInboundReversal.setPaymentId(uuid);
                                 fpsInboundReversal.setFPID(FPID);
-                                fpsInboundReversal.setRvsdDocument(paymentreversalDocument);
+                                fpsInboundReversal.setRvslDocument(paymentreversalDocument);
                                 fpsInboundReversal.setRvsdIntrBkSttlmAmt(paymentreversalDocument.getFIToFIPmtRvsl().getTxInf().get(0).getRvsdIntrBkSttlmAmt().getValue());
                                 fpsInboundReversal.setRvsdIntrBkSttlmAmtCcy(paymentreversalDocument.getFIToFIPmtRvsl().getTxInf().get(0).getRvsdIntrBkSttlmAmt().getCcy());
                                 fpsInboundReversal.setOrgnlPaymentId(paymentreversalDocument.getFIToFIPmtRvsl().getTxInf().get(0).getOrgnlTxId());
