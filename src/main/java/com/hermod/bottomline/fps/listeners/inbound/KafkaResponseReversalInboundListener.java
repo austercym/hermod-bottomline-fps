@@ -186,7 +186,7 @@ public class KafkaResponseReversalInboundListener extends KafkaInboundListener i
 		listSts.add(sts);
 		pmtInfAndSts.setStsRsnInf(listSts);
 		// <InstdAgt> - from instructed agent on original payment
-		BranchAndFinancialInstitutionIdentification5 instdAgt = gson.fromJson(gson.toJson(fpsPaymentResponse.getRvsdDocument().getFIToFIPmtRvsl().getTxInf().get(0).getInstdAgt()),
+		BranchAndFinancialInstitutionIdentification5 instdAgt = gson.fromJson(gson.toJson(fpsPaymentResponse.getRvsdDocument().getFIToFIPmtRvsl().getTxInf().get(0).getInstgAgt()),
 				BranchAndFinancialInstitutionIdentification5.class);
 		pmtInfAndSts.setInstdAgt(instdAgt);
 		//<OrgnlTxRef>

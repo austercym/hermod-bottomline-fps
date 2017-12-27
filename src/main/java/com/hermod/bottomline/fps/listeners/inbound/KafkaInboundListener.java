@@ -50,7 +50,7 @@ public class KafkaInboundListener extends BaseListener {
         } catch (Exception e) {
             LOG.error("[FPS][PmtId: {}] Error generating message identifier for response. Error Message: {}", paymentId, e.getMessage(), e);
             msgId002 = "002" + originalDocument.getFIToFICstmrCdtTrf().getCdtTrfTxInf().get(0).getPmtId().getTxId() + df.format(new Date());
-            LOG.error("[FPS][PmtId: {}] generated message identifier by default. Pacs.002 MsgId: {}", paymentId, msgId002);
+            LOG.info("[FPS][PmtId: {}] generated message identifier by default. Pacs.002 MsgId: {}", paymentId, msgId002);
         }
 
         // Payment Status Report
@@ -83,7 +83,7 @@ public class KafkaInboundListener extends BaseListener {
         listSts.add(sts);
         pmtInfAndSts.setStsRsnInf(listSts);
         // <InstdAgt> - from instructed agent on original payment
-        BranchAndFinancialInstitutionIdentification5 instdAgt = gson.fromJson(gson.toJson(originalDocument.getFIToFICstmrCdtTrf().getGrpHdr().getInstdAgt()), BranchAndFinancialInstitutionIdentification5.class);
+        BranchAndFinancialInstitutionIdentification5 instdAgt = gson.fromJson(gson.toJson(originalDocument.getFIToFICstmrCdtTrf().getGrpHdr().getInstgAgt()), BranchAndFinancialInstitutionIdentification5.class);
         pmtInfAndSts.setInstdAgt(instdAgt);
         //<OrgnlTxRef>
         pmtInfAndSts.setOrgnlTxRef(new OriginalTransactionReference20());
