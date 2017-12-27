@@ -16,6 +16,9 @@ public class KafkaResponseConsumerConfig extends KafkaConsumerConfig{
 	@Value("${kafka.topic.inbound.response}")
 	private String inboundTopic;
 
+	@Value("${kafka.topic.reversal.response}")
+	private String inboundReversalTopic;
+
 	@Value("${kafka.topic.outbound.request}")
 	private String outboundTopic;
 
@@ -27,6 +30,9 @@ public class KafkaResponseConsumerConfig extends KafkaConsumerConfig{
 	
 	@Autowired
 	private MessageListener<?, ?> kafkaResponseInboundListener;
+
+	@Autowired
+	private MessageListener<?, ?> kafkaResponseReversalInboundListener;
 
 	@Autowired
 	private MessageListener<?, ?> kafkaRequestOutboundListener;
@@ -45,6 +51,22 @@ public class KafkaResponseConsumerConfig extends KafkaConsumerConfig{
 		kafkaResponseInboundListenerContainer.setupMessageListener(kafkaResponseInboundListener);
 		
 		return kafkaResponseInboundListenerContainer;
+	}
+
+	@Bean
+	public ConcurrentMessageListenerContainer<?, ?> kafkaResponseReversalInboundListenerContainer() {
+
+		ContainerProperties containerProperties = new ContainerProperties(inboundReversalTopic);
+		containerProperties.setPollTimeout(consumerPoolTimeout);
+
+		ConcurrentMessageListenerContainer<?, ?> kafkaResponseReversalInboundListenerContainer = new ConcurrentMessageListenerContainer<>(
+				kafkaConsumerFactory(),
+				containerProperties
+		);
+		kafkaResponseReversalInboundListenerContainer.setConcurrency(numMaxThreads);
+		kafkaResponseReversalInboundListenerContainer.setupMessageListener(kafkaResponseReversalInboundListener);
+
+		return kafkaResponseReversalInboundListenerContainer;
 	}
 
 	@Bean

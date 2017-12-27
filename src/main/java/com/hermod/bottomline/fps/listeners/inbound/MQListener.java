@@ -10,14 +10,12 @@ import com.hermod.bottomline.fps.storage.PaymentBean;
 import com.hermod.bottomline.fps.storage.PaymentStatus;
 import com.hermod.bottomline.fps.types.FPSMessage;
 import com.hermod.bottomline.fps.utils.Constants;
-import com.hermod.bottomline.fps.utils.CurrencyCodes;
 import com.hermod.bottomline.fps.utils.generators.EventGenerator;
 import com.hermod.bottomline.fps.utils.generators.IDGeneratorBean;
+import com.hermod.bottomline.fps.utils.generators.SchemeValidatorBean;
 import com.orwellg.umbrella.avro.types.event.Event;
-import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
-import com.orwellg.umbrella.avro.types.payment.fps.FPSInboundPayment;
-import com.orwellg.umbrella.avro.types.payment.fps.FPSInboundReversal;
-import com.orwellg.umbrella.avro.types.payment.fps.FPSOutboundPaymentResponse;
+import com.orwellg.umbrella.avro.types.payment.fps.*;
+import com.orwellg.umbrella.commons.utils.enums.CurrencyCodes;
 import com.orwellg.umbrella.commons.utils.enums.FPSEvents;
 import org.apache.activemq.util.ByteArrayInputStream;
 import org.apache.commons.io.IOUtils;
@@ -69,6 +67,9 @@ public abstract class MQListener extends BaseListener implements MessageListener
 
     @Value("${kafka.topic.reversal.request}")
     protected String inboundReversalTopic;
+
+    @Value("${kafka.topic.reversal.response}")
+    protected String inboundReversalResponseTopic;
 
     @Value("${kafka.topic.inbound.response}")
     private String outboundResponseTopic;
@@ -122,8 +123,6 @@ public abstract class MQListener extends BaseListener implements MessageListener
 
     public void sendMessageToTopic(Reader reader, String paymentType, String id) {
         boolean schemaValidation = true;
-        SchemaFactory schemaFactory = SchemaFactory
-                .newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
         if (reader != null) {
             String message = "";
             try {
@@ -140,40 +139,31 @@ public abstract class MQListener extends BaseListener implements MessageListener
                 try {
                     // Validate against scheme
                     Source src = new StreamSource(new StringReader(message));
-                    Resource xsdResource = new ClassPathResource("./xsd/pacs.008.001.05.xsd");
-                    Schema schema = schemaFactory.newSchema(new StreamSource(xsdResource.getInputStream()));
-                    Validator validator = schema.newValidator();
+                    Validator validator = SchemeValidatorBean.getInstance().getValidatorPacs008();
                     validator.validate(src);
 
                 } catch (SAXException ex) {
                     schemaValidation = false;
                     errorMessage = ex.getMessage();
-                    LOG.error("[FPS][PaymentType: {}] Error Validating message against scheme. Error:{} Message: {}", 
-                            paymentType,  ex.getMessage(), message);
+
                 } catch (IOException e) {
                     schemaValidation = false;
                     errorMessage = e.getMessage();
-                    LOG.error("[FPS][PaymentType: {}] I/O Error. Error:{} Message: {}", 
-                            paymentType,  e.getMessage(), message);
                 }
                 if(!schemaValidation) {
                     try {
                         // Validate against scheme
                         Source src = new StreamSource(new StringReader(message));
-                        Resource xsdResource = new ClassPathResource("./xsd/pacs.007.001.05.xsd");
-                        Schema schema = schemaFactory.newSchema(new StreamSource(xsdResource.getInputStream()));
-                        Validator validator = schema.newValidator();
+                        Validator validator = SchemeValidatorBean.getInstance().getValidatorPacs007();
                         validator.validate(src);
                         schemaValidation = true;
                         isReversal = true;
                     } catch (SAXException ex) {
                         schemaValidation = false;
                         errorMessage = ex.getMessage();
-                        LOG.error("[FPS][PaymentType: {}] Error Validating message against scheme. Error:{} Message: {}", paymentType, ex.getMessage(), message);
                     } catch (IOException e) {
                         schemaValidation = false;
                         errorMessage = e.getMessage();
-                        LOG.error("[FPS][PaymentType: {}] I/O Error. Error:{} Message: {}", paymentType, e.getMessage(), message);
                     }
                 }
 
@@ -192,7 +182,6 @@ public abstract class MQListener extends BaseListener implements MessageListener
                     Object avroFpsMessage = transform.fps2avro(fpsMessage);
 
                     boolean isValid = validMessage((FPSAvroMessage)avroFpsMessage);
-
 
                     String FPID = extractFPID((FPSAvroMessage) avroFpsMessage, isReversal);
                     String paymentTypeCode = extractPaymentTypeCode((FPSAvroMessage) avroFpsMessage, isReversal);
@@ -255,34 +244,46 @@ public abstract class MQListener extends BaseListener implements MessageListener
                                 sendToKafka(inboundReversalTopic, uuid, event, paymentTypeCode);
                             }
 
-
-
                             LOG.info("[FPS][PmtId: {}] Sent FPS Inbound payment request", uuid);
                         } else {
+                            if(!isReversal) {
 
-                            FPSOutboundPaymentResponse fpsResponse = new FPSOutboundPaymentResponse();
+                                FPSOutboundPaymentResponse fpsResponse = new FPSOutboundPaymentResponse();
 
-                            fpsResponse.setFPID(FPID);
-                            fpsResponse.setPaymentId(uuid);
-                            fpsResponse.setOrgnlPaymentDocument(paymentDocument);
-                            fpsResponse.setTxSts(Constants.REJECT_CODE);
-                            fpsResponse.setStsRsn(Constants.NO_VALIDATION_CODE);
-                            fpsResponse.setPaymentTimestamp(new Date().getTime());
+                                fpsResponse.setFPID(FPID);
+                                fpsResponse.setPaymentId(uuid);
+                                fpsResponse.setOrgnlPaymentDocument(paymentDocument);
+                                fpsResponse.setTxSts(Constants.REJECT_CODE);
+                                fpsResponse.setStsRsn(Constants.NO_VALIDATION_CODE);
+                                fpsResponse.setPaymentTimestamp(new Date().getTime());
 
 
-                            LOG.info("[FPS][PmtId: {}] Sending FPS Inbound payment Reject response", uuid);
-                            // Send avro message to Kafka
-                            Event event = EventGenerator.generateEvent(
-                                    this.getClass().getName(), FPSEvents.FPS_VALIDATION_ERROR.getEventName(),
-                                    uuid,
-                                    gson.toJson(fpsResponse),
-                                    entity,
-                                    brand
-                            );
+                                LOG.info("[FPS][PmtId: {}] Sending FPS Inbound payment Reject response", uuid);
+                                // Send avro message to Kafka
+                                Event event = EventGenerator.generateEvent(this.getClass().getName(), FPSEvents.FPS_VALIDATION_ERROR.getEventName(), uuid, gson.toJson(fpsResponse), entity, brand);
 
-                            sendToKafka(outboundResponseTopic, uuid, event, paymentTypeCode);
+                                sendToKafka(outboundResponseTopic, uuid, event, paymentTypeCode);
 
-                            LOG.info("[FPS][PmtId: {}] Sent FPS Inbound payment Reject response", uuid);
+                                LOG.info("[FPS][PmtId: {}] Sent FPS Inbound payment Reject response", uuid);
+                            }else{
+                                FPSOutboundReversalResponse fpsResponse = new FPSOutboundReversalResponse();
+
+                                fpsResponse.setFPID(FPID);
+                                fpsResponse.setPaymentId(uuid);
+                                fpsResponse.setRvsdDocument(paymentreversalDocument);
+                                fpsResponse.setRvsdRsn(Constants.NO_VALIDATION_CODE);
+                                fpsResponse.setRvsdSts(Constants.REJECT_CODE);
+                                fpsResponse.setPaymentTimestamp(new Date().getTime());
+
+
+                                LOG.info("[FPS][PmtId: {}] Sending FPS Inbound payment Reversal response", uuid);
+                                // Send avro message to Kafka
+                                Event event = EventGenerator.generateEvent(this.getClass().getName(), FPSEvents.FPS_VALIDATION_ERROR.getEventName(), uuid, gson.toJson(fpsResponse), entity, brand);
+
+                                sendToKafka(inboundReversalResponseTopic, uuid, event, paymentTypeCode);
+
+                                LOG.info("[FPS][PmtId: {}] Sent FPS Inbound payment Reversal response", uuid);
+                            }
                         }
                     }
 

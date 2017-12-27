@@ -10,6 +10,7 @@ import com.hermod.bottomline.fps.storage.PaymentStatus;
 import com.hermod.bottomline.fps.types.FPSMessage;
 import com.hermod.bottomline.fps.utils.Constants;
 import com.hermod.bottomline.fps.utils.generators.EventGenerator;
+import com.hermod.bottomline.fps.utils.generators.SchemeValidatorBean;
 import com.orwellg.umbrella.avro.types.event.Event;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSOutboundPayment;
@@ -130,11 +131,8 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
                     boolean schemaValidation = true;
                     // Validate against scheme
                     try {
-                        SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-                        Resource xsdResource = new ClassPathResource("./xsd/pacs.008.001.05.xsd");
                         Source src = new StreamSource(new StringReader(rawMessage.toString()));
-                        Schema schema = schemaFactory.newSchema(new StreamSource(xsdResource.getInputStream()));
-                        Validator validator = schema.newValidator();
+                        Validator validator = SchemeValidatorBean.getInstance().getValidatorPacs008();
                         validator.validate(src);
                     } catch (SAXException ex) {
                         schemaValidation = false;

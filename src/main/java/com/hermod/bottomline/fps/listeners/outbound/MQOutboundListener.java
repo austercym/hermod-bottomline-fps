@@ -10,6 +10,7 @@ import com.hermod.bottomline.fps.storage.PaymentOutboundBean;
 import com.hermod.bottomline.fps.types.FPSMessage;
 import com.hermod.bottomline.fps.utils.generators.EventGenerator;
 import com.hermod.bottomline.fps.utils.generators.IDGeneratorBean;
+import com.hermod.bottomline.fps.utils.generators.SchemeValidatorBean;
 import com.orwellg.umbrella.avro.types.event.Event;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSInboundPaymentResponse;
@@ -123,12 +124,9 @@ public abstract class MQOutboundListener extends BaseListener implements Message
 
                     boolean schemaValidation = true;
                     try {
-                        SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-                        Resource xsdResource = new ClassPathResource("./xsd/pacs.002.001.06.xsd");
                         Source src = new StreamSource(new StringReader(message));
                         // Validate against scheme
-                        Schema schema = schemaFactory.newSchema(new StreamSource(xsdResource.getInputStream()));
-                        Validator validator = schema.newValidator();
+                        Validator validator = SchemeValidatorBean.getInstance().getValidatorPacs002();
                         validator.validate(src);
                     } catch (SAXException ex) {
                         schemaValidation = false;

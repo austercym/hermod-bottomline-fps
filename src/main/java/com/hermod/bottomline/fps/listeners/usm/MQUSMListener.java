@@ -9,6 +9,7 @@ import com.hermod.bottomline.fps.services.transform.helper.ConversionException;
 import com.hermod.bottomline.fps.utils.USMMessage;
 import com.hermod.bottomline.fps.utils.generators.EventGenerator;
 import com.hermod.bottomline.fps.utils.generators.IDGeneratorBean;
+import com.hermod.bottomline.fps.utils.generators.SchemeValidatorBean;
 import com.orwellg.umbrella.avro.types.event.Event;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSInboundUSM;
@@ -111,10 +112,7 @@ public class MQUSMListener extends BaseListener implements MessageListener {
     }
 
     public void sendMessageToTopic(Reader reader, String id) {
-        SchemaFactory schemaFactory = SchemaFactory
-                .newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
         if (reader != null) {
-            Source[] xsdSources = getSourcesXSDs();
             String message = "";
             try {
                 String uuid = StringUtils.isNotEmpty(id)?id:IDGeneratorBean.getInstance().generatorID().getFasterPaymentUniqueId();
@@ -126,7 +124,7 @@ public class MQUSMListener extends BaseListener implements MessageListener {
                 kafkaSender.sendRawMessage(loggingTopic, message, uuid);
 
                 // Validate against scheme
-                boolean schemaValidation = isWellFormedMessage(schemaFactory, xsdSources, message);
+                boolean schemaValidation = isWellFormedMessage(message);
 
                 // Getting Avro
                 Source src = new StreamSource(new StringReader(message));
@@ -177,12 +175,11 @@ public class MQUSMListener extends BaseListener implements MessageListener {
         }
     }
 
-    private boolean isWellFormedMessage(SchemaFactory schemaFactory, Source[] xsdSources, String message) {
+    private boolean isWellFormedMessage(String message) {
         boolean schemaValidation = true;
         try {
             Source src = new StreamSource(new StringReader(message));
-            Schema schema = schemaFactory.newSchema(xsdSources);
-            Validator validator = schema.newValidator();
+            Validator validator = SchemeValidatorBean.getInstance().getValidatorUSM();
             validator.validate(src);
         } catch (SAXException ex) {
             schemaValidation = false;
@@ -193,23 +190,6 @@ public class MQUSMListener extends BaseListener implements MessageListener {
             LOG.error("[FPS][USM] I/O Error. Error:{} Message: {}", e.getMessage(), message);
         }
         return schemaValidation;
-    }
-
-    private Source[] getSourcesXSDs() {
-        Resource fpsUSMxsdResource = new ClassPathResource("./xsd/usm/FPSUSMs.xsd");
-        Resource iso20022TypesxsdResource = new ClassPathResource("./xsd/usm/ISO20022Types.xsd");
-        Resource fpsUSMTypesxsdResource = new ClassPathResource("./xsd/usm/FPSUSMTypes.xsd");
-        Resource fpsUSMElementsResource = new ClassPathResource("./xsd/usm/FPSUSMElements.xsd");
-        Source[] xsdSources = null;
-        try{
-            xsdSources = new Source[]{new StreamSource(iso20022TypesxsdResource.getInputStream()),
-                    new StreamSource(fpsUSMTypesxsdResource.getInputStream()),
-                    new StreamSource(fpsUSMElementsResource.getInputStream()),
-                    new StreamSource(fpsUSMxsdResource.getInputStream())};
-        }catch(IOException e){
-            LOG.error("[FPS][USM] ERROR: Getting sources from USM xsd files. {}",e.getMessage());
-        }
-        return xsdSources;
     }
 
     private boolean validMessage(FPSAvroMessage avroFpsMessage) {

@@ -9,6 +9,7 @@ import com.orwellg.umbrella.avro.types.event.Event;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSOutboundPaymentResponse;
 import com.orwellg.umbrella.commons.types.utils.avro.RawMessageUtils;
+import com.orwellg.umbrella.commons.utils.enums.CurrencyCodes;
 import com.orwellg.umbrella.commons.utils.enums.FPSEvents;
 import com.orwellg.umbrella.commons.utils.enums.KafkaHeaders;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -92,7 +93,11 @@ public class KafkaResponseInboundListener extends KafkaInboundListener implement
 						LOG.info("[FPS][PmtId: {}] XML Response generated for FPS inbound payment. Response: {}", key, rawMessage.toString());
 						kafkaSender.sendRawMessage(loggingTopic, rawMessage.toString(), key);
 
-						updatePaymentResponseInMemory(fpsPaymentResponse.getOrgnlPaymentDocument(), rawMessage.toString(), key);
+						Gson gson = new Gson();
+
+						String originalStr = gson.toJson(fpsPaymentResponse.getOrgnlPaymentDocument());
+						String FPID = extractFPID(fpsPaymentResponse.getOrgnlPaymentDocument());
+						updatePaymentResponseInMemory(originalStr, FPID, rawMessage.toString(), key);
 
 						//Send to MQ (Environment=Queue)
 						String queueToSend = outboundAsynQueue;
@@ -124,6 +129,11 @@ public class KafkaResponseInboundListener extends KafkaInboundListener implement
 		 }
 	}
 
+	private FPSAvroMessage generateFPSPacs002Response(FPSOutboundPaymentResponse fpsPaymentResponse) {
+		return generateFPSPacs002(fpsPaymentResponse.getOrgnlPaymentDocument(), fpsPaymentResponse.getPaymentId(),
+				fpsPaymentResponse.getStsRsn(), fpsPaymentResponse.getTxSts());
+	}
+
 	private void sendToMQ(String key, StringWriter rawMessage, String queueToSend, String paymentType) {
 		boolean messageSent = false;
 
@@ -139,6 +149,24 @@ public class KafkaResponseInboundListener extends KafkaInboundListener implement
                 numMaxAttempts--;
             }
         }
+	}
+
+	protected String extractFPID(com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Document originalMessage) {
+		String FPID = "";
+		com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.CreditTransferTransaction19 creditTransferTransaction = originalMessage
+				.getFIToFICstmrCdtTrf().getCdtTrfTxInf().get(0);
+		if(!creditTransferTransaction.getInstrForNxtAgt().isEmpty()){
+			FPID = creditTransferTransaction.getInstrForNxtAgt().get(0).getInstrInf();
+			FPID = FPID.substring(FPID.lastIndexOf('/')+1);
+		} else{
+			String txId = creditTransferTransaction.getPmtId().getTxId();
+			String paymentTypeCode = creditTransferTransaction.getPmtTpInf().getLclInstrm().getPrtry();
+			String currency = CurrencyCodes.getInstance().getCurrencyCode(creditTransferTransaction.getIntrBkSttlmAmt().getCcy());
+			String sendingFPSInstitution = creditTransferTransaction.getInstgAgt().getFinInstnId().getClrSysMmbId().getMmbId();
+			String dateSent = creditTransferTransaction.getIntrBkSttlmDt().replaceAll("-","");
+			FPID = txId+paymentTypeCode+dateSent+currency+sendingFPSInstitution;
+		}
+		return FPID;
 	}
 
 }

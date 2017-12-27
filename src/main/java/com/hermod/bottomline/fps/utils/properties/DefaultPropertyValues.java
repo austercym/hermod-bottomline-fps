@@ -64,7 +64,9 @@ public class DefaultPropertyValues {
 	private final static String KAFKA_DEFAULT_OUTBOUND_REQUEST_TOPIC  = "com.orwellg.hermod.bottomline.fps.outbound.payment.request.1";
 
 	private final static String KAFKA_DEFAULT_USM_TOPIC_PARTITIONS  = "com.orwellg.yggdrasil.dsl.fps.inbound.usm.received.1";
-	private final static String KAFKA_DEFAULT_REVERSAL_TOPIC_PARTITIONS  = "com.orwellg.yggdrasil.dsl.fps.inbound.reversal.request.1";
+
+	private final static String KAFKA_DEFAULT_INBOUND_REVERSAL_REQUEST_TOPIC = "com.orwellg.yggdrasil.dsl.fps.inbound.reversal.request.1";
+	private final static String KAFKA_DEFAULT_INBOUND_REVERSAL_RESPONSE_TOPIC  = "com.orwellg.yggdrasil.dsl.fps.inbound.reversal.response.1";
 
 	private final static String KAFKA_DEFAULT_MESSAGE_LOGGING_TOPIC   = "com.orwellg.logging.message";
 
@@ -129,7 +131,8 @@ public class DefaultPropertyValues {
 		defaultValues.put("kafka.topic.outbound.partitions", KAFKA_DEFAULT_OUTBOUND_TOPIC_PARTITIONS);
 
 		defaultValues.put("kafka.topic.usm.message", KAFKA_DEFAULT_USM_TOPIC_PARTITIONS);
-		defaultValues.put("kafka.topic.reversal.request", KAFKA_DEFAULT_REVERSAL_TOPIC_PARTITIONS);
+		defaultValues.put("kafka.topic.reversal.request", KAFKA_DEFAULT_INBOUND_REVERSAL_REQUEST_TOPIC);
+		defaultValues.put("kafka.topic.reversal.response", KAFKA_DEFAULT_INBOUND_REVERSAL_RESPONSE_TOPIC);
 
 
 		defaultValues.put("kafka.topic.fps.logging", KAFKA_DEFAULT_MESSAGE_LOGGING_TOPIC);

@@ -16,6 +16,10 @@ public class ProjectConfig extends ComponentConfig {
 
 	@Autowired
 	private AbstractMessageListenerContainer<?,?> kafkaResponseInboundListenerContainer;
+
+	@Autowired
+	private AbstractMessageListenerContainer<?,?> kafkaResponseReversalInboundListenerContainer;
+
 	@Autowired
 	private AbstractMessageListenerContainer<?,?> kafkaRequestOutboundListenerContainer;
 
@@ -38,6 +42,7 @@ public class ProjectConfig extends ComponentConfig {
 	    LOG.info("Connector to Bottomline start. Starting containers....");
 		kafkaResponseInboundListenerContainer.start();
 		kafkaRequestOutboundListenerContainer.start();
+		kafkaResponseReversalInboundListenerContainer.start();
 		jmsSIPListenerContainer.start();
 		jmsASYNCListenerContainer.start();
 		jmsSIPOutboundListenerContainer.start();

@@ -11,6 +11,7 @@ import io.reactivex.Flowable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.lang.reflect.Method;
@@ -28,7 +29,9 @@ public final class TransformationHelper {
 
 	static {
 		Converters.add(new TypeConverterEntry(XMLGregorianCalendar.class, Long.class, (calendar, ctx) -> { return (Long)((XMLGregorianCalendar)calendar).toGregorianCalendar().getTimeInMillis(); }));
-		Converters.add(new TypeConverterEntry(XMLGregorianCalendar.class, CharSequence.class, (calendar, ctx) -> { return ((XMLGregorianCalendar)calendar).toXMLFormat();}));
+		Converters.add(new TypeConverterEntry(XMLGregorianCalendar.class, CharSequence.class, (calendar, ctx) -> {
+			return ((XMLGregorianCalendar)calendar).toXMLFormat();
+		}));
 		Converters.add(new TypeConverterEntry(XMLGregorianCalendar.class, String.class, (calendar, ctx) -> {
 			return ((XMLGregorianCalendar)calendar).toXMLFormat();
 		}));
@@ -178,6 +181,7 @@ public final class TransformationHelper {
 			
 			final DatatypeFactory dtf = DatatypeFactory.newInstance();
 			final XMLGregorianCalendar xmlCalendar = dtf.newXMLGregorianCalendar(calendar);
+			xmlCalendar.setTimezone(DatatypeConstants.FIELD_UNDEFINED);
 			return xmlCalendar;
 		}
 		catch (Exception err) {
@@ -194,6 +198,7 @@ public final class TransformationHelper {
 
 			final DatatypeFactory dtf = DatatypeFactory.newInstance();
 			final XMLGregorianCalendar xmlCalendar = dtf.newXMLGregorianCalendar(calendar);
+			xmlCalendar.setTimezone(DatatypeConstants.FIELD_UNDEFINED);
 			return xmlCalendar;
 		}
 		catch (Exception err) {

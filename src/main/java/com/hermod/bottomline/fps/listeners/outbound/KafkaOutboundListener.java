@@ -5,7 +5,7 @@ import com.hermod.bottomline.fps.listeners.BaseListener;
 import com.hermod.bottomline.fps.storage.InMemoryPaymentStorage;
 import com.hermod.bottomline.fps.storage.PaymentBean;
 import com.hermod.bottomline.fps.types.FPSMessage;
-import com.hermod.bottomline.fps.utils.CurrencyCodes;
+import com.orwellg.umbrella.commons.utils.enums.CurrencyCodes;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

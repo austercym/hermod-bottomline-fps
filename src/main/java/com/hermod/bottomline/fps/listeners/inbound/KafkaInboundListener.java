@@ -5,10 +5,8 @@ import com.hermod.bottomline.fps.listeners.BaseListener;
 import com.hermod.bottomline.fps.storage.InMemoryPaymentStorage;
 import com.hermod.bottomline.fps.storage.PaymentBean;
 import com.hermod.bottomline.fps.types.FPSMessage;
-import com.hermod.bottomline.fps.utils.CurrencyCodes;
 import com.hermod.bottomline.fps.utils.generators.IDGeneratorBean;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
-import com.orwellg.umbrella.avro.types.payment.fps.FPSOutboundPaymentResponse;
 import com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs002_001_06.*;
 import com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.InstructionForNextAgent1;
 import org.apache.logging.log4j.LogManager;
@@ -38,7 +36,8 @@ public class KafkaInboundListener extends BaseListener {
         return rawMessage;
     }
 
-    protected FPSAvroMessage generateFPSPacs002Response(FPSOutboundPaymentResponse fpsPaymentResponse) {
+    protected FPSAvroMessage generateFPSPacs002(com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Document originalDocument,
+                                              String paymentId, String rsn, String txSts){
         Document fpsPacs002Response = new Document();
         Gson gson = new Gson();
         DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
@@ -49,9 +48,9 @@ public class KafkaInboundListener extends BaseListener {
         try {
             msgId002 = IDGeneratorBean.getInstance().generatorID().getFasterPaymentUniqueId();
         } catch (Exception e) {
-            LOG.error("[FPS][PmtId: {}] Error generating message identifier for response. Error Message: {}", fpsPaymentResponse.getPaymentId(), e.getMessage(), e);
-            msgId002 = "002" + fpsPaymentResponse.getOrgnlPaymentDocument().getFIToFICstmrCdtTrf().getCdtTrfTxInf().get(0).getPmtId().getTxId() + df.format(new Date());
-            LOG.error("[FPS][PmtId: {}] generated message identifier by default. Pacs.002 MsgId: {}", fpsPaymentResponse.getPaymentId(), msgId002);
+            LOG.error("[FPS][PmtId: {}] Error generating message identifier for response. Error Message: {}", paymentId, e.getMessage(), e);
+            msgId002 = "002" + originalDocument.getFIToFICstmrCdtTrf().getCdtTrfTxInf().get(0).getPmtId().getTxId() + df.format(new Date());
+            LOG.error("[FPS][PmtId: {}] generated message identifier by default. Pacs.002 MsgId: {}", paymentId, msgId002);
         }
 
         // Payment Status Report
@@ -62,7 +61,7 @@ public class KafkaInboundListener extends BaseListener {
         fpsPacs002Response.getFIToFIPmtStsRpt().getGrpHdr().setMsgId(msgId002);
         fpsPacs002Response.getFIToFIPmtStsRpt().getGrpHdr().setCreDtTm(new Date().getTime());
         // Instructing Agent - from instructed agent on original payment
-        BranchAndFinancialInstitutionIdentification5 instgAgt = gson.fromJson(gson.toJson(fpsPaymentResponse.getOrgnlPaymentDocument().getFIToFICstmrCdtTrf().getGrpHdr().getInstdAgt()), BranchAndFinancialInstitutionIdentification5.class);
+        BranchAndFinancialInstitutionIdentification5 instgAgt = gson.fromJson(gson.toJson(originalDocument.getFIToFICstmrCdtTrf().getGrpHdr().getInstdAgt()), BranchAndFinancialInstitutionIdentification5.class);
         fpsPacs002Response.getFIToFIPmtStsRpt().getGrpHdr().setInstgAgt(instgAgt);
 
         // Transaction Information and Status
@@ -70,35 +69,35 @@ public class KafkaInboundListener extends BaseListener {
         PaymentTransaction52 pmtInfAndSts = new PaymentTransaction52();
         // <OrgnlGrpInf>
         pmtInfAndSts.setOrgnlGrpInf(new OriginalGroupInformation3());
-        pmtInfAndSts.getOrgnlGrpInf().setOrgnlMsgId(fpsPaymentResponse.getOrgnlPaymentDocument().getFIToFICstmrCdtTrf().getGrpHdr().getMsgId());
+        pmtInfAndSts.getOrgnlGrpInf().setOrgnlMsgId(originalDocument.getFIToFICstmrCdtTrf().getGrpHdr().getMsgId());
         // TODO Change pacs.008 version to v.06
         pmtInfAndSts.getOrgnlGrpInf().setOrgnlMsgNmId("pacs.008.001.05");
         // <OrgnlTxId>
-        pmtInfAndSts.setOrgnlTxId(fpsPaymentResponse.getOrgnlPaymentDocument().getFIToFICstmrCdtTrf().getCdtTrfTxInf().get(0).getPmtId().getTxId());
+        pmtInfAndSts.setOrgnlTxId(originalDocument.getFIToFICstmrCdtTrf().getCdtTrfTxInf().get(0).getPmtId().getTxId());
         // <TxSts>
-        pmtInfAndSts.setTxSts(fpsPaymentResponse.getTxSts());
+        pmtInfAndSts.setTxSts(txSts);
         // <StsRsnInf>
         List<StatusReasonInformation9> listSts = new ArrayList<>();
         StatusReasonInformation9 sts = new StatusReasonInformation9();
-        sts.setRsn(new StatusReason6Choice(null, fpsPaymentResponse.getStsRsn()));
+        sts.setRsn(new StatusReason6Choice(null, rsn));
         listSts.add(sts);
         pmtInfAndSts.setStsRsnInf(listSts);
         // <InstdAgt> - from instructed agent on original payment
-        BranchAndFinancialInstitutionIdentification5 instdAgt = gson.fromJson(gson.toJson(fpsPaymentResponse.getOrgnlPaymentDocument().getFIToFICstmrCdtTrf().getGrpHdr().getInstdAgt()), BranchAndFinancialInstitutionIdentification5.class);
+        BranchAndFinancialInstitutionIdentification5 instdAgt = gson.fromJson(gson.toJson(originalDocument.getFIToFICstmrCdtTrf().getGrpHdr().getInstdAgt()), BranchAndFinancialInstitutionIdentification5.class);
         pmtInfAndSts.setInstdAgt(instdAgt);
         //<OrgnlTxRef>
         pmtInfAndSts.setOrgnlTxRef(new OriginalTransactionReference20());
         pmtInfAndSts.getOrgnlTxRef().setIntrBkSttlmAmt(new ActiveOrHistoricCurrencyAndAmount());
-        pmtInfAndSts.getOrgnlTxRef().getIntrBkSttlmAmt().setCcy(fpsPaymentResponse.getOrgnlPaymentDocument().getFIToFICstmrCdtTrf().getCdtTrfTxInf().get(0).getIntrBkSttlmAmt().getCcy());
-        pmtInfAndSts.getOrgnlTxRef().getIntrBkSttlmAmt().setValue(fpsPaymentResponse.getOrgnlPaymentDocument().getFIToFICstmrCdtTrf().getCdtTrfTxInf().get(0).getIntrBkSttlmAmt().getValue());
-        pmtInfAndSts.getOrgnlTxRef().setIntrBkSttlmDt(fpsPaymentResponse.getOrgnlPaymentDocument().getFIToFICstmrCdtTrf().getCdtTrfTxInf().get(0).getIntrBkSttlmDt());
-        pmtInfAndSts.getOrgnlTxRef().setSttlmInf(gson.fromJson(gson.toJson(fpsPaymentResponse.getOrgnlPaymentDocument().getFIToFICstmrCdtTrf().getGrpHdr().getSttlmInf()),SettlementInstruction1.class));
+        pmtInfAndSts.getOrgnlTxRef().getIntrBkSttlmAmt().setCcy(originalDocument.getFIToFICstmrCdtTrf().getCdtTrfTxInf().get(0).getIntrBkSttlmAmt().getCcy());
+        pmtInfAndSts.getOrgnlTxRef().getIntrBkSttlmAmt().setValue(originalDocument.getFIToFICstmrCdtTrf().getCdtTrfTxInf().get(0).getIntrBkSttlmAmt().getValue());
+        pmtInfAndSts.getOrgnlTxRef().setIntrBkSttlmDt(originalDocument.getFIToFICstmrCdtTrf().getCdtTrfTxInf().get(0).getIntrBkSttlmDt());
+        pmtInfAndSts.getOrgnlTxRef().setSttlmInf(gson.fromJson(gson.toJson(originalDocument.getFIToFICstmrCdtTrf().getGrpHdr().getSttlmInf()),SettlementInstruction1.class));
         pmtInfAndSts.getOrgnlTxRef().setPmtTpInf(new PaymentTypeInformation25());
-        pmtInfAndSts.getOrgnlTxRef().getPmtTpInf().setSvcLvl(gson.fromJson(gson.toJson(fpsPaymentResponse.getOrgnlPaymentDocument().getFIToFICstmrCdtTrf().getCdtTrfTxInf().get(0).getPmtTpInf().getSvcLvl()),ServiceLevel8Choice.class));
-        pmtInfAndSts.getOrgnlTxRef().getPmtTpInf().setLclInstrm(gson.fromJson(gson.toJson(fpsPaymentResponse.getOrgnlPaymentDocument().getFIToFICstmrCdtTrf().getCdtTrfTxInf().get(0).getPmtTpInf().getLclInstrm()),LocalInstrument2Choice.class));
+        pmtInfAndSts.getOrgnlTxRef().getPmtTpInf().setSvcLvl(gson.fromJson(gson.toJson(originalDocument.getFIToFICstmrCdtTrf().getCdtTrfTxInf().get(0).getPmtTpInf().getSvcLvl()),ServiceLevel8Choice.class));
+        pmtInfAndSts.getOrgnlTxRef().getPmtTpInf().setLclInstrm(gson.fromJson(gson.toJson(originalDocument.getFIToFICstmrCdtTrf().getCdtTrfTxInf().get(0).getPmtTpInf().getLclInstrm()),LocalInstrument2Choice.class));
 
         List<String> FPIdLst = new ArrayList<>();
-        List<InstructionForNextAgent1> instrForNxtAgt = fpsPaymentResponse.getOrgnlPaymentDocument().getFIToFICstmrCdtTrf().getCdtTrfTxInf().get(0).getInstrForNxtAgt();
+        List<InstructionForNextAgent1> instrForNxtAgt = originalDocument.getFIToFICstmrCdtTrf().getCdtTrfTxInf().get(0).getInstrForNxtAgt();
         for (InstructionForNextAgent1 instruction : instrForNxtAgt) {
             String instrInf = instruction.getInstrInf();
             if (instrInf.startsWith("/FPID/")) {
@@ -123,13 +122,9 @@ public class KafkaInboundListener extends BaseListener {
         return avroMessage;
     }
 
-    protected PaymentBean updatePaymentResponseInMemory(com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Document originalMessage,
+    protected PaymentBean updatePaymentResponseInMemory(String originalStr, String FPID,
                                                         String responseMessage, String paymentId) {
         InMemoryPaymentStorage storage = InMemoryPaymentStorage.getInstance();
-        Gson gson = new Gson();
-
-        String originalStr = gson.toJson(originalMessage);
-        String FPID = extractFPID(originalMessage);
 
         LOG.debug("[FPS][PmtId: {}] Storing response message to in-memory storage with FPID {}", paymentId, FPID);
         PaymentBean payment = storage.findPayment(FPID, originalStr);
@@ -139,24 +134,6 @@ public class KafkaInboundListener extends BaseListener {
         payment = storage.completePaymentResponse(FPID, originalStr, responseMessage);
 
         return payment;
-    }
-
-    private String extractFPID(com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Document originalMessage) {
-        String FPID = "";
-        com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.CreditTransferTransaction19 creditTransferTransaction = originalMessage
-                .getFIToFICstmrCdtTrf().getCdtTrfTxInf().get(0);
-        if(!creditTransferTransaction.getInstrForNxtAgt().isEmpty()){
-            FPID = creditTransferTransaction.getInstrForNxtAgt().get(0).getInstrInf();
-            FPID = FPID.substring(FPID.lastIndexOf('/')+1);
-        } else{
-            String txId = creditTransferTransaction.getPmtId().getTxId();
-            String paymentTypeCode = creditTransferTransaction.getPmtTpInf().getLclInstrm().getPrtry();
-            String currency = CurrencyCodes.getInstance().getCurrencyCode(creditTransferTransaction.getIntrBkSttlmAmt().getCcy());
-            String sendingFPSInstitution = creditTransferTransaction.getInstgAgt().getFinInstnId().getClrSysMmbId().getMmbId();
-            String dateSent = creditTransferTransaction.getIntrBkSttlmDt().replaceAll("-","");
-            FPID = txId+paymentTypeCode+dateSent+currency+sendingFPSInstitution;
-        }
-        return FPID;
     }
 
     protected StringWriter transformPaymentRequestToString(FPSMessage fpsMessage) throws JAXBException {
