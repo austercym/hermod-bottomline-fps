@@ -123,13 +123,13 @@ public class KafkaInboundListener extends BaseListener {
     }
 
     protected PaymentBean updatePaymentResponseInMemory(String originalStr, String FPID,
-                                                        String responseMessage, String paymentId) {
+                                                        String responseMessage, String paymentId, String paymentType) {
         InMemoryPaymentStorage storage = InMemoryPaymentStorage.getInstance();
 
         LOG.debug("[FPS][PmtId: {}] Storing response message to in-memory storage with FPID {}", paymentId, FPID);
         PaymentBean payment = storage.findPayment(FPID, originalStr);
         if (payment == null) {
-            storage.storePayment(FPID, originalStr, paymentId);
+            storage.storePayment(FPID, originalStr, paymentId, paymentType);
         }
         payment = storage.completePaymentResponse(FPID, originalStr, responseMessage);
 

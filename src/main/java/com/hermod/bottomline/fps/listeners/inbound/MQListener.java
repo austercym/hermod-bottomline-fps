@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.jms.core.JmsOperations;
 import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.xml.sax.SAXException;
@@ -79,6 +80,16 @@ public abstract class MQListener extends BaseListener implements MessageListener
 
     @Value("${kafka.topic.inbound.response.replyTo}")
     protected String replyTo;
+
+    @Value("${wq.mq.queue.sip.inbound.resp}")
+    private String outboundQueue;
+    @Value("${wq.mq.queue.asyn.inbound.resp}")
+    private String outboundAsynQueue;
+    @Value("${wq.mq.num.max.attempts}")
+    private int numMaxAttempts;
+
+    @Autowired
+    private JmsOperations jmsOperations;
 
     protected void onMessage(Message message, String paymentType) {
 
@@ -196,12 +207,26 @@ public abstract class MQListener extends BaseListener implements MessageListener
                         paymentreversalDocument = ((com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs007_001_05.Document) ((FPSAvroMessage) avroFpsMessage).getMessage());
                         originalPaymentMessage = gson.toJson(paymentreversalDocument);
                     }
-                    PaymentBean previousPaymentProcessed = checkPreviousResponse(originalPaymentMessage,uuid, FPID);
+                    PaymentBean previousPaymentProcessed = checkPreviousResponse(originalPaymentMessage,uuid, FPID, paymentType);
 
                     if (previousPaymentProcessed != null){
-                        //TODO send previous response to resp queue TO BOTTOMLINE
+
                         LOG.info("[FPS][PmtId: {}] Payment previously processed, FPID: {}. Sending previous FPS Inbound payment response. Message: {}",
                                 uuid, FPID, previousPaymentProcessed.getResponseMessage());
+                        while(!previousPaymentProcessed.getStatus().getName().equals(PaymentStatus.PROCESSED.getName())){
+                            LOG.info("[FPS][PmtId: {}] Waiting for finishing to be processed, FPID: {}", uuid, FPID);
+                            Thread.sleep(10);
+                            previousPaymentProcessed = checkPreviousResponse(originalPaymentMessage,uuid, FPID, paymentType);
+                        }
+                        String paymentTypeToSend = previousPaymentProcessed.getPaymentType();
+                        String queueToSend = outboundAsynQueue;
+
+                        if (paymentTypeToSend.equalsIgnoreCase("SIP")) {
+                            queueToSend = outboundQueue;
+                        }
+
+                        sendToMQ(uuid, previousPaymentProcessed.getResponseMessage(), queueToSend, paymentType);
+
                     }else {
                         if (schemaValidation && isValid) {
                             // Send avro message to Kafka
@@ -306,14 +331,14 @@ public abstract class MQListener extends BaseListener implements MessageListener
         }
     }
 
-    private PaymentBean checkPreviousResponse(String message, String uuid, String FPID) {
+    private PaymentBean checkPreviousResponse(String message, String uuid, String FPID, String paymentType) {
         PaymentBean resendPreviousResponse = null;
         InMemoryPaymentStorage storage = InMemoryPaymentStorage.getInstance();
         PaymentBean payment = storage.findPayment(FPID, message);
         if (payment != null && payment.getStatus().equals(PaymentStatus.PROCESSED)){
             resendPreviousResponse = payment;
         }else{
-            storage.storePayment(FPID, message, uuid);
+            storage.storePayment(FPID, message, uuid, paymentType);
         }
         return resendPreviousResponse;
     }
@@ -376,6 +401,23 @@ public abstract class MQListener extends BaseListener implements MessageListener
         }
         paymentTypeCode = paymentTypeCode.substring(0, paymentTypeCode.indexOf('/'));
         return paymentTypeCode;
+    }
+
+    private void sendToMQ(String key, String rawMessage, String queueToSend, String paymentType) {
+        boolean messageSent = false;
+
+        while (!messageSent && numMaxAttempts>0) {
+            try{
+                LOG.info("[FPS][PaymentType: {}][PmtId: {}] Message to be sent to queue {} to Bottomline: {}", paymentType, key, queueToSend, rawMessage);
+                jmsOperations.send(queueToSend, session -> {
+                    return session.createTextMessage(rawMessage);
+                });
+                messageSent = true;
+            } catch (Exception ex) {
+                LOG.error("[FPS] Error sending message for testing. Error Message: {}", ex.getMessage());
+                numMaxAttempts--;
+            }
+        }
     }
 
     private boolean validMessage(FPSAvroMessage avroFpsMessage) {

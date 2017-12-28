@@ -108,7 +108,6 @@ public class KafkaResponseReversalInboundListener extends KafkaInboundListener i
 
 						String originalStr = gson.toJson(fpsPaymentReversalResponse.getRvsdDocument());
 						String FPID = extractFPID(fpsPaymentReversalResponse.getRvsdDocument());
-						updatePaymentResponseInMemory(originalStr, FPID, rawMessage.toString(), key);
 
 						//Send to MQ (Environment=Queue)
 						String queueToSend = outboundAsynQueue;
@@ -122,7 +121,8 @@ public class KafkaResponseReversalInboundListener extends KafkaInboundListener i
 							queueToSend = outboundQueue;
 						}
 
-						sendToMQ(key, rawMessage, queueToSend, paymentType);
+						updatePaymentResponseInMemory(originalStr, FPID, rawMessage.toString(), key, paymentType);
+						sendToMQ(key, rawMessage.toString(), queueToSend, paymentType);
 
 					} else {
 						throw new MessageConversionException("Exception in message emission. The transform for pacs_002_001 is null");
@@ -236,14 +236,14 @@ public class KafkaResponseReversalInboundListener extends KafkaInboundListener i
 	}
 
 
-	private void sendToMQ(String key, StringWriter rawMessage, String queueToSend, String paymentType) {
+	private void sendToMQ(String key, String rawMessage, String queueToSend, String paymentType) {
 		boolean messageSent = false;
 
 		while (!messageSent && numMaxAttempts>0) {
             try{
-                LOG.info("[FPS][PaymentType: {}][PmtId: {}] Message to be sent to queue {} to Bottomline: {}", paymentType, key, queueToSend, rawMessage.toString());
+                LOG.info("[FPS][PaymentType: {}][PmtId: {}] Message to be sent to queue {} to Bottomline: {}", paymentType, key, queueToSend, rawMessage);
                 jmsOperations.send(queueToSend, session -> {
-                    return session.createTextMessage(rawMessage.toString());
+                    return session.createTextMessage(rawMessage);
                 });
 				messageSent = true;
             } catch (Exception ex) {

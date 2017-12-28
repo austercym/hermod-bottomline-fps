@@ -10,8 +10,16 @@ public class PaymentBean implements Serializable{
     private String FPID;
     private String paymentID;
     private String responseMessage;
-
+    private String paymentType;
     private PaymentStatus status;
+
+    public String getPaymentType() {
+        return paymentType;
+    }
+
+    public void setPaymentType(String paymentType) {
+        this.paymentType = paymentType;
+    }
 
     public Date getTimestamp() {
         return timestamp;

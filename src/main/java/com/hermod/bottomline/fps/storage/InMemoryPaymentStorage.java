@@ -35,13 +35,14 @@ public class InMemoryPaymentStorage {
 
     }
 
-    public PaymentBean storePayment(String FPID, String originalMessage, String paymentId) {
+    public PaymentBean storePayment(String FPID, String originalMessage, String paymentId, String paymentType) {
         String key = generateHash(FPID, originalMessage);
         PaymentBean message = new PaymentBean();
         message.setFPID(FPID);
         message.setTimestamp(new Date());
         message.setStatus(PaymentStatus.PENDING);
         message.setPaymentID(paymentId);
+        message.setPaymentType(paymentType);
         storage.put(key,message);
         return message;
     }
