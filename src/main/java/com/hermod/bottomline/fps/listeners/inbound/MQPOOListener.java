@@ -33,7 +33,5 @@ public class MQPOOListener extends MQListener {
                 uuid,
                 replyTo, bottomlineEnv, PAYMENT_TYPE, true
         );
-
     }
-
 }

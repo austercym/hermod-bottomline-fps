@@ -27,7 +27,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.StringWriter;
 
-
 @Component(value="kafkaResponseInboundListener")
 public class KafkaResponseInboundListener extends KafkaInboundListener implements MessageListener<String, String>, KafkaDataListener<ConsumerRecord<String, String>> {
 
@@ -42,7 +41,6 @@ public class KafkaResponseInboundListener extends KafkaInboundListener implement
 
 	@Autowired
 	private KafkaSender kafkaSender;
-
 
 	@Override
 	public void onMessage(ConsumerRecord<String, String> message) {

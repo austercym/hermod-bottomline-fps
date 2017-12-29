@@ -7,9 +7,7 @@ import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
 import org.junit.Test;
 
 import javax.xml.bind.JAXB;
-import javax.xml.transform.stream.StreamSource;
 import java.io.File;
-import java.io.StringReader;
 
 public class ConvertUSMASPMAlertMessageTest {
 

@@ -1,10 +1,5 @@
 package com.hermod.bottomline.fps.utils.generators;
 
-import com.orwellg.yggdrasil.net.client.producer.CommandProducerConfig;
-import com.orwellg.yggdrasil.net.client.producer.GeneratorIdCommandProducer;
-import org.apache.kafka.clients.CommonClientConfigs;
-import org.apache.kafka.common.protocol.SecurityProtocol;
-import org.apache.kafka.common.utils.Time;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.xml.sax.SAXException;
@@ -16,7 +11,6 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 import java.io.IOException;
-import java.util.Properties;
 
 public class SchemeValidatorBean {
 

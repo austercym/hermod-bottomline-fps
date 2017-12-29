@@ -33,7 +33,5 @@ public class MQSTANDINListener extends MQListener {
                 uuid,
                 replyTo, bottomlineEnv, paymentType, false, true
         );
-
     }
-
 }

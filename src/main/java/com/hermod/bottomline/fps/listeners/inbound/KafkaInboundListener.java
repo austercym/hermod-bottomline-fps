@@ -30,12 +30,6 @@ public class KafkaInboundListener extends BaseListener {
 
     private static Logger LOG = LogManager.getLogger(KafkaInboundListener.class);
 
-    @Value("${wq.mq.num.max.attempts}")
-    private int numMaxAttempts;
-
-    @Autowired
-    private JmsOperations jmsOperations;
-
     protected StringWriter transformResponseToString(FPSMessage fpsMessage) throws JAXBException {
         StringWriter rawMessage = new StringWriter();
         final JAXBContext jc = JAXBContext.newInstance(iso.std.iso._20022.tech.xsd.pacs_002_001.Document.class);

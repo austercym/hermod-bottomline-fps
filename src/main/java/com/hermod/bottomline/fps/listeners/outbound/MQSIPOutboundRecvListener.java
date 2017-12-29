@@ -33,7 +33,5 @@ public class MQSIPOutboundRecvListener extends MQOutboundListener {
                 uuid,
                 null, bottomlineEnv, paymentType, false
         );
-
     }
-
 }

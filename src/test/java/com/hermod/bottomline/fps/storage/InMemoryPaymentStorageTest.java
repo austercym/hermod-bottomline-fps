@@ -16,7 +16,7 @@ public class InMemoryPaymentStorageTest {
     @Before
     public void setUp() throws Exception {
         messageStorage = InMemoryPaymentStorage.getInstance();
-        messageStorage.storePayment("fpid", "originalmessage", "paymentId");
+        messageStorage.storePayment("fpid", "originalmessage", "paymentId", "paymentType");
     }
 
     @After
@@ -44,7 +44,7 @@ public class InMemoryPaymentStorageTest {
 
     @Test
     public void storeDifferentPaymentWithSameFPID() throws Exception {
-        messageStorage.storePayment("fpid", "otheroriginalmessage", "paymentId2");
+        messageStorage.storePayment("fpid", "otheroriginalmessage", "paymentId2", "paymentType");
         PaymentBean message = messageStorage.findPayment("fpid", "originalmessage");
         assertThat(message.getPaymentID(), is("paymentId"));
 

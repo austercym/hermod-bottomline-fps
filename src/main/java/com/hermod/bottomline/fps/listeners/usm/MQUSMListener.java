@@ -25,8 +25,6 @@ import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.stereotype.Component;
@@ -36,12 +34,9 @@ import javax.jms.BytesMessage;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.TextMessage;
-import javax.xml.XMLConstants;
 import javax.xml.bind.JAXB;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 import java.io.*;
 
@@ -53,9 +48,6 @@ public class MQUSMListener extends BaseListener implements MessageListener {
 
     @Autowired
     private Gson gson;
-
-    @Autowired
-    private Jaxb2Marshaller marshaller;
 
     @Autowired
     protected KafkaSender kafkaSender;
@@ -209,7 +201,7 @@ public class MQUSMListener extends BaseListener implements MessageListener {
         StringBuffer xmlStr = new StringBuffer( message );
 
         USMMessage usmMessage = new USMMessage();
-        //FPSMessage usmGenericMessage = null;
+
         if(message.toLowerCase().contains("fpsinst3rdpartystatusmessage")) {
             FPSInst3RdPartyStatusMessageType fpsInst3RdPartyStatusMessageType = JAXB.unmarshal(new StreamSource(new StringReader(xmlStr.toString())),
                     FPSInst3RdPartyStatusMessageType.class);
@@ -217,15 +209,12 @@ public class MQUSMListener extends BaseListener implements MessageListener {
             usmMessage.setMessageId(fpsInst3RdPartyStatusMessageType.getMessageID());
             usmMessage.setUsmType(USMMessageTypes.FPS_INST_3RD_PARTY_STATUS);
             usmMessage.setFpsMessage(fpsInst3RdPartyStatusMessageType);
-            //usmGenericMessage.setFPSInst3rdPartyStatusMessage(fpsInst3RdPartyStatusMessageType);
-            //usmMessage.setFpsMessage(fpsInst3RdPartyStatusMessageType);
         }else if(message.toLowerCase().contains("servicestatusmessage")){
             ServiceStatusMessageType serviceStatusMessageType = JAXB.unmarshal(new StreamSource(new StringReader(xmlStr.toString())),
                     ServiceStatusMessageType.class);
             usmMessage.setDateTime(serviceStatusMessageType.getDateTime());
             usmMessage.setMessageId(serviceStatusMessageType.getMessageID());
             usmMessage.setUsmType(USMMessageTypes.SERVICE_STATUS);
-         //   usmGenericMessage.setServiceStatusMessage(serviceStatusMessageType);
             usmMessage.setFpsMessage(serviceStatusMessageType);
         }else if(message.toLowerCase().contains("netsenderthresholdstatuschangemessage")){
             NetSenderThresholdStatusChangeMessageType netSenderThresholdStatusChangeMessageType =
@@ -233,7 +222,6 @@ public class MQUSMListener extends BaseListener implements MessageListener {
             usmMessage.setDateTime(netSenderThresholdStatusChangeMessageType.getDateTime());
             usmMessage.setMessageId(netSenderThresholdStatusChangeMessageType.getMessageID());
             usmMessage.setUsmType(USMMessageTypes.NET_SENDER_THRESHOLD_STATUS_CHANGE);
-      //      usmGenericMessage.setNetSenderThresholdStatusChangeMessage(netSenderThresholdStatusChangeMessageType);
             usmMessage.setFpsMessage(netSenderThresholdStatusChangeMessageType);
         }else if(message.toLowerCase().contains("netsendercapstatusmessage")){
             NetSenderCapStatusMessageType netSenderCapStatusMessageType = JAXB.unmarshal(new StreamSource(new StringReader(xmlStr.toString())),
@@ -241,7 +229,6 @@ public class MQUSMListener extends BaseListener implements MessageListener {
             usmMessage.setDateTime(netSenderCapStatusMessageType.getDateTime());
             usmMessage.setMessageId(netSenderCapStatusMessageType.getMessageID());
             usmMessage.setUsmType(USMMessageTypes.NET_SENDER_CAP_STATUS);
-       //     usmGenericMessage.setNetSenderCapStatusMessage(netSenderCapStatusMessageType);
             usmMessage.setFpsMessage(netSenderCapStatusMessageType);
         }else if(message.toLowerCase().contains("sitlchangemessage")){
             SITLChangeMessageType sitlChangeMessageType = JAXB.unmarshal(new StreamSource(new StringReader(xmlStr.toString())),
@@ -249,7 +236,6 @@ public class MQUSMListener extends BaseListener implements MessageListener {
             usmMessage.setDateTime(sitlChangeMessageType.getDateTime());
             usmMessage.setMessageId(sitlChangeMessageType.getMessageID());
             usmMessage.setUsmType(USMMessageTypes.SITL_CHANGE);
-        //    usmGenericMessage.setSITLChangeMessage(sitlChangeMessageType);
             usmMessage.setFpsMessage(sitlChangeMessageType);
         }else if(message.toLowerCase().contains("stlpaymentcodemessage")){
             STLPaymentCodeMessageType stlPaymentCodeMessageType = JAXB.unmarshal(new StreamSource(new StringReader(xmlStr.toString())),
@@ -257,7 +243,6 @@ public class MQUSMListener extends BaseListener implements MessageListener {
             usmMessage.setDateTime(stlPaymentCodeMessageType.getDateTime());
             usmMessage.setMessageId(stlPaymentCodeMessageType.getMessageID());
             usmMessage.setUsmType(USMMessageTypes.STL_PAYMENT_CODE);
-        //    usmGenericMessage.setSTLPaymentCodeMessage(stlPaymentCodeMessageType);
             usmMessage.setFpsMessage(stlPaymentCodeMessageType);
         }else if(message.toLowerCase().contains("netsenderthresholdmessage")){
             NetSenderThresholdMessageType netSenderThresholdMessageType = JAXB.unmarshal(new StreamSource(new StringReader(xmlStr.toString())),
@@ -265,7 +250,6 @@ public class MQUSMListener extends BaseListener implements MessageListener {
             usmMessage.setDateTime(netSenderThresholdMessageType.getDateTime());
             usmMessage.setMessageId(netSenderThresholdMessageType.getMessageID());
             usmMessage.setUsmType(USMMessageTypes.NET_SENDER_THRESHOLD);
-        //    usmGenericMessage.setNetSenderThresholdMessage(netSenderThresholdMessageType);
             usmMessage.setFpsMessage(netSenderThresholdMessageType);
         }else if(message.toLowerCase().contains("netsendercapchangemessage")){
             NetSenderCapChangeMessageType netSenderCapChangeMessageType = JAXB.unmarshal(new StreamSource(new StringReader(xmlStr.toString())),
@@ -273,7 +257,6 @@ public class MQUSMListener extends BaseListener implements MessageListener {
             usmMessage.setDateTime(netSenderCapChangeMessageType.getDateTime());
             usmMessage.setMessageId(netSenderCapChangeMessageType.getMessageID());
             usmMessage.setUsmType(USMMessageTypes.NET_SENDER_CAP_CHANGE);
-       //     usmGenericMessage.setNetSenderCapChangeMessage(netSenderCapChangeMessageType);
             usmMessage.setFpsMessage(netSenderCapChangeMessageType);
         }else if(message.toLowerCase().contains("settlementstatusmessage")){
             SettlementStatusMessageType settlementStatusMessageType = JAXB.unmarshal(new StreamSource(new StringReader(xmlStr.toString())),
@@ -281,7 +264,6 @@ public class MQUSMListener extends BaseListener implements MessageListener {
             usmMessage.setDateTime(settlementStatusMessageType.getDateTime());
             usmMessage.setMessageId(settlementStatusMessageType.getMessageID());
             usmMessage.setUsmType(USMMessageTypes.SETTLEMENT_STATUS);
-          //  usmGenericMessage.setSettlementStatusMessage(settlementStatusMessageType);
             usmMessage.setFpsMessage(settlementStatusMessageType);
         }else if(message.toLowerCase().contains("schemereturnpaymentfailure")){
             SchemeReturnPaymentFailureType schemeReturnPaymentFailureType = JAXB.unmarshal(new StreamSource(new StringReader(xmlStr.toString())),
@@ -289,7 +271,6 @@ public class MQUSMListener extends BaseListener implements MessageListener {
             usmMessage.setDateTime(schemeReturnPaymentFailureType.getDateTime());
             usmMessage.setMessageId(schemeReturnPaymentFailureType.getMessageID());
             usmMessage.setUsmType(USMMessageTypes.SCHEME_RETURN_PAYMENT_FAILURE);
-           // usmGenericMessage.setSchemeReturnPaymentFailure(schemeReturnPaymentFailureType);
             usmMessage.setFpsMessage(schemeReturnPaymentFailureType);
         }else if(message.toLowerCase().contains("freeformatmessage")){
             FreeFormatMessageType freeFormatMessageType = JAXB.unmarshal(new StreamSource(new StringReader(xmlStr.toString())),
@@ -297,7 +278,6 @@ public class MQUSMListener extends BaseListener implements MessageListener {
             usmMessage.setDateTime(freeFormatMessageType.getDateTime());
             usmMessage.setMessageId(freeFormatMessageType.getMessageID());
             usmMessage.setUsmType(USMMessageTypes.FREE_FORMAT);
-            //usmGenericMessage.setFreeFormatMessage(freeFormatMessageType);
             usmMessage.setFpsMessage(freeFormatMessageType);
         }else if(message.toLowerCase().contains("aspmalertmessage")){
             ASPMAlertMessageType aspmAlertMessageType = JAXB.unmarshal(new StreamSource(new StringReader(xmlStr.toString())),
@@ -305,17 +285,13 @@ public class MQUSMListener extends BaseListener implements MessageListener {
             usmMessage.setDateTime(aspmAlertMessageType.getDateTime());
             usmMessage.setMessageId(aspmAlertMessageType.getMessageID());
             usmMessage.setUsmType(USMMessageTypes.ASPM_ALERT);
-            //usmGenericMessage.setASPMAlertMessage(aspmAlertMessageType);
             usmMessage.setFpsMessage(aspmAlertMessageType);
         }else if(message.toLowerCase().contains("proprietarymessage")){
             ProprietaryMessageType proprietaryMessageType = JAXB.unmarshal(new StreamSource(new StringReader(xmlStr.toString())),
                     ProprietaryMessageType.class);
-            //com.orwellg.umbrella.avro.types.usm.ProprietaryMessageType proprietaryMessageType = JAXB.unmarshal(new StreamSource(new StringReader(xmlStr.toString())),
-            //        com.orwellg.umbrella.avro.types.usm.ProprietaryMessageType.class);
             usmMessage.setDateTime(proprietaryMessageType.getDateTime());
             usmMessage.setMessageId(proprietaryMessageType.getMessageID());
             usmMessage.setUsmType(USMMessageTypes.PROPIETARY);
-            //usmGenericMessage.setProprietaryMessage(proprietaryMessageType);
             usmMessage.setFpsMessage(proprietaryMessageType);
         }
         return usmMessage;

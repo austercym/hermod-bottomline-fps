@@ -33,7 +33,6 @@ public class MQAsynOutboundRecvListener extends MQOutboundListener {
                 uuid,
                 null, bottomlineEnv, paymentType, false
         );
-
     }
 
 }
