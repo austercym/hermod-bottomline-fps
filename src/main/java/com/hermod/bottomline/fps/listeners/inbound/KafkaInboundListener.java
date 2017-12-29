@@ -11,6 +11,9 @@ import com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs002_001_06.*;
 import com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.InstructionForNextAgent1;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jms.core.JmsOperations;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -26,6 +29,12 @@ import java.util.List;
 public class KafkaInboundListener extends BaseListener {
 
     private static Logger LOG = LogManager.getLogger(KafkaInboundListener.class);
+
+    @Value("${wq.mq.num.max.attempts}")
+    private int numMaxAttempts;
+
+    @Autowired
+    private JmsOperations jmsOperations;
 
     protected StringWriter transformResponseToString(FPSMessage fpsMessage) throws JAXBException {
         StringWriter rawMessage = new StringWriter();

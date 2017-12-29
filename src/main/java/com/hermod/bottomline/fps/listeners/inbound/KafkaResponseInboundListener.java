@@ -20,7 +20,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jms.JmsException;
-import org.springframework.jms.core.JmsOperations;
 import org.springframework.kafka.listener.KafkaDataListener;
 import org.springframework.kafka.listener.MessageListener;
 import org.springframework.messaging.converter.MessageConversionException;
@@ -40,12 +39,6 @@ public class KafkaResponseInboundListener extends KafkaInboundListener implement
 
 	@Value("${kafka.topic.fps.logging}")
 	private String loggingTopic;
-
-	@Value("${wq.mq.num.max.attempts}")
-	private int numMaxAttempts;
-
-	@Autowired
-	private JmsOperations jmsOperations;
 
 	@Autowired
 	private KafkaSender kafkaSender;
@@ -134,22 +127,7 @@ public class KafkaResponseInboundListener extends KafkaInboundListener implement
 				fpsPaymentResponse.getStsRsn(), fpsPaymentResponse.getTxSts());
 	}
 
-	private void sendToMQ(String key, String rawMessage, String queueToSend, String paymentType) {
-		boolean messageSent = false;
 
-		while (!messageSent && numMaxAttempts>0) {
-            try{
-                LOG.info("[FPS][PaymentType: {}][PmtId: {}] Message to be sent to queue {} to Bottomline: {}", paymentType, key, queueToSend, rawMessage);
-                jmsOperations.send(queueToSend, session -> {
-                    return session.createTextMessage(rawMessage);
-                });
-				messageSent = true;
-            } catch (Exception ex) {
-                LOG.error("[FPS] Error sending message for testing. Error Message: {}", ex.getMessage());
-                numMaxAttempts--;
-            }
-        }
-	}
 
 	protected String extractFPID(com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Document originalMessage) {
 		String FPID = "";

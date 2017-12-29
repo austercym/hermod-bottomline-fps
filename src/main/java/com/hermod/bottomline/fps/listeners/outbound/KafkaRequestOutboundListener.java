@@ -69,12 +69,6 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
     @Value("${brand.name}")
     private String brand;
 
-    @Value("${wq.mq.num.max.attempts}")
-    private int numMaxAttempts;
-
-    @Autowired
-    private JmsOperations jmsOperations;
-
     @Autowired
     private KafkaSender kafkaSender;
 
@@ -155,7 +149,7 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
                             queueToSend = outboundQueue;
                         }
 
-                        sendToMQ(key, paymentType, rawMessage, queueToSend);
+                        sendToMQ(key,  rawMessage.toString(), queueToSend, paymentType);
 
                         fpsOutboundPayment.setTxSts("SENT");
                         String eventName = FPSEvents.FPS_PAYMENT_SENT.getEventName();
@@ -210,24 +204,6 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
 
         } catch (Exception e) {
             throw new MessageConversionException("Exception in message emission. Message: " + e.getMessage(), e);
-        }
-    }
-
-    private void sendToMQ(String key, String paymentType, StringWriter rawMessage, String queueToSend) {
-        boolean messageSent = false;
-
-        while (!messageSent && numMaxAttempts>0) {
-
-            try {
-                LOG.info("[FPS][PaymentType: {}][PmtId: {}] Message to be sent to queue {} to Bottomline: {}", paymentType, key, queueToSend, rawMessage.toString());
-                jmsOperations.send(queueToSend, session -> {
-                    return session.createTextMessage(rawMessage.toString());
-                });
-                messageSent = true;
-            } catch (Exception ex) {
-                LOG.error("[FPS] Error sending message for testing. Error Message: {}", ex.getMessage());
-                numMaxAttempts--;
-            }
         }
     }
 
