@@ -38,7 +38,7 @@
         </FinInstnId>
       </InstdAgt>
       <OrgnlTxRef>
-        <IntrBkSttlmAmt Ccy="GBP">40.23</IntrBkSttlmAmt>
+        <IntrBkSttlmAmt Ccy="GBP">40.236</IntrBkSttlmAmt>
         <IntrBkSttlmDt>2016-11-15</IntrBkSttlmDt>
         <SttlmInf>
           <SttlmMtd>CLRG</SttlmMtd>
