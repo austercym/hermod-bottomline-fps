@@ -17,15 +17,6 @@ public class DefaultPropertyValues {
 	private final static String MQ_DEFAULT_CHANNEL  = "IPAGOO.CONNECT";
 	private final static String MQ_DEFAULT_USERNAME = "ipagoo";
 
-	/*
-	private final static String MQ_DEFAULT_HOST  = "localhost";
-	private final static Integer MQ_DEFAULT_PORT = 1414;
-	private final static String MQ_DEFAULT_QUEUE_MANAGER = "QM1";
-	private final static String MQ_DEFAULT_CHANNEL  = "DEV.APP.SVRCONN";
-	private final static String MQ_DEFAULT_USERNAME = "root";
-	 */
-
-
 	private final static String MQ_DEFAULT_PASSWORD = "";
 	private final static Long MQ_DEFAULT_RECEIVED_TIMEOUT = 2000L;
 	private final static Integer MQ_DEFAULT_NUM_MAX_CONSUMERS = 1;
@@ -36,6 +27,7 @@ public class DefaultPropertyValues {
 	private final static String MQ_DEFAULT_INBOUND_SIP_QUEUE  = "ORUN.HOST.SYNC.RECV.QL";
 	private final static String MQ_DEFAULT_INBOUND_ASYN_QUEUE  = "ORUN.HOST.ASYN.RECV.QL";
 	private final static String MQ_DEFAULT_INBOUND_POO_QUEUE  = "ORUN.HOST.POO.RECV.QL";
+	private final static String MQ_DEFAULT_INBOUND_STANDIN_QUEUE  = "ORUN.HOST.STANDIN.RECV.QL";
 
 	private final static String MQ_DEFAULT_INBOUND_USM_QUEUE  = "ORUN.HOST.USM.RECV.QR";
 	private final static String MQ_DEFAULT_INBOUND_RESP_SIP_QUEUE = "ORUN.HOST.SYNC.RECV.RESP.QR";
@@ -101,6 +93,7 @@ public class DefaultPropertyValues {
 		defaultValues.put("wq.mq.queue.sip.inbound.resp", MQ_DEFAULT_INBOUND_RESP_SIP_QUEUE);
 		defaultValues.put("wq.mq.queue.asyn.inbound", MQ_DEFAULT_INBOUND_ASYN_QUEUE);
 		defaultValues.put("wq.mq.queue.poo.inbound", MQ_DEFAULT_INBOUND_POO_QUEUE);
+		defaultValues.put("wq.mq.queue.standin.inbound", MQ_DEFAULT_INBOUND_STANDIN_QUEUE);
 		defaultValues.put("wq.mq.queue.asyn.inbound.resp", MQ_DEFAULT_INBOUND_RESP_ASYN_QUEUE);
 		defaultValues.put("wq.mq.queue.usm.inbound", MQ_DEFAULT_INBOUND_USM_QUEUE);
 

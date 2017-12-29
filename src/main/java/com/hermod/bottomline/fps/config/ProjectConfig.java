@@ -30,6 +30,9 @@ public class ProjectConfig extends ComponentConfig {
 	private DefaultMessageListenerContainer jmsASYNCListenerContainer;
 
 	@Autowired
+	private DefaultMessageListenerContainer jmsSTANDINListenerContainer;
+
+	@Autowired
 	private DefaultMessageListenerContainer jmsPOOListenerContainer;
 
 	@Autowired
@@ -43,8 +46,10 @@ public class ProjectConfig extends ComponentConfig {
 		kafkaResponseInboundListenerContainer.start();
 		kafkaRequestOutboundListenerContainer.start();
 		kafkaResponseReversalInboundListenerContainer.start();
+
 		jmsSIPListenerContainer.start();
 		jmsASYNCListenerContainer.start();
+		jmsSTANDINListenerContainer.start();
 		jmsSIPOutboundListenerContainer.start();
 		jmsAsynOutboundListenerContainer.start();
 		jmsPOOListenerContainer.start();
