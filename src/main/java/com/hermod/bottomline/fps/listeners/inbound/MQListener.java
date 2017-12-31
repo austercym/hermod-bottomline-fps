@@ -181,7 +181,7 @@ public abstract class MQListener extends BaseListener implements MessageListener
                 if (transform != null) {
                     Object avroFpsMessage = transform.fps2avro(fpsMessage);
 
-                    boolean isValid = validMessage((FPSAvroMessage)avroFpsMessage);
+                    //boolean isValid = validMessage((FPSAvroMessage)avroFpsMessage);
 
                     String FPID = extractFPID((FPSAvroMessage) avroFpsMessage, isReversal);
                     String paymentTypeCode = extractPaymentTypeCode((FPSAvroMessage) avroFpsMessage, isReversal);
@@ -217,7 +217,7 @@ public abstract class MQListener extends BaseListener implements MessageListener
                         sendToMQ(uuid, previousPaymentProcessed.getResponseMessage(), queueToSend, paymentType);
 
                     }else {
-                        if (schemaValidation && isValid) {
+                        if (schemaValidation) {
                             // Send avro message to Kafka
                             if(!isReversal) {
                                 FPSInboundPayment fpsRequest = new FPSInboundPayment();

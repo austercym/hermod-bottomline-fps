@@ -139,13 +139,13 @@ public abstract class MQOutboundListener extends BaseListener implements Message
                     FPSTransform transform = getTransform(fpsMessage.getClass().getPackage().getName());
                     if (transform != null) {
                         Object avroFpsMessage = transform.fps2avro(fpsMessage);
-                        boolean isValid = validMessage((FPSAvroMessage) avroFpsMessage);
+                        //boolean isValid = validMessage((FPSAvroMessage) avroFpsMessage);
 
                         Document paymentDocument = ((Document) ((FPSAvroMessage) avroFpsMessage).getMessage());
 
                         paymentType = getPaymentType(paymentDocument);
 
-                        if (schemaValidation && isValid) {
+                        if (schemaValidation) {
                             // Send avro message to Kafka
                             FPSInboundPaymentResponse fpsResponse = new FPSInboundPaymentResponse();
                             fpsResponse.setStsDocument(paymentDocument);

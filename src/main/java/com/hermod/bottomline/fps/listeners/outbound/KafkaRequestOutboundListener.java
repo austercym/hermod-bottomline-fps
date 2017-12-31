@@ -109,7 +109,7 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
                 if (transform != null) {
                     LOG.info("[FPS][PmtId: {}]  Transform FPS outbound payment from avro file.", key);
                     FPSMessage fpsMessage = transform.avro2fps(avroMessage);
-                    boolean isValid = validMessage(fpsDocument);
+                    //boolean isValid = validMessage(fpsDocument);
 
                     StringWriter rawMessage = transformRequestToString(fpsMessage);
 
@@ -134,7 +134,7 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
 
                     Event event = null;
 
-                    if (schemaValidation && isValid) {
+                    if (schemaValidation) {
 
                         //Send to MQ (Environment=Queue)
                         String queueToSend = outboundAsyncQueue;
