@@ -34,6 +34,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static com.hermod.bottomline.fps.utils.Constants.RESP_SUFFIX;
+
 @Component(value="kafkaResponseReversalInboundListener")
 public class KafkaResponseReversalInboundListener extends KafkaInboundListener implements MessageListener<String, String>, KafkaDataListener<ConsumerRecord<String, String>> {
 
@@ -88,9 +90,10 @@ public class KafkaResponseReversalInboundListener extends KafkaInboundListener i
 						FPSMessage fpsMessage = transform.avro2fps(fpsPacs002Response);
 
 						StringWriter rawMessage = transformResponseToString(fpsMessage);
+						String uuid = getResponsePaymentId(fpsPaymentReversalResponse);
 
 						LOG.info("[FPS][PmtId: {}] XML Response generated for FPS inbound reversal payment. Response: {}", key, rawMessage.toString());
-						kafkaSender.sendRawMessage(loggingTopic, rawMessage.toString(), key);
+						kafkaSender.sendRawMessage(loggingTopic, rawMessage.toString(), uuid);
 
 						Gson gson = new Gson();
 
@@ -250,4 +253,7 @@ public class KafkaResponseReversalInboundListener extends KafkaInboundListener i
 		return FPID;
 	}
 
+	private String getResponsePaymentId(FPSOutboundReversalResponse fpsPaymentResponse) {
+		return fpsPaymentResponse.getPaymentId()+ RESP_SUFFIX;
+	}
 }

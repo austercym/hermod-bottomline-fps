@@ -27,6 +27,8 @@ import org.springframework.stereotype.Component;
 
 import java.io.StringWriter;
 
+import static com.hermod.bottomline.fps.utils.Constants.RESP_SUFFIX;
+
 @Component(value="kafkaResponseInboundListener")
 public class KafkaResponseInboundListener extends KafkaInboundListener implements MessageListener<String, String>, KafkaDataListener<ConsumerRecord<String, String>> {
 
@@ -80,9 +82,10 @@ public class KafkaResponseInboundListener extends KafkaInboundListener implement
 						FPSMessage fpsMessage = transform.avro2fps(fpsPacs002Response);
 
 						StringWriter rawMessage = transformResponseToString(fpsMessage);
+						String uuid = getResponsePaymentId(fpsPaymentResponse);
 
 						LOG.info("[FPS][PmtId: {}] XML Response generated for FPS inbound payment. Response: {}", key, rawMessage.toString());
-						kafkaSender.sendRawMessage(loggingTopic, rawMessage.toString(), key);
+						kafkaSender.sendRawMessage(loggingTopic, rawMessage.toString(), uuid);
 
 						Gson gson = new Gson();
 
@@ -143,6 +146,9 @@ public class KafkaResponseInboundListener extends KafkaInboundListener implement
 			FPID = txId+paymentTypeCode+dateSent+currency+sendingFPSInstitution;
 		}
 		return FPID;
+	}
+	private String getResponsePaymentId(FPSOutboundPaymentResponse fpsPaymentResponse) {
+		return fpsPaymentResponse.getPaymentId() + RESP_SUFFIX;
 	}
 
 }

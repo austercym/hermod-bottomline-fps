@@ -39,9 +39,10 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Validator;
 import java.io.*;
 
+import static com.hermod.bottomline.fps.utils.Constants.RESP_SUFFIX;
+
 public abstract class MQOutboundListener extends BaseListener implements MessageListener {
 
-    public static final String RESP_SUFFIX = "_RESP";
     private static Logger LOG = LogManager.getLogger(MQOutboundListener.class);
 
     @Autowired
