@@ -26,7 +26,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.messaging.converter.MessageConversionException;
-import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.stereotype.Component;
 import org.xml.sax.SAXException;
 
@@ -40,7 +39,7 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Validator;
 import java.io.*;
 
-@Component(value = "mqUSMListener")
+    @Component(value = "mqUSMListener")
 @Scope("prototype")
 public class MQUSMListener extends BaseListener implements MessageListener {
 

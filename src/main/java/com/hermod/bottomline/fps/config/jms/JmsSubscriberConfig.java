@@ -29,6 +29,8 @@ public class JmsSubscriberConfig extends ComponentConfig {
     private MessageListener mqSIPOutboundRecvListener;
     @Autowired
     private MessageListener mqAsynOutboundRecvListener;
+    @Autowired
+    private MessageListener mqUSMListener;
 
     // INBOUND QUEUES TO RETRIEVE MESSAGES FROM BOTTOMLINE
 	@Value("${wq.mq.queue.sip.inbound}")
@@ -39,6 +41,8 @@ public class JmsSubscriberConfig extends ComponentConfig {
     private String pooQueue;
     @Value("${wq.mq.queue.standin.inbound}")
     private String standinQueue;
+    @Value("${wq.mq.queue.usm.inbound}")
+    private String usmInboundQueue;
 
     // OUTBOUND QUEUES TO RETRIEVE RESP  MESSAGES FROM BOTTOMLINE
     @Value("${wq.mq.queue.sip.outbound.resp}")
@@ -46,6 +50,7 @@ public class JmsSubscriberConfig extends ComponentConfig {
 
     @Value("${wq.mq.queue.asyn.outbound.resp}")
     private String asyncOutboundRecvQueue;
+
 
 
 	@Value("${wq.mq.receive.num.max.consumers}")
@@ -124,6 +129,20 @@ public class JmsSubscriberConfig extends ComponentConfig {
         listenerContainer.setSessionTransacted(true);
         listenerContainer.setDestinationName(asyncOutboundRecvQueue);
         listenerContainer.setMessageListener(mqAsynOutboundRecvListener);
+        listenerContainer.setMaxConcurrentConsumers(maxConcurrentConsumers);
+        listenerContainer.setSessionTransacted(true);
+
+        return listenerContainer;
+    }
+
+    @Bean
+    public DefaultMessageListenerContainer jmsUSMListenerContainer(ConnectionFactory connectionFactory)
+    {
+        DefaultMessageListenerContainer listenerContainer = new DefaultMessageListenerContainer();
+        listenerContainer.setConnectionFactory((ConnectionFactory)(applicationContext.getBean("mqQueueConnectionFactory")));
+        listenerContainer.setSessionTransacted(true);
+        listenerContainer.setDestinationName(usmInboundQueue);
+        listenerContainer.setMessageListener(mqUSMListener);
         listenerContainer.setMaxConcurrentConsumers(maxConcurrentConsumers);
         listenerContainer.setSessionTransacted(true);
 
