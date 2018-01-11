@@ -136,35 +136,35 @@ public abstract class MQListener extends BaseListener implements MessageListener
 
                 String errorMessage = "";
                 boolean isReversal = false;
-                try {
-                    // Validate against scheme
-                    Source src = new StreamSource(new StringReader(message));
-                    Validator validator = SchemeValidatorBean.getInstance().getValidatorPacs008();
-                    validator.validate(src);
-
-                } catch (SAXException ex) {
-                    schemaValidation = false;
-                    errorMessage = ex.getMessage();
-
-                } catch (IOException e) {
-                    schemaValidation = false;
-                    errorMessage = e.getMessage();
-                }
-                if(!schemaValidation) {
+                if(message!=null && message.contains("pacs.008")) {
                     try {
                         // Validate against scheme
                         Source src = new StreamSource(new StringReader(message));
-                        Validator validator = SchemeValidatorBean.getInstance().getValidatorPacs007();
+                        Validator validator = SchemeValidatorBean.getInstance().getValidatorPacs008();
                         validator.validate(src);
-                        schemaValidation = true;
-                        isReversal = true;
                     } catch (SAXException ex) {
                         schemaValidation = false;
                         errorMessage = ex.getMessage();
+
                     } catch (IOException e) {
                         schemaValidation = false;
                         errorMessage = e.getMessage();
                     }
+                }else if(message != null && message.contains("pacs.007")) {
+                        try {
+                            // Validate against scheme
+                            Source src = new StreamSource(new StringReader(message));
+                            Validator validator = SchemeValidatorBean.getInstance().getValidatorPacs007();
+                            validator.validate(src);
+                            schemaValidation = true;
+                            isReversal = true;
+                        } catch (SAXException ex) {
+                            schemaValidation = false;
+                            errorMessage = ex.getMessage();
+                        } catch (IOException e) {
+                            schemaValidation = false;
+                            errorMessage = e.getMessage();
+                        }
                 }
 
                 if(!schemaValidation){
