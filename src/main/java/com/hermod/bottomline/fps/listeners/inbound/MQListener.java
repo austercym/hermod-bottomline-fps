@@ -214,7 +214,8 @@ public abstract class MQListener extends BaseListener implements MessageListener
                             queueToSend = outboundQueue;
                         }
 
-                        sendToMQ(uuid, previousPaymentProcessed.getResponseMessage(), queueToSend, paymentType);
+                        boolean responseSent = sendToMQ(uuid, previousPaymentProcessed.getResponseMessage(), queueToSend, paymentType);
+
 
                     }else {
                         if (schemaValidation) {

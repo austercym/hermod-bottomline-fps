@@ -113,7 +113,7 @@ public class KafkaResponseReversalInboundListener extends KafkaInboundListener i
 						}
 
 						updatePaymentResponseInMemory(originalStr, FPID, rawMessage.toString(), key, paymentType);
-						sendToMQ(key, rawMessage.toString(), queueToSend, paymentType);
+						boolean reversalSent = sendToMQ(key, rawMessage.toString(), queueToSend, paymentType);
 
 					} else {
 						throw new MessageConversionException("Exception in message emission. The transform for pacs_002_001 is null");

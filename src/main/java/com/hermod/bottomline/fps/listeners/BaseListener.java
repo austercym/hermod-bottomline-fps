@@ -31,8 +31,9 @@ public class BaseListener {
 		return transforms.getOrDefault(beanKey, null);
 	}
 
-	protected void sendToMQ(String key, String rawMessage, String queueToSend, String paymentType) {
+	protected boolean sendToMQ(String key, String rawMessage, String queueToSend, String paymentType) {
 		boolean messageSent = false;
+		LOG.info("[FPS][PaymentType: {}][PmtId: {}] Sending message to queue {} to Bottomline. Attempts to try {}", paymentType, key, queueToSend, numMaxAttempts);
 		while (!messageSent && numMaxAttempts>0) {
 			try {
 				LOG.info("[FPS][PaymentType: {}][PmtId: {}] Message to be sent to queue {} to Bottomline: {}", paymentType, key, queueToSend, rawMessage);
@@ -41,8 +42,13 @@ public class BaseListener {
 			} catch (Exception ex) {
 				LOG.error("[FPS] Error sending message for testing. Error Message: {}", ex.getMessage());
 				numMaxAttempts--;
+				LOG.info("[FPS][PaymentType: {}][PmtId: {}] Sending message to queue {} to Bottomline. Attempts to try {}", paymentType, key, queueToSend, numMaxAttempts);
 			}
 		}
+		if(!messageSent){
+			LOG.error("[FPS][PmtId: {}] Error sending message to {} queue. Max number of attempts reached", key, queueToSend);
+		}
+		return messageSent;
 	}
 
 }

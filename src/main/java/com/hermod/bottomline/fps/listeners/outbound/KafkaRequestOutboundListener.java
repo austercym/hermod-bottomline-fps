@@ -143,21 +143,15 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
                             queueToSend = outboundQueue;
                         }
 
-                        sendToMQ(key,  rawMessage.toString(), queueToSend, paymentType);
+                        boolean paymentSent = sendToMQ(key,  rawMessage.toString(), queueToSend, paymentType);
 
                         fpsOutboundPayment.setTxSts("SENT");
+
                         String eventName = FPSEvents.FPS_PAYMENT_SENT.getEventName();
-                        if(eventPayment.getEvent().getName().equalsIgnoreCase(FPSEvents.FPS_SEND_RETURN.getEventName())){
+                        if (eventPayment.getEvent().getName().equalsIgnoreCase(FPSEvents.FPS_SEND_RETURN.getEventName())) {
                             eventName = FPSEvents.FPS_RETURN_SENT.getEventName();
                         }
-                        event = EventGenerator.generateEvent(
-                                this.getClass().getName(),
-                                eventName,
-                                paymentId,
-                                gson.toJson(fpsOutboundPayment),
-                                entity,
-                                brand
-                        );
+                        event = EventGenerator.generateEvent(this.getClass().getName(), eventName, paymentId, gson.toJson(fpsOutboundPayment), entity, brand);
 
                         LOG.info("[FPS][PmtId: {}] Sending Message to Topic {}", key, outboundResponseTopic);
                         sendToKafka(outboundResponseTopic, key, event);
