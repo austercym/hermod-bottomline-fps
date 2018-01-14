@@ -23,18 +23,18 @@ import javax.jms.QueueConnectionFactory;
 public class JmsConnectionConfig extends ComponentConfig {
 
 	private Logger LOG = LogManager.getLogger(JmsConnectionConfig.class);
-	
-	@Value("${wq.mq.host}")
+
+	@Value("${wq.mq.site1.host}")
 	private String host;
-	@Value("${wq.mq.port}")
+	@Value("${wq.mq.site1.port}")
 	private Integer port;
-	@Value("${wq.mq.channel}")
+	@Value("${wq.mq.site1.channel}")
 	private String channel;
-	@Value("${wq.mq.queue.manager}")
+	@Value("${wq.mq.site1.queue.manager}")
 	private String queueManager;
-	@Value("${wq.mq.username}")
+	@Value("${wq.mq.site1.username}")
 	private String username;
-	@Value("${wq.mq.password}")
+	@Value("${wq.mq.site1.password}")
 	private String password;
 	
 	@Bean

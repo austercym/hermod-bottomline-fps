@@ -1,13 +1,19 @@
 package com.hermod.bottomline.fps.storage;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.DigestUtils;
 
 import java.util.Date;
-import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
+import org.apache.commons.collections4.map.PassiveExpiringMap;
+
 
 public class InMemoryPaymentStorage {
 
-    private HashMap<String, PaymentBean> storage = new HashMap<>();
+    @Value("${inmemory.cache.expiringMinutes}")
+    private int expiringMinutes;
+
+    private PassiveExpiringMap<String, PaymentBean> storage = new PassiveExpiringMap<>(expiringMinutes, TimeUnit.MINUTES);
 
     private static InMemoryPaymentStorage instance = null;
 
@@ -56,7 +62,7 @@ public class InMemoryPaymentStorage {
     }
 
     public void cleanStorage() {
-        storage = new HashMap<>();
+        storage = new PassiveExpiringMap<>(expiringMinutes, TimeUnit.MINUTES);
     }
 
     private String generateHash(String FPID, String originalMessage){

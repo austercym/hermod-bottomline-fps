@@ -24,6 +24,7 @@
 		<yggdrasil.version>0.0.1</yggdrasil.version>
 		<spring.version>4.3.8.RELEASE</spring.version>
 		<com.ibm.mq.version>9.0.3.0</com.ibm.mq.version>
+		<org.apache.commons.version>4.1</org.apache.commons.version>
 		<javax.jms.version>2.0.1</javax.jms.version>
 		<jaxb2.basics.version>1.11.1</jaxb2.basics.version>
 		<jaxb2.maven.plugin.version>2.3.1</jaxb2.maven.plugin.version>
@@ -44,6 +45,11 @@
 			<groupId>com.ibm.mq</groupId>
 			<artifactId>allclient</artifactId>
 			<version>${com.ibm.mq.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-collections4</artifactId>
+			<version>${org.apache.commons.version}</version>
 		</dependency>
     	<dependency>
 			<groupId>org.springframework.boot</groupId>

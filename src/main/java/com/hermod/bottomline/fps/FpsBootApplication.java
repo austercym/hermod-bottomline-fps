@@ -9,10 +9,9 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 public class FpsBootApplication {
 
     public static void main(String[] args) {
-
-    		new SpringApplicationBuilder(FpsBootApplication.class)
-    			.initializers(new SpringProfileSettingApplicationContextInitializer("hermod-bottomline-fps.properties", DefaultPropertyValues.getDefaultValues()))
-    			.run(args);
+		new SpringApplicationBuilder(FpsBootApplication.class)
+			.initializers(new SpringProfileSettingApplicationContextInitializer("hermod-bottomline-fps.properties", DefaultPropertyValues.getDefaultValues()))
+			.run(args);
     }
 
 }

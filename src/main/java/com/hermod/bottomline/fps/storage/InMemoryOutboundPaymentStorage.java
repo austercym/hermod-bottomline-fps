@@ -3,11 +3,16 @@ package com.hermod.bottomline.fps.storage;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSOutboundPayment;
 
 import java.util.Date;
-import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
+import org.apache.commons.collections4.map.PassiveExpiringMap;
+import org.springframework.beans.factory.annotation.Value;
 
 public class InMemoryOutboundPaymentStorage {
 
-    private HashMap<String, PaymentOutboundBean> storage = new HashMap<>();
+    @Value("${inmemory.cache.expiringMinutes}")
+    private int expiringMinutes;
+
+    private PassiveExpiringMap<String, PaymentOutboundBean> storage = new PassiveExpiringMap<>(expiringMinutes, TimeUnit.MINUTES);
 
     private static InMemoryOutboundPaymentStorage instance = null;
 
@@ -44,7 +49,7 @@ public class InMemoryOutboundPaymentStorage {
 
 
     public void cleanStorage() {
-        storage = new HashMap<>();
+        storage = new PassiveExpiringMap<>(expiringMinutes, TimeUnit.MINUTES);
     }
 
 }
