@@ -17,21 +17,18 @@ public class MQSIPListener extends MQListener {
     public static final String PAYMENT_TYPE = "SIP";
     private static Logger LOG = LogManager.getLogger(MQSIPListener.class);
 
-    @Value("${jms.mq.bottomline.environment.1}")
-    private String bottomlineEnv;
-
     @Override
     public void onMessage(Message message) {
         super.onMessage(message, PAYMENT_TYPE);
     }
 
     @Override
-    protected void sendToKafka(String topic, String uuid, Event event, String paymentType){
+    protected void sendToKafka(String topic, String uuid, Event event, String paymentType, String environmentMQ){
         kafkaSender.send(
                 topic,
                 RawMessageUtils.encodeToString(Event.SCHEMA$, event),
                 uuid,
-                replyTo, bottomlineEnv, paymentType, false
+                replyTo, environmentMQ, paymentType, false
         );
 
     }

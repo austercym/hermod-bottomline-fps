@@ -46,10 +46,6 @@ public class ProjectConfig extends ComponentConfig {
 	@EventListener(ApplicationReadyEvent.class)
 	public void doSomethingAfterStartup() {
 	    LOG.info("Connector to Bottomline start. Starting containers....");
-		kafkaResponseInboundListenerContainer.start();
-		kafkaRequestOutboundListenerContainer.start();
-		kafkaResponseReversalInboundListenerContainer.start();
-
 		jmsSIPListenerContainer.start();
 		jmsASYNCListenerContainer.start();
 		jmsSTANDINListenerContainer.start();
@@ -57,6 +53,10 @@ public class ProjectConfig extends ComponentConfig {
 		jmsAsynOutboundListenerContainer.start();
 		jmsPOOListenerContainer.start();
 		jmsUSMListenerContainer.start();
+
+		kafkaResponseInboundListenerContainer.start();
+		kafkaRequestOutboundListenerContainer.start();
+		kafkaResponseReversalInboundListenerContainer.start();
 
 	    LOG.info("Connector started");
 	}

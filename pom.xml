@@ -270,6 +270,19 @@
 				</resources>
 			</build>
 		</profile>
+		<profile>
+			<id>uat</id>
+			<build>
+				<resources>
+					<resource>
+						<directory>src/main/resources/uat</directory>
+					</resource>
+					<resource>
+						<directory>src/main/resources</directory>
+					</resource>
+				</resources>
+			</build>
+		</profile>
 	</profiles>
   
 </project>

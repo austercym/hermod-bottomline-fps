@@ -54,6 +54,25 @@ public class JmsProducerConfig extends ComponentConfig {
 	}
 
 	@Bean
+	public JmsOperations jmsOperationsSite2(CachingConnectionFactory cachingConnectionSite2Factory) {
+
+		JmsTemplate jmsTemplate = new JmsTemplate(cachingConnectionSite2Factory);
+		jmsTemplate.setReceiveTimeout(receiveTimeout);
+
+		// Creating and assing the message converter for jmsTemplate
+		MarshallingMessageConverter converter = new MarshallingMessageConverter();
+		converter.setTargetType(MessageType.TEXT);
+		converter.setMarshaller(marshaller());
+		converter.setUnmarshaller(marshaller());
+		// set this converter on the implicit Spring JMS template
+		jmsTemplate.setMessageConverter(converter);
+		jmsTemplate.setMessageIdEnabled(true);
+		jmsTemplate.setMessageTimestampEnabled(true);
+
+		return jmsTemplate;
+	}
+
+	@Bean
 	public PlatformTransactionManager jmsTransactionManager(CachingConnectionFactory cachingConnectionFactory) {
 		JmsTransactionManager jmsTransactionManager = new JmsTransactionManager();
 		jmsTransactionManager.setConnectionFactory(cachingConnectionFactory);

@@ -45,6 +45,8 @@ public class MQUSMListener extends BaseListener implements MessageListener {
 
     private static Logger LOG = LogManager.getLogger(MQUSMListener.class);
 
+    public static String PAYMENT_TYPE = "USM";
+
     @Autowired
     private Gson gson;
 
@@ -62,7 +64,11 @@ public class MQUSMListener extends BaseListener implements MessageListener {
     @Value("${kafka.topic.fps.logging}")
     private String loggingTopic;
 
-    public void onMessage(Message message) {
+    @Value("${connector.mq_primary}")
+    private String environmentMQ;
+
+
+        public void onMessage(Message message) {
 
         LOG.info("[FPS] Getting usm message...............");
         InputStream stream = null;
@@ -192,7 +198,7 @@ public class MQUSMListener extends BaseListener implements MessageListener {
                 topic,
                 RawMessageUtils.encodeToString(Event.SCHEMA$, event),
                 uuid,
-                null, "bottomlineEnv", "USM", false
+                null, environmentMQ, PAYMENT_TYPE, false
         );
     }
 

@@ -20,35 +20,35 @@ import javax.jms.QueueConnectionFactory;
 
 @Configuration
 @EnableTransactionManagement
-public class JmsConnectionConfig extends ComponentConfig {
+public class JmsConnectionSite2Config extends ComponentConfig {
 
-	private Logger LOG = LogManager.getLogger(JmsConnectionConfig.class);
+	private Logger LOG = LogManager.getLogger(JmsConnectionSite2Config.class);
 
-	@Value("${wq.mq.site1.host}")
+	@Value("${wq.mq.site2.host}")
 	private String host;
-	@Value("${wq.mq.site1.port}")
+	@Value("${wq.mq.site2.port}")
 	private Integer port;
-	@Value("${wq.mq.site1.channel}")
+	@Value("${wq.mq.site2.channel}")
 	private String channel;
-	@Value("${wq.mq.site1.queue.manager}")
+	@Value("${wq.mq.site2.queue.manager}")
 	private String queueManager;
-	@Value("${wq.mq.site1.username}")
+	@Value("${wq.mq.site2.username}")
 	private String username;
-	@Value("${wq.mq.site1.password}")
+	@Value("${wq.mq.site2.password}")
 	private String password;
 	
 	@Bean
-    public ConnectionFactory connectionFactory() {
-        return mqQueueConnectionFactory();
+    public ConnectionFactory connectionSite2Factory() {
+        return mqQueueConnectionSite2Factory();
     }
 
     @Bean
-    public QueueConnectionFactory queueConnectionFactory() {
-        return mqQueueConnectionFactory();
+    public QueueConnectionFactory queueConnectionSite2Factory() {
+        return mqQueueConnectionSite2Factory();
     }
     
 	@Bean
-	public MQQueueConnectionFactory mqQueueConnectionFactory() {
+	public MQQueueConnectionFactory mqQueueConnectionSite2Factory() {
 		
 	    MQQueueConnectionFactory mqQueueConnectionFactory = new MQQueueConnectionFactory();
 	    mqQueueConnectionFactory.setHostName(host);
@@ -60,26 +60,25 @@ public class JmsConnectionConfig extends ComponentConfig {
 	        mqQueueConnectionFactory.setPort(port);
 	        mqQueueConnectionFactory.setQueueManager(queueManager);
 	    } catch (Exception e) {
-	    		LOG.error("Error creating the MQ Connection Factory. Message: {}", e.getMessage(), e);
+	    		LOG.error("Error creating the MQ Connection Site 2 Factory. Message: {}", e.getMessage(), e);
 	    }
 	    
 	    return mqQueueConnectionFactory;
 	}
 	
 	@Bean
-	public UserCredentialsConnectionFactoryAdapter userCredentialsConnectionFactoryAdapter(MQQueueConnectionFactory mqQueueConnectionFactory) {
+	public UserCredentialsConnectionFactoryAdapter userCredentialsConnectionSite2FactoryAdapter(MQQueueConnectionFactory mqQueueConnectionSite2Factory) {
 	    UserCredentialsConnectionFactoryAdapter userCredentialsConnectionFactoryAdapter = new UserCredentialsConnectionFactoryAdapter();
 	    userCredentialsConnectionFactoryAdapter.setUsername(username);
 	    userCredentialsConnectionFactoryAdapter.setPassword(password);
-	    userCredentialsConnectionFactoryAdapter.setTargetConnectionFactory(mqQueueConnectionFactory);
+	    userCredentialsConnectionFactoryAdapter.setTargetConnectionFactory(mqQueueConnectionSite2Factory);
 	    return userCredentialsConnectionFactoryAdapter;
 	}
 	
 	@Bean
-	//@Primary
-	public CachingConnectionFactory cachingConnectionFactory(UserCredentialsConnectionFactoryAdapter userCredentialsConnectionFactoryAdapter) {
+	public CachingConnectionFactory cachingConnectionSite2Factory(UserCredentialsConnectionFactoryAdapter userCredentialsConnectionSite2FactoryAdapter) {
 	    CachingConnectionFactory cachingConnectionFactory = new CachingConnectionFactory();
-	    cachingConnectionFactory.setTargetConnectionFactory(userCredentialsConnectionFactoryAdapter);
+	    cachingConnectionFactory.setTargetConnectionFactory(userCredentialsConnectionSite2FactoryAdapter);
 	    cachingConnectionFactory.setSessionCacheSize(500);
 	    cachingConnectionFactory.setReconnectOnException(true);
 	    cachingConnectionFactory.setCacheConsumers(true);
@@ -87,9 +86,9 @@ public class JmsConnectionConfig extends ComponentConfig {
 	}
 	
 	@Bean
-	public PlatformTransactionManager jmsTransactionManager(CachingConnectionFactory cachingConnectionFactory) {
+	public PlatformTransactionManager jmsTransactionSite2Manager(CachingConnectionFactory cachingConnectionSite2Factory) {
 	    JmsTransactionManager jmsTransactionManager = new JmsTransactionManager();
-	    jmsTransactionManager.setConnectionFactory(cachingConnectionFactory);
+	    jmsTransactionManager.setConnectionFactory(cachingConnectionSite2Factory);
 	    return jmsTransactionManager;
 	}
 	

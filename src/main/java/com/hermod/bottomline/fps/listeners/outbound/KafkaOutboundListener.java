@@ -30,7 +30,7 @@ public class KafkaOutboundListener extends BaseListener {
 
 
     protected PaymentBean updatePaymentResponseInMemory(com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Document originalMessage,
-                                                        String responseMessage, String paymentId, String paymentType) {
+                                                        String responseMessage, String paymentId, String paymentType, String environmentMQ) {
         InMemoryPaymentStorage storage = InMemoryPaymentStorage.getInstance();
         Gson gson = new Gson();
 
@@ -40,7 +40,7 @@ public class KafkaOutboundListener extends BaseListener {
         LOG.debug("[FPS][PmtId: {}] Storing response message to in-memory storage with FPID {}", paymentId, FPID);
         PaymentBean payment = storage.findPayment(FPID, originalStr);
         if (payment == null) {
-            storage.storePayment(FPID, originalStr, paymentId, paymentType);
+            storage.storePayment(FPID, originalStr, paymentId, paymentType, environmentMQ);
         }
         payment = storage.completePaymentResponse(FPID, originalStr, responseMessage);
 

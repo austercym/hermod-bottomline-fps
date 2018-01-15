@@ -13,7 +13,7 @@ public class InMemoryPaymentStorage {
     @Value("${inmemory.cache.expiringMinutes}")
     private int expiringMinutes;
 
-    private PassiveExpiringMap<String, PaymentBean> storage = new PassiveExpiringMap<>(expiringMinutes, TimeUnit.MINUTES);
+    private PassiveExpiringMap<String, PaymentBean> storage = new PassiveExpiringMap<>(expiringMinutes>0?expiringMinutes:20, TimeUnit.MINUTES);
 
     private static InMemoryPaymentStorage instance = null;
 
@@ -41,7 +41,7 @@ public class InMemoryPaymentStorage {
 
     }
 
-    public PaymentBean storePayment(String FPID, String originalMessage, String paymentId, String paymentType) {
+    public PaymentBean storePayment(String FPID, String originalMessage, String paymentId, String paymentType, String environmentMQ) {
         String key = generateHash(FPID, originalMessage);
         PaymentBean message = new PaymentBean();
         message.setFPID(FPID);
@@ -49,6 +49,7 @@ public class InMemoryPaymentStorage {
         message.setStatus(PaymentStatus.PENDING);
         message.setPaymentID(paymentId);
         message.setPaymentType(paymentType);
+        message.setEnvironmentMQ(environmentMQ);
         storage.put(key,message);
         return message;
     }
@@ -62,7 +63,7 @@ public class InMemoryPaymentStorage {
     }
 
     public void cleanStorage() {
-        storage = new PassiveExpiringMap<>(expiringMinutes, TimeUnit.MINUTES);
+        storage = new PassiveExpiringMap<>(expiringMinutes>0?expiringMinutes:20, TimeUnit.MINUTES);
     }
 
     private String generateHash(String FPID, String originalMessage){

@@ -12,7 +12,7 @@ public class InMemoryOutboundPaymentStorage {
     @Value("${inmemory.cache.expiringMinutes}")
     private int expiringMinutes;
 
-    private PassiveExpiringMap<String, PaymentOutboundBean> storage = new PassiveExpiringMap<>(expiringMinutes, TimeUnit.MINUTES);
+    private PassiveExpiringMap<String, PaymentOutboundBean> storage = new PassiveExpiringMap<>(expiringMinutes>0?expiringMinutes:20, TimeUnit.MINUTES);
 
     private static InMemoryOutboundPaymentStorage instance = null;
 
@@ -49,7 +49,7 @@ public class InMemoryOutboundPaymentStorage {
 
 
     public void cleanStorage() {
-        storage = new PassiveExpiringMap<>(expiringMinutes, TimeUnit.MINUTES);
+        storage = new PassiveExpiringMap<>(expiringMinutes>0?expiringMinutes:20, TimeUnit.MINUTES);
     }
 
 }

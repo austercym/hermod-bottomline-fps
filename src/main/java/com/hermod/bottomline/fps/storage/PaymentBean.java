@@ -11,6 +11,9 @@ public class PaymentBean implements Serializable{
     private String paymentID;
     private String responseMessage;
     private String paymentType;
+    private String environmentMQ;
+
+
     private PaymentStatus status;
 
     public String getPaymentType() {
@@ -19,6 +22,14 @@ public class PaymentBean implements Serializable{
 
     public void setPaymentType(String paymentType) {
         this.paymentType = paymentType;
+    }
+
+    public String getEnvironmentMQ() {
+        return environmentMQ;
+    }
+
+    public void setEnvironmentMQ(String environmentMQ) {
+        this.environmentMQ = environmentMQ;
     }
 
     public Date getTimestamp() {

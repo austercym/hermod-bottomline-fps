@@ -1,4 +1,4 @@
 server:
     port: 9595
 connector:
-    mq_primary: site1
+    mq_primary: BOTTOMLINE1

@@ -66,6 +66,9 @@ public abstract class MQOutboundListener extends BaseListener implements Message
     @Value("${kafka.topic.fps.logging}")
     private String loggingTopic;
 
+    @Value("${connector.mq_primary}")
+    private String environmentMQ;
+
     protected void onMessage(Message message, String paymentType) {
 
         LOG.info("[FPS][PaymentType: {}] Receiving outbound payment response message from Bottomline", paymentType);
@@ -202,7 +205,7 @@ public abstract class MQOutboundListener extends BaseListener implements Message
                             LOG.info("[FPS][PmtId: {}] Sending FPS Outbound payment response", uuid);
                             Event event = EventGenerator.generateEvent(this.getClass().getName(), FPSEvents.FPS_RESPONSE_RECEIVED.getEventName(), fpsResponse.getOrgnlPaymentId(), gson.toJson(fpsResponse), entity, brand);
 
-                            sendToKafka(inboundTopic, uuid, event, paymentType);
+                            sendToKafka(inboundTopic, uuid, event, paymentType, environmentMQ);
 
                             LOG.info("[FPS][PmtId: {}] Sent FPS Outbound payment response", uuid);
                         }
@@ -282,6 +285,6 @@ public abstract class MQOutboundListener extends BaseListener implements Message
         return true;
     }
 
-    protected abstract void sendToKafka(String topic, String uuid, Event event, String paymentType);
+    protected abstract void sendToKafka(String topic, String uuid, Event event, String paymentType, String environmentMQ);
 
 }

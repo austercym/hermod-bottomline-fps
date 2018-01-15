@@ -49,6 +49,9 @@ public class KafkaResponseReversalInboundListener extends KafkaInboundListener i
 	@Value("${kafka.topic.fps.logging}")
 	private String loggingTopic;
 
+	@Value("${connector.mq_primary}")
+	private String environmentPrimaryMQ;
+
 	@Autowired
 	private KafkaSender kafkaSender;
 
@@ -112,8 +115,13 @@ public class KafkaResponseReversalInboundListener extends KafkaInboundListener i
 							queueToSend = outboundQueue;
 						}
 
-						updatePaymentResponseInMemory(originalStr, FPID, rawMessage.toString(), key, paymentType);
-						boolean reversalSent = sendToMQ(key, rawMessage.toString(), queueToSend, paymentType);
+						Header headerSite = headers.lastHeader(KafkaHeaders.FPS_SITE.getKafkaHeader());
+						String environmentMQ = environmentPrimaryMQ;
+						if(headerSite != null){
+							environmentMQ = new String(headerSite.value(), "UTF-8");
+						}
+						updatePaymentResponseInMemory(originalStr, FPID, rawMessage.toString(), key, paymentType, environmentMQ);
+						boolean reversalSent = sendToMQ(key, rawMessage.toString(), queueToSend, paymentType, environmentMQ);
 
 					} else {
 						throw new MessageConversionException("Exception in message emission. The transform for pacs_002_001 is null");

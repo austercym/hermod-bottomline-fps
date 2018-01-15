@@ -63,6 +63,15 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
     @Value("${brand.name}")
     private String brand;
 
+    @Value("${connector.mq_primary}")
+    private String environmentMQ;
+
+    @Value("${jms.mq.bottomline.environment.1}")
+    private String environmentMQSite1;
+
+    @Value("${jms.mq.bottomline.environment.2}")
+    private String environmentMQSite2;
+
     @Autowired
     private KafkaSender kafkaSender;
 
@@ -143,7 +152,14 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
                             queueToSend = outboundQueue;
                         }
 
-                        boolean paymentSent = sendToMQ(key,  rawMessage.toString(), queueToSend, paymentType);
+                        boolean paymentSent = sendToMQ(key, rawMessage.toString(), queueToSend, paymentType, environmentMQ);
+                        if(!paymentSent){
+                            String alternativeEnvironmentMQ = environmentMQSite1;
+                            if(environmentMQ.equalsIgnoreCase(environmentMQSite1)){
+                                alternativeEnvironmentMQ = environmentMQSite2;
+                            }
+                            paymentSent = sendToMQ(key, rawMessage.toString(), queueToSend, paymentType, alternativeEnvironmentMQ);
+                        }
 
                         fpsOutboundPayment.setTxSts("SENT");
 

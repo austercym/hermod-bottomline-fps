@@ -17,21 +17,18 @@ public class MQPOOListener extends MQListener {
     public static String PAYMENT_TYPE = "POO";
     public static Logger LOG = LogManager.getLogger(MQPOOListener.class);
 
-    @Value("${jms.mq.bottomline.environment.1}")
-    private String bottomlineEnv;
-
     @Override
     public void onMessage(Message message) {
         super.onMessage(message, PAYMENT_TYPE);
     }
 
     @Override
-    protected void sendToKafka(String topic, String uuid, Event event, String paymentType){
+    protected void sendToKafka(String topic, String uuid, Event event, String paymentType, String environmentMQ){
         kafkaSender.send(
                 topic,
                 RawMessageUtils.encodeToString(Event.SCHEMA$, event),
                 uuid,
-                replyTo, bottomlineEnv, PAYMENT_TYPE, true
+                replyTo, environmentMQ, PAYMENT_TYPE, true
         );
     }
 }
