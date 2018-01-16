@@ -6,7 +6,7 @@
         </Console>
         <Kafka name="KAFKA" topic="log_hermod_bottomline_fps_001" syncsend="true" ignoreexceptions="false">
             <PatternLayout pattern="%d %-5p [%t] %C{2} (%F:%L) - %m%n"/>
-            <Property name="bootstrap.servers">${kafka.bootstrap.host}</Property>
+            <Property name="bootstrap.servers">hdf-group3-0.node.consul, hdf-group3-1.node.consul, hdf-group3-2.node.consul</Property>
         </Kafka>
         <RollingFile name="FILE" filename="logs/hermod-bottomline-fps.log" filePattern="logs/hermod-bottomline-fps-%d{yyyy-MM-dd}-%i.log">
             <PatternLayout pattern="%d %-5p [%t] %C{2} (%F:%L) - %m%n" />

@@ -1,4 +1,0 @@
-server:
-    port: 9595
-connector:
-    mq_primary: BOTTOMLINE1
