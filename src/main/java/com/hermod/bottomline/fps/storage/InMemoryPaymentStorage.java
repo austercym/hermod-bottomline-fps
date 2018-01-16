@@ -56,9 +56,11 @@ public class InMemoryPaymentStorage {
 
     public PaymentBean completePaymentResponse(String FPID, String originalMessage, String responseMessage){
         PaymentBean messageToUpdate = findPayment(FPID, originalMessage);
-        messageToUpdate.setResponseMessage(responseMessage);
-        messageToUpdate.setStatus(PaymentStatus.PROCESSED);
-        messageToUpdate.setTimestamp(new Date());
+        if(messageToUpdate != null) {
+            messageToUpdate.setResponseMessage(responseMessage);
+            messageToUpdate.setStatus(PaymentStatus.PROCESSED);
+            messageToUpdate.setTimestamp(new Date());
+        }
         return messageToUpdate;
     }
 
