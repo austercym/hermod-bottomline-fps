@@ -43,8 +43,28 @@ public class ProjectConfig extends ComponentConfig {
 	@Autowired
 	private DefaultMessageListenerContainer jmsAsynOutboundListenerContainer;
 
+	@Autowired
+	private DefaultMessageListenerContainer jmsSIPListenerSite2Container;
+
+	@Autowired
+	private DefaultMessageListenerContainer jmsASYNCListenerSite2Container;
+
+	@Autowired
+	private DefaultMessageListenerContainer jmsSTANDINListenerSite2Container;
+
+	@Autowired
+	private DefaultMessageListenerContainer jmsPOOListenerSite2Container;
+
+	@Autowired
+	private DefaultMessageListenerContainer jmsUSMListenerSite2Container;
+
+	@Autowired
+	private DefaultMessageListenerContainer jmsSIPOutboundListenerSite2Container;
+	@Autowired
+	private DefaultMessageListenerContainer jmsAsynOutboundListenerSite2Container;
+
 	@EventListener(ApplicationReadyEvent.class)
-	public void doSomethingAfterStartup() {
+	public void startListeners() {
 	    LOG.info("Connector to Bottomline start. Starting containers....");
 		jmsSIPListenerContainer.start();
 		jmsASYNCListenerContainer.start();
@@ -53,6 +73,14 @@ public class ProjectConfig extends ComponentConfig {
 		jmsAsynOutboundListenerContainer.start();
 		jmsPOOListenerContainer.start();
 		jmsUSMListenerContainer.start();
+
+		jmsSIPListenerSite2Container.start();
+		jmsASYNCListenerSite2Container.start();
+		jmsSTANDINListenerSite2Container.start();
+		jmsSIPOutboundListenerSite2Container.start();
+		jmsAsynOutboundListenerSite2Container.start();
+		jmsPOOListenerSite2Container.start();
+		jmsUSMListenerSite2Container.start();
 
 		kafkaResponseInboundListenerContainer.start();
 		kafkaRequestOutboundListenerContainer.start();

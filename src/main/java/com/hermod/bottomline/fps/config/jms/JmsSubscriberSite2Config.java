@@ -16,9 +16,9 @@ import javax.jms.MessageListener;
 
 @Configuration
 @EnableJms
-public class JmsSubscriberConfig extends ComponentConfig {
+public class JmsSubscriberSite2Config extends ComponentConfig {
 
-    private static final Logger LOG = LogManager.getLogger(JmsSubscriberConfig.class);
+    private static final Logger LOG = LogManager.getLogger(JmsSubscriberSite2Config.class);
     @Autowired private ApplicationContext applicationContext;
 	
 	@Autowired
@@ -58,20 +58,14 @@ public class JmsSubscriberConfig extends ComponentConfig {
 	@Value("${wq.mq.receive.num.max.consumers}")
 	private Integer maxConcurrentConsumers;
 
-    @Value("${connector.mq_primary}")
-    private String bottomlineSite;
-
-    @Value("${jms.mq.bottomline.environment.1}")
-    private String bottomlineSite1Env;
-
     @Value("${jms.mq.bottomline.environment.2}")
     private String bottomlineSite2Env;
 	
 	@Bean
-    public DefaultMessageListenerContainer jmsSIPListenerContainer(ConnectionFactory connectionFactory)
+    public DefaultMessageListenerContainer jmsSIPListenerSite2Container(ConnectionFactory connectionFactory)
     {
         DefaultMessageListenerContainer listenerContainer = new DefaultMessageListenerContainer();
-        listenerContainer.setConnectionFactory((ConnectionFactory) (applicationContext.getBean("mqQueueConnectionFactory")));
+        listenerContainer.setConnectionFactory((ConnectionFactory) (applicationContext.getBean("mqQueueConnectionSite2Factory")));
         listenerContainer.setDestinationName(sipQueue);
         listenerContainer.setMessageListener(mqSIPListener);
         listenerContainer.setMaxConcurrentConsumers(maxConcurrentConsumers);
@@ -81,10 +75,10 @@ public class JmsSubscriberConfig extends ComponentConfig {
     }
 
     @Bean
-    public DefaultMessageListenerContainer jmsASYNCListenerContainer(ConnectionFactory connectionFactory)
+    public DefaultMessageListenerContainer jmsASYNCListenerSite2Container(ConnectionFactory connectionFactory)
     {
         DefaultMessageListenerContainer listenerContainer = new DefaultMessageListenerContainer();
-        listenerContainer.setConnectionFactory((ConnectionFactory) (applicationContext.getBean("mqQueueConnectionFactory")));
+        listenerContainer.setConnectionFactory((ConnectionFactory) (applicationContext.getBean("mqQueueConnectionSite2Factory")));
         listenerContainer.setDestinationName(asynQueue);
         listenerContainer.setMessageListener(mqASYNListener);
         listenerContainer.setMaxConcurrentConsumers(maxConcurrentConsumers);
@@ -94,10 +88,10 @@ public class JmsSubscriberConfig extends ComponentConfig {
     }
 
     @Bean
-    public DefaultMessageListenerContainer jmsSTANDINListenerContainer(ConnectionFactory connectionFactory)
+    public DefaultMessageListenerContainer jmsSTANDINListenerSite2Container(ConnectionFactory connectionFactory)
     {
         DefaultMessageListenerContainer listenerContainer = new DefaultMessageListenerContainer();
-        listenerContainer.setConnectionFactory((ConnectionFactory) (applicationContext.getBean("mqQueueConnectionFactory")));
+        listenerContainer.setConnectionFactory((ConnectionFactory) (applicationContext.getBean("mqQueueConnectionSite2Factory")));
         listenerContainer.setDestinationName(standinQueue);
         listenerContainer.setMessageListener(mqSTANDINListener);
         listenerContainer.setMaxConcurrentConsumers(maxConcurrentConsumers);
@@ -107,10 +101,10 @@ public class JmsSubscriberConfig extends ComponentConfig {
     }
 
     @Bean
-    public DefaultMessageListenerContainer jmsPOOListenerContainer(ConnectionFactory connectionFactory)
+    public DefaultMessageListenerContainer jmsPOOListenerSite2Container(ConnectionFactory connectionFactory)
     {
         DefaultMessageListenerContainer listenerContainer = new DefaultMessageListenerContainer();
-        listenerContainer.setConnectionFactory((ConnectionFactory) (applicationContext.getBean("mqQueueConnectionFactory")));
+        listenerContainer.setConnectionFactory((ConnectionFactory) (applicationContext.getBean("mqQueueConnectionSite2Factory")));
         listenerContainer.setDestinationName(pooQueue);
         listenerContainer.setMessageListener(mqPOOListener);
         listenerContainer.setMaxConcurrentConsumers(maxConcurrentConsumers);
@@ -120,10 +114,10 @@ public class JmsSubscriberConfig extends ComponentConfig {
     }
 
     @Bean
-    public DefaultMessageListenerContainer jmsSIPOutboundListenerContainer(ConnectionFactory connectionFactory)
+    public DefaultMessageListenerContainer jmsSIPOutboundListenerSite2Container(ConnectionFactory connectionFactory)
     {
         DefaultMessageListenerContainer listenerContainer = new DefaultMessageListenerContainer();
-        listenerContainer.setConnectionFactory((ConnectionFactory) (applicationContext.getBean("mqQueueConnectionFactory")));
+        listenerContainer.setConnectionFactory((ConnectionFactory) (applicationContext.getBean("mqQueueConnectionSite2Factory")));
         listenerContainer.setDestinationName(sipOutboundRecvQueue);
         listenerContainer.setMessageListener(mqSIPOutboundRecvListener);
         listenerContainer.setMaxConcurrentConsumers(maxConcurrentConsumers);
@@ -133,10 +127,10 @@ public class JmsSubscriberConfig extends ComponentConfig {
     }
 
     @Bean
-    public DefaultMessageListenerContainer jmsAsynOutboundListenerContainer(ConnectionFactory connectionFactory)
+    public DefaultMessageListenerContainer jmsAsynOutboundListenerSite2Container(ConnectionFactory connectionFactory)
     {
         DefaultMessageListenerContainer listenerContainer = new DefaultMessageListenerContainer();
-        listenerContainer.setConnectionFactory((ConnectionFactory) (applicationContext.getBean("mqQueueConnectionFactory")));
+        listenerContainer.setConnectionFactory((ConnectionFactory) (applicationContext.getBean("mqQueueConnectionSite2Factory")));
         listenerContainer.setSessionTransacted(true);
         listenerContainer.setDestinationName(asyncOutboundRecvQueue);
         listenerContainer.setMessageListener(mqAsynOutboundRecvListener);
@@ -147,10 +141,10 @@ public class JmsSubscriberConfig extends ComponentConfig {
     }
 
     @Bean
-    public DefaultMessageListenerContainer jmsUSMListenerContainer(ConnectionFactory connectionFactory)
+    public DefaultMessageListenerContainer jmsUSMListenerSite2Container(ConnectionFactory connectionFactory)
     {
         DefaultMessageListenerContainer listenerContainer = new DefaultMessageListenerContainer();
-        listenerContainer.setConnectionFactory((ConnectionFactory) (applicationContext.getBean("mqQueueConnectionFactory")));
+        listenerContainer.setConnectionFactory((ConnectionFactory) (applicationContext.getBean("mqQueueConnectionSite2Factory")));
         listenerContainer.setSessionTransacted(true);
         listenerContainer.setDestinationName(usmInboundQueue);
         listenerContainer.setMessageListener(mqUSMListener);
@@ -159,4 +153,5 @@ public class JmsSubscriberConfig extends ComponentConfig {
 
         return listenerContainer;
     }
+
 }
