@@ -78,6 +78,7 @@ public class DefaultPropertyValues {
 
 	private final static Integer KAFKA_DEFAULT_OUTBOUND_TOPIC_PARTITIONS = 3;
 	private final static String KAFKA_DEFAULT_CONSUMER_GROUP_ID = "hermod-bottomline-fps-inbound";
+	private final static String KAFKA_DEFAULT_CONSUMER_INMEMORY_GROUP_ID = "hermod-bottomline-fps-inmemory.1";
 	private final static Integer KAFKA_DEFAULT_CONSUMER_THREADS = 3;
 	private final static Long KAFKA_DEFAULT_CONSUMER_POLL_TIMEOUT = 3000L;
 	private final static Integer INMEMORY_DEFAULT_CACHE_EXPIRINGMINUTES = 30;
@@ -159,6 +160,8 @@ public class DefaultPropertyValues {
 
 		defaultValues.put("kafka.consumer.poll.timeout", KAFKA_DEFAULT_CONSUMER_POLL_TIMEOUT);
 		defaultValues.put("inmemory.cache.expiringMinutes", INMEMORY_DEFAULT_CACHE_EXPIRINGMINUTES);
+
+		defaultValues.put("connector.%id.groupId", KAFKA_DEFAULT_CONSUMER_INMEMORY_GROUP_ID);
 	}
 
 	public static Map<String, Object> getDefaultValues() {

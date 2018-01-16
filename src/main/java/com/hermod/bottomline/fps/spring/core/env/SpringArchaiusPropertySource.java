@@ -20,12 +20,15 @@ public class SpringArchaiusPropertySource extends PropertySource<Void> {
     private DynamicPropertyFactory dynamicPropertyFactory;
     
     private Map<String, Object> defaultPropertyValues;
+    private Integer connectorId;
     
     public SpringArchaiusPropertySource(String propertiesFileName, Map<String, Object> defaultPropertyValues) {
         super(propertiesFileName);
         try {
         		// Load the properties filename from get the spring properties
         		PropertiesUtils props = new PropertiesUtils(name);
+
+        		connectorId = props.getIntProperty("connector.id");
         		
         		String zookeeperHost = props.getStringProperty(ZK_HOST_KEY);
         		String zookeeperPath = props.getStringProperty(ZK_PATH_KEY);
@@ -39,23 +42,28 @@ public class SpringArchaiusPropertySource extends PropertySource<Void> {
     
 	@Override
 	public Object getProperty(String name) {
-    		
-    		if (defaultPropertyValues != null && defaultPropertyValues.containsKey(name)) {
-    			if (defaultPropertyValues.get(name) instanceof Integer) {
-    				return dynamicPropertyFactory.getIntProperty(name, (Integer) defaultPropertyValues.get(name)).get();
-    			} else if (defaultPropertyValues.get(name) instanceof Double) {
-    				return dynamicPropertyFactory.getDoubleProperty(name, (Double) defaultPropertyValues.get(name)).get();
-    			} else if (defaultPropertyValues.get(name) instanceof Long) {
-    				return dynamicPropertyFactory.getLongProperty(name, (Long) defaultPropertyValues.get(name)).get();
-    			} else if (defaultPropertyValues.get(name) instanceof Boolean) {
-    				return dynamicPropertyFactory.getBooleanProperty(name, (Boolean) defaultPropertyValues.get(name)).get();
-    			} else if (defaultPropertyValues.get(name) instanceof Float) {
-    				return dynamicPropertyFactory.getFloatProperty(name, (Float) defaultPropertyValues.get(name)).get();
-    			} else {
-    				return dynamicPropertyFactory.getStringProperty(name, (String) defaultPropertyValues.get(name)).get();
-    			}
+
+    	String propertyName = name;
+
+    	if(propertyName.contains("%id")){
+    		propertyName = propertyName.replace("%id", connectorId.toString());
+		}
+        if (defaultPropertyValues != null && defaultPropertyValues.containsKey(propertyName)) {
+            if (defaultPropertyValues.get(propertyName) instanceof Integer) {
+                return dynamicPropertyFactory.getIntProperty(propertyName, (Integer) defaultPropertyValues.get(propertyName)).get();
+            } else if (defaultPropertyValues.get(propertyName) instanceof Double) {
+                return dynamicPropertyFactory.getDoubleProperty(propertyName, (Double) defaultPropertyValues.get(propertyName)).get();
+            } else if (defaultPropertyValues.get(propertyName) instanceof Long) {
+                return dynamicPropertyFactory.getLongProperty(propertyName, (Long) defaultPropertyValues.get(propertyName)).get();
+            } else if (defaultPropertyValues.get(propertyName) instanceof Boolean) {
+                return dynamicPropertyFactory.getBooleanProperty(propertyName, (Boolean) defaultPropertyValues.get(propertyName)).get();
+            } else if (defaultPropertyValues.get(propertyName) instanceof Float) {
+                return dynamicPropertyFactory.getFloatProperty(propertyName, (Float) defaultPropertyValues.get(propertyName)).get();
+            } else {
+                return dynamicPropertyFactory.getStringProperty(propertyName, (String) defaultPropertyValues.get(propertyName)).get();
+            }
 		} else {
-			return dynamicPropertyFactory.getStringProperty(name, null).get();
+			return dynamicPropertyFactory.getStringProperty(propertyName, null).get();
 		}
 	}
 
