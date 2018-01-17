@@ -19,7 +19,7 @@
             <DefaultRolloverStrategy max="5" />
         </RollingFile>
         <Async name="ASYNC">
-            <AppenderRef ref="KAFKA" />
+            <!--<AppenderRef ref="KAFKA" />-->
             <AppenderRef ref="FILE" />
             <AppenderRef ref="CONSOLE" />
         </Async>
