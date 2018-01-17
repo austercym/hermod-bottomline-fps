@@ -52,6 +52,9 @@ public abstract class MQListener extends BaseListener implements MessageListener
     @Autowired
     protected KafkaSender kafkaSender;
 
+    @Value("${inmemory.cache.expiringMinutes}")
+    private int expiringMinutes;
+
     @Value("{entity.name}")
     private String entity;
     @Value("${brand.name}")
@@ -326,7 +329,7 @@ public abstract class MQListener extends BaseListener implements MessageListener
 
     private PaymentBean checkPreviousResponse(String message, String uuid, String FPID, String paymentType, String environmentMQ) {
         PaymentBean resendPreviousResponse = null;
-        InMemoryPaymentStorage storage = InMemoryPaymentStorage.getInstance();
+        InMemoryPaymentStorage storage = InMemoryPaymentStorage.getInstance(expiringMinutes);
         PaymentBean payment = storage.findPayment(FPID, message);
         if (payment != null && payment.getStatus().equals(PaymentStatus.PROCESSED)){
             resendPreviousResponse = payment;

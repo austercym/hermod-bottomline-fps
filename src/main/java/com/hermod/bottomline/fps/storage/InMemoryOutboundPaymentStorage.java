@@ -2,30 +2,34 @@ package com.hermod.bottomline.fps.storage;
 
 import com.orwellg.umbrella.avro.types.payment.fps.FPSOutboundPayment;
 
+import java.util.Collections;
 import java.util.Date;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.map.PassiveExpiringMap;
 import org.springframework.beans.factory.annotation.Value;
 
 public class InMemoryOutboundPaymentStorage {
 
-    @Value("${inmemory.cache.expiringMinutes}")
-    private int expiringMinutes;
+    private Integer timeToExpire;
 
-    private PassiveExpiringMap<String, PaymentOutboundBean> storage = new PassiveExpiringMap<>(expiringMinutes>0?expiringMinutes:20, TimeUnit.MINUTES);
+    private Map<String, PaymentOutboundBean> storage;
 
     private static InMemoryOutboundPaymentStorage instance = null;
 
     //private constructor to avoid client applications to use constructor
-    private InMemoryOutboundPaymentStorage(){}
+    private InMemoryOutboundPaymentStorage((Integer timeToExpire){
+        this.timeToExpire = timeToExpire;
+        storage = Collections.synchronizedMap(new PassiveExpiringMap<String, PaymentBean>(timeToExpire, TimeUnit.MINUTES));
+    }
 
     // Lazy Initialization (If required then only)
-    public static InMemoryOutboundPaymentStorage getInstance() {
+    public static InMemoryOutboundPaymentStorage getInstance(Integer timeToExpire) {
         if (instance == null) {
             // Thread Safe. Might be costly operation in some case
             synchronized (InMemoryOutboundPaymentStorage.class) {
                 if (instance == null) {
-                    instance = new InMemoryOutboundPaymentStorage();
+                    instance = new InMemoryOutboundPaymentStorage(timeToExpire);
                 }
             }
         }
@@ -49,7 +53,7 @@ public class InMemoryOutboundPaymentStorage {
 
 
     public void cleanStorage() {
-        storage = new PassiveExpiringMap<>(expiringMinutes>0?expiringMinutes:20, TimeUnit.MINUTES);
+        storage = Collections.synchronizedMap(new PassiveExpiringMap<>(this.timeToExpire, TimeUnit.MINUTES));
     }
 
 }

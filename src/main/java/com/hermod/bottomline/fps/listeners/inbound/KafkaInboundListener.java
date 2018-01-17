@@ -12,6 +12,7 @@ import com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs002_001_06.*;
 import com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.InstructionForNextAgent1;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -27,6 +28,9 @@ import java.util.List;
 public class KafkaInboundListener extends BaseListener {
 
     private static Logger LOG = LogManager.getLogger(KafkaInboundListener.class);
+
+    @Value("${inmemory.cache.expiringMinutes}")
+    private int expiringMinutes;
 
     protected StringWriter transformResponseToString(FPSMessage fpsMessage) throws JAXBException {
         StringWriter rawMessage = new StringWriter();
@@ -126,7 +130,7 @@ public class KafkaInboundListener extends BaseListener {
     protected PaymentBean updatePaymentResponseInMemory(String originalStr, String FPID,
                                                         String responseMessage, String paymentId,
                                                         String paymentType, String environmentMQ) {
-        InMemoryPaymentStorage storage = InMemoryPaymentStorage.getInstance();
+        InMemoryPaymentStorage storage = InMemoryPaymentStorage.getInstance(expiringMinutes);
 
         LOG.debug("[FPS][PmtId: {}] Storing response message to in-memory storage with FPID {}", paymentId, FPID);
         PaymentBean payment = storage.findPayment(FPID, originalStr);

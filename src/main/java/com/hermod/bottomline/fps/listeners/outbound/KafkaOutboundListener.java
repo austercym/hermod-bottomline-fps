@@ -8,6 +8,7 @@ import com.hermod.bottomline.fps.types.FPSMessage;
 import com.orwellg.umbrella.commons.utils.enums.CurrencyCodes;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -18,6 +19,9 @@ import java.io.StringWriter;
 public class KafkaOutboundListener extends BaseListener {
 
     private static Logger LOG = LogManager.getLogger(KafkaOutboundListener.class);
+
+    @Value("${inmemory.cache.expiringMinutes}")
+    private int expiringMinutes;
 
     protected StringWriter transformRequestToString(FPSMessage fpsMessage) throws JAXBException {
         StringWriter rawMessage = new StringWriter();
@@ -31,7 +35,7 @@ public class KafkaOutboundListener extends BaseListener {
 
     protected PaymentBean updatePaymentResponseInMemory(com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Document originalMessage,
                                                         String responseMessage, String paymentId, String paymentType, String environmentMQ) {
-        InMemoryPaymentStorage storage = InMemoryPaymentStorage.getInstance();
+        InMemoryPaymentStorage storage = InMemoryPaymentStorage.getInstance(expiringMinutes);
         Gson gson = new Gson();
 
         String originalStr = gson.toJson(originalMessage);

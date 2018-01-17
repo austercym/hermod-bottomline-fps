@@ -10,6 +10,7 @@ import com.hermod.bottomline.fps.utils.mq.MessageTestQueueSender;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -41,6 +42,9 @@ public class SimulateSendEventToKafka {
     @Autowired
     MessageTestQueueSender messageTestQueueSender;
 
+    @Value("${inmemory.cache.expiringMinutes}")
+    private int expiringMinutes;
+
     @RequestMapping(method= RequestMethod.POST, value="/sip")
     public ResponseEntity<String> sendSIP(@RequestBody String queueMessage,
                                           @RequestHeader("x-process-id") String key) {
@@ -67,7 +71,7 @@ public class SimulateSendEventToKafka {
 
     @RequestMapping(method= RequestMethod.GET, value="/resetstorage")
     public ResponseEntity<String> cleanMemory() {
-        InMemoryPaymentStorage inmemoryStorage = InMemoryPaymentStorage.getInstance();
+        InMemoryPaymentStorage inmemoryStorage = InMemoryPaymentStorage.getInstance(expiringMinutes);
         inmemoryStorage.cleanStorage();
         return new ResponseEntity<>("Memory reset", HttpStatus.OK);
     }

@@ -18,7 +18,7 @@ public class InMemoryPaymentStorageTest {
 
     @Before
     public void setUp() throws Exception {
-        messageStorage = InMemoryPaymentStorage.getInstance();
+        messageStorage = InMemoryPaymentStorage.getInstance(20);
         messageStorage.storePayment("fpid", "originalmessage", "paymentId", "paymentType", "bottomline1");
     }
 
