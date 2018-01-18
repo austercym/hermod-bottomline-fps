@@ -58,12 +58,15 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
     @Value("${kafka.topic.fps.logging}")
     private String loggingTopic;
 
+    @Value("${inmemory.cache.expiringMinutes}")
+    private int expiringMinutes;
+
     @Value("{entity.name}")
     private String entity;
     @Value("${brand.name}")
     private String brand;
 
-    @Value("${connector.mq_primary}")
+    @Value("${connector.%id.mq_primary}")
     private String environmentMQ;
 
     @Value("${jms.mq.bottomline.environment.1}")
@@ -213,7 +216,7 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
 
     private PaymentOutboundBean storeOutboundPayment(String paymentId, FPSOutboundPayment outboundPayment) {
         PaymentOutboundBean resendPreviousResponse = null;
-        InMemoryOutboundPaymentStorage storage = InMemoryOutboundPaymentStorage.getInstance();
+        InMemoryOutboundPaymentStorage storage = InMemoryOutboundPaymentStorage.getInstance(expiringMinutes);
         PaymentOutboundBean payment = storage.findPayment(paymentId);
         if (payment != null && payment.getStatus().equals(PaymentStatus.PROCESSED)) {
             resendPreviousResponse = payment;

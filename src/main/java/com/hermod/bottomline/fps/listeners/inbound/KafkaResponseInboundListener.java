@@ -41,7 +41,7 @@ public class KafkaResponseInboundListener extends KafkaInboundListener implement
 	@Value("${kafka.topic.fps.logging}")
 	private String loggingTopic;
 
-	@Value("${connector.mq_primary}")
+	@Value("${connector.%id.mq_primary}")
 	private String environmentPrimaryMQ;
 
 

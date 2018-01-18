@@ -66,7 +66,7 @@ public class InMemoryPaymentStorage {
     }
 
     public void cleanStorage() {
-        storage = Collections.synchronizedMap(new PassiveExpiringMap<>(this.timeToExpire, TimeUnit.MINUTES));
+        storage.clear();
     }
 
     private String generateHash(String FPID, String originalMessage){

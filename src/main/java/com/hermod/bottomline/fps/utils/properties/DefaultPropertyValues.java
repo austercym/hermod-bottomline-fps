@@ -49,8 +49,8 @@ public class DefaultPropertyValues {
 	private final static String MQ_DEFAULT_INBOUND_RESP_ASYN_QUEUE = "ORUN.HOST.ASYN.RECV.RESP.QR";
 
 
-	private final static String MQ_BOTTOMLINE1_ENVIRONMENT = "BOTTOMLINE1";
-	private final static String MQ_BOTTOMLINE2_ENVIRONMENT = "BOTTOMLINE2";
+	private final static String MQ_BOTTOMLINE1_ENVIRONMENT = "COLT";
+	private final static String MQ_BOTTOMLINE2_ENVIRONMENT = "BUNKER";
 
 	private final static String MQ_DEFAULT_OUTBOUND_SIP_QUEUE  = "ORUN.HOST.SYNC.SEND.QR";
 	private final static String MQ_DEFAULT_OUTBOUND_SIP_RESP_QUEUE  = "ORUN.HOST.SYNC.SEND.RESP.QL";
@@ -82,6 +82,7 @@ public class DefaultPropertyValues {
 	private final static Integer KAFKA_DEFAULT_CONSUMER_THREADS = 3;
 	private final static Long KAFKA_DEFAULT_CONSUMER_POLL_TIMEOUT = 3000L;
 	private final static Integer INMEMORY_DEFAULT_CACHE_EXPIRINGMINUTES = 30;
+	private final static String CONNECTOR_DEFAULT_MQ_SITE_PRIMARY = "COLT";
 
 	
 	private final static Map<String, Object> defaultValues;
@@ -151,17 +152,16 @@ public class DefaultPropertyValues {
 		defaultValues.put("kafka.topic.reversal.request", KAFKA_DEFAULT_INBOUND_REVERSAL_REQUEST_TOPIC);
 		defaultValues.put("kafka.topic.reversal.response", KAFKA_DEFAULT_INBOUND_REVERSAL_RESPONSE_TOPIC);
 
-
 		defaultValues.put("kafka.topic.fps.logging", KAFKA_DEFAULT_MESSAGE_LOGGING_TOPIC);
 
 		defaultValues.put("kafka.consumer.group.id", KAFKA_DEFAULT_CONSUMER_GROUP_ID);
 		defaultValues.put("kafka.consumer.threads.num", KAFKA_DEFAULT_CONSUMER_THREADS);
 		defaultValues.put("kafka.consumer.poll.timeout", KAFKA_DEFAULT_CONSUMER_POLL_TIMEOUT);
 
-		defaultValues.put("kafka.consumer.poll.timeout", KAFKA_DEFAULT_CONSUMER_POLL_TIMEOUT);
 		defaultValues.put("inmemory.cache.expiringMinutes", INMEMORY_DEFAULT_CACHE_EXPIRINGMINUTES);
 
-		defaultValues.put("connector.%id.groupId", KAFKA_DEFAULT_CONSUMER_INMEMORY_GROUP_ID);
+		defaultValues.put("connector.1.groupId", KAFKA_DEFAULT_CONSUMER_INMEMORY_GROUP_ID);
+		defaultValues.put("connector.1.mq_primary", CONNECTOR_DEFAULT_MQ_SITE_PRIMARY);
 	}
 
 	public static Map<String, Object> getDefaultValues() {

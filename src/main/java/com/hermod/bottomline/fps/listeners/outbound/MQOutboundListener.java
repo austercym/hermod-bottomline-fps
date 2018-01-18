@@ -66,8 +66,11 @@ public abstract class MQOutboundListener extends BaseListener implements Message
     @Value("${kafka.topic.fps.logging}")
     private String loggingTopic;
 
-    @Value("${connector.mq_primary}")
+    @Value("${connector.%id.mq_primary}")
     private String environmentMQ;
+
+    @Value("${inmemory.cache.expiringMinutes}")
+    private int expiringMinutes;
 
     protected void onMessage(Message message, String paymentType) {
 
@@ -162,7 +165,7 @@ public abstract class MQOutboundListener extends BaseListener implements Message
                                 fpsResponse.setIntrBkSttlmAmtCcy(paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getIntrBkSttlmAmt().getCcy());
                             }
 
-                            InMemoryOutboundPaymentStorage storage = InMemoryOutboundPaymentStorage.getInstance();
+                            InMemoryOutboundPaymentStorage storage = InMemoryOutboundPaymentStorage.getInstance(expiringMinutes);
                             PaymentOutboundBean paymentBean = storage.findPayment(paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxId());
                             if (paymentBean != null) {
                                 FPSOutboundPayment originalMessage = paymentBean.getOutboundPayment();

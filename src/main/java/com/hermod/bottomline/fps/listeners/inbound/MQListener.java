@@ -83,7 +83,7 @@ public abstract class MQListener extends BaseListener implements MessageListener
     @Value("${wq.mq.queue.asyn.inbound.resp}")
     private String outboundAsynQueue;
 
-    @Value("${connector.mq_primary}")
+    @Value("${connector.%id.mq_primary}")
     private String environmentMQ;
 
     protected void onMessage(Message message, String paymentType) {

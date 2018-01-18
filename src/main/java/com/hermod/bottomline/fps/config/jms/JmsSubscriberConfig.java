@@ -58,7 +58,7 @@ public class JmsSubscriberConfig extends ComponentConfig {
 	@Value("${wq.mq.receive.num.max.consumers}")
 	private Integer maxConcurrentConsumers;
 
-    @Value("${connector.mq_primary}")
+    @Value("${connector.%id.mq_primary}")
     private String bottomlineSite;
 
     @Value("${jms.mq.bottomline.environment.1}")

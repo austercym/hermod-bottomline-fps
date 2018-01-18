@@ -18,9 +18,9 @@ public class InMemoryOutboundPaymentStorage {
     private static InMemoryOutboundPaymentStorage instance = null;
 
     //private constructor to avoid client applications to use constructor
-    private InMemoryOutboundPaymentStorage((Integer timeToExpire){
+    private InMemoryOutboundPaymentStorage(Integer timeToExpire){
         this.timeToExpire = timeToExpire;
-        storage = Collections.synchronizedMap(new PassiveExpiringMap<String, PaymentBean>(timeToExpire, TimeUnit.MINUTES));
+        storage = Collections.synchronizedMap(new PassiveExpiringMap<String, PaymentOutboundBean>(timeToExpire, TimeUnit.MINUTES));
     }
 
     // Lazy Initialization (If required then only)
@@ -53,7 +53,7 @@ public class InMemoryOutboundPaymentStorage {
 
 
     public void cleanStorage() {
-        storage = Collections.synchronizedMap(new PassiveExpiringMap<>(this.timeToExpire, TimeUnit.MINUTES));
+        storage.clear();
     }
 
 }
