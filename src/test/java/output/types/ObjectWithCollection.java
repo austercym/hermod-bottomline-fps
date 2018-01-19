@@ -1,8 +1,8 @@
 package output.types;
 
-import java.util.ArrayList;
-
 import input.types.ChildType;
+
+import java.util.ArrayList;
 
 
 public class ObjectWithCollection {

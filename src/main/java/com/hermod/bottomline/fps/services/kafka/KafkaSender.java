@@ -6,18 +6,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 public class KafkaSender {
 
-	private static final Logger LOGGER = LogManager.getLogger(KafkaSender.class);
+	private static final Logger LOG = LogManager.getLogger(KafkaSender.class);
 
 	@Autowired
 	private KafkaWithHeadersTemplate<String, String> kafkaTemplate;
 
-	public void send(String topic, String payload, String key, String replayTo, String environment, String paymentType) {
-		LOGGER.info("sending payload='{}' to topic='{}'", payload, topic);
-		kafkaTemplate.send(topic, payload, key, replayTo, environment, paymentType);
+	public void send(String topic, String payload, String key, String replyTo, String environment, String paymentType,
+					 boolean isPOO) {
+		LOG.info("[FPS][PmtId: {}] Sending payload='{}' to topic='{}'", key, payload, topic);
+		kafkaTemplate.send(topic, payload, key, replyTo, environment, paymentType, isPOO, false);
+	}
+
+	public void send(String topic, String payload, String key, String replyTo, String environment, String paymentType,
+					 boolean isPOO, boolean isStandin) {
+		LOG.info("[FPS][PmtId: {}] Sending payload='{}' to topic='{}'", key, payload, topic);
+		kafkaTemplate.send(topic, payload, key, replyTo, environment, paymentType, isPOO, isStandin);
 	}
 
 	public void sendRawMessage(String topic, String payload, String key) {
-		LOGGER.info("sending payload='{}' to topic='{}'", payload, topic);
+		LOG.info("[FPS][PmtId: {}] Sending raw payload='{}' to topic='{}'",key, payload, topic);
 		kafkaTemplate.sendRawMessage(topic, payload, key);
 	}
 }

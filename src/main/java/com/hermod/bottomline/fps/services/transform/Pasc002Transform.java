@@ -4,9 +4,8 @@ import com.hermod.bottomline.fps.services.transform.helper.ConfigurationExceptio
 import com.hermod.bottomline.fps.services.transform.helper.ConversionException;
 import com.hermod.bottomline.fps.services.transform.helper.TransformationHelper;
 import com.hermod.bottomline.fps.types.FPSMessage;
-import org.springframework.stereotype.Component;
-
 import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
+import org.springframework.stereotype.Component;
 
 @Component(value="transform_pacs_002_001")
 public class Pasc002Transform implements FPSTransform {

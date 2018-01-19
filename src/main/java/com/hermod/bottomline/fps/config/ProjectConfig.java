@@ -13,25 +13,78 @@ import org.springframework.kafka.listener.AbstractMessageListenerContainer;
 public class ProjectConfig extends ComponentConfig {
 
 	private static final Logger LOG = LogManager.getLogger(ProjectConfig.class);
-	
+
 	@Autowired
-	private AbstractMessageListenerContainer<?,?> kafkaRejectListenerContainer;
+	private AbstractMessageListenerContainer<?,?> kafkaResponseInboundListenerContainer;
+
 	@Autowired
-	private AbstractMessageListenerContainer<?,?> kafkaResponseListenerContainer;
-	
+	private AbstractMessageListenerContainer<?,?> kafkaResponseReversalInboundListenerContainer;
+
+	@Autowired
+	private AbstractMessageListenerContainer<?,?> kafkaRequestOutboundListenerContainer;
+
 	@Autowired
 	private DefaultMessageListenerContainer jmsSIPListenerContainer;
 
 	@Autowired
-	private DefaultMessageListenerContainer jmsSOPListenerContainer;
+	private DefaultMessageListenerContainer jmsASYNCListenerContainer;
+
+	@Autowired
+	private DefaultMessageListenerContainer jmsSTANDINListenerContainer;
+
+	@Autowired
+	private DefaultMessageListenerContainer jmsPOOListenerContainer;
+
+	@Autowired
+	private DefaultMessageListenerContainer jmsUSMListenerContainer;
+
+	@Autowired
+	private DefaultMessageListenerContainer jmsSIPOutboundListenerContainer;
+	@Autowired
+	private DefaultMessageListenerContainer jmsAsynOutboundListenerContainer;
+
+	@Autowired
+	private DefaultMessageListenerContainer jmsSIPListenerSite2Container;
+
+	@Autowired
+	private DefaultMessageListenerContainer jmsASYNCListenerSite2Container;
+
+	@Autowired
+	private DefaultMessageListenerContainer jmsSTANDINListenerSite2Container;
+
+	@Autowired
+	private DefaultMessageListenerContainer jmsPOOListenerSite2Container;
+
+	@Autowired
+	private DefaultMessageListenerContainer jmsUSMListenerSite2Container;
+
+	@Autowired
+	private DefaultMessageListenerContainer jmsSIPOutboundListenerSite2Container;
+	@Autowired
+	private DefaultMessageListenerContainer jmsAsynOutboundListenerSite2Container;
 
 	@EventListener(ApplicationReadyEvent.class)
-	public void doSomethingAfterStartup() {
+	public void startListeners() {
 	    LOG.info("Connector to Bottomline start. Starting containers....");
-		kafkaResponseListenerContainer.start();
-		kafkaRejectListenerContainer.start();
 		jmsSIPListenerContainer.start();
-		jmsSOPListenerContainer.start();
+		jmsASYNCListenerContainer.start();
+		jmsSTANDINListenerContainer.start();
+		jmsSIPOutboundListenerContainer.start();
+		jmsAsynOutboundListenerContainer.start();
+		jmsPOOListenerContainer.start();
+		jmsUSMListenerContainer.start();
+
+		jmsSIPListenerSite2Container.start();
+		jmsASYNCListenerSite2Container.start();
+		jmsSTANDINListenerSite2Container.start();
+		jmsSIPOutboundListenerSite2Container.start();
+		jmsAsynOutboundListenerSite2Container.start();
+		jmsPOOListenerSite2Container.start();
+		jmsUSMListenerSite2Container.start();
+
+		kafkaResponseInboundListenerContainer.start();
+		kafkaRequestOutboundListenerContainer.start();
+		kafkaResponseReversalInboundListenerContainer.start();
 
 	    LOG.info("Connector started");
 	}

@@ -1,11 +1,11 @@
 package com.hermod.bottomline.fps.services.transform.helper.builder;
 
-import java.util.Collection;
-
-import com.hermod.bottomline.fps.services.transform.helper.ConversionException;
 import com.hermod.bottomline.fps.services.transform.helper.BuilderContext;
+import com.hermod.bottomline.fps.services.transform.helper.ConversionException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.Collection;
 
 public class ComplexObjectBuilderRule implements BuilderRuleIf {
 

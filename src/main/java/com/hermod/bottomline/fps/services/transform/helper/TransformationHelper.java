@@ -11,6 +11,7 @@ import io.reactivex.Flowable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.lang.reflect.Method;
@@ -27,12 +28,10 @@ public final class TransformationHelper {
 	private static HashMap<String, BuilderRuleIf> BuilderRules = new HashMap<>();
 
 	static {
-		Converters.add(new TypeConverterEntry(XMLGregorianCalendar.class, Long.class, (calendar, ctx) -> { return (Long)((XMLGregorianCalendar)calendar).toGregorianCalendar().getTimeInMillis(); }));
-		Converters.add(new TypeConverterEntry(XMLGregorianCalendar.class, CharSequence.class, (calendar, ctx) -> { return ((XMLGregorianCalendar)calendar).toXMLFormat();}));
-		Converters.add(new TypeConverterEntry(XMLGregorianCalendar.class, String.class, (calendar, ctx) -> {
-			return ((XMLGregorianCalendar)calendar).toXMLFormat();
-		}));
-		Converters.add(new TypeConverterEntry(BigDecimal.class, Decimal.class, (decimalValue, ctx) -> DecimalTypeUtils.toDecimal((BigDecimal)decimalValue)));
+		Converters.add(new TypeConverterEntry(XMLGregorianCalendar.class, Long.class, (calendar, ctx) -> (Long)((XMLGregorianCalendar)calendar).toGregorianCalendar().getTimeInMillis()));
+		Converters.add(new TypeConverterEntry(XMLGregorianCalendar.class, CharSequence.class, (calendar, ctx) -> ((XMLGregorianCalendar)calendar).toXMLFormat()));
+		Converters.add(new TypeConverterEntry(XMLGregorianCalendar.class, String.class, (calendar, ctx) -> ((XMLGregorianCalendar)calendar).toXMLFormat()));
+		Converters.add(new TypeConverterEntry(BigDecimal.class, Decimal.class, (decimalValue, ctx) -> DecimalTypeUtils.toDecimal((BigDecimal)decimalValue,2)));
 		Converters.add(new TypeConverterEntry(Decimal.class, BigDecimal.class, (decimalValue, ctx) ->  ((Decimal)decimalValue).getValue()));
 		Converters.add(new TypeConverterEntry(CharSequence.class,  XMLGregorianCalendar.class, TransformationHelper::charSequenceToXmlCalendar));
 		Converters.add(new TypeConverterEntry(String.class,  XMLGregorianCalendar.class, TransformationHelper::charSequenceToXmlCalendar));
@@ -178,6 +177,7 @@ public final class TransformationHelper {
 			
 			final DatatypeFactory dtf = DatatypeFactory.newInstance();
 			final XMLGregorianCalendar xmlCalendar = dtf.newXMLGregorianCalendar(calendar);
+			xmlCalendar.setTimezone(DatatypeConstants.FIELD_UNDEFINED);
 			return xmlCalendar;
 		}
 		catch (Exception err) {
@@ -194,6 +194,7 @@ public final class TransformationHelper {
 
 			final DatatypeFactory dtf = DatatypeFactory.newInstance();
 			final XMLGregorianCalendar xmlCalendar = dtf.newXMLGregorianCalendar(calendar);
+			xmlCalendar.setTimezone(DatatypeConstants.FIELD_UNDEFINED);
 			return xmlCalendar;
 		}
 		catch (Exception err) {

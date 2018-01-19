@@ -1,17 +1,16 @@
 package com.hermod.bottomline.fps.utils.generators;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.util.StringUtils;
-
 import com.orwellg.umbrella.avro.types.event.EntityIdentifierType;
 import com.orwellg.umbrella.avro.types.event.Event;
 import com.orwellg.umbrella.avro.types.event.EventType;
 import com.orwellg.umbrella.avro.types.event.ProcessIdentifierType;
 import com.orwellg.umbrella.commons.utils.constants.Constants;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.util.StringUtils;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class EventGenerator {
 
@@ -23,7 +22,7 @@ public class EventGenerator {
 	
 	public static Event generateEvent(String source, String eventName, String id, String eventData, String componentEntity, String componentBrand) {
 		
-		LOG.debug("Generating event with received datas.");
+		LOG.debug("Generating event with received data.");
 		
 		String entity = Constants.IPAGOO_ENTITY;
 		if (!StringUtils.isEmpty(componentEntity)) { entity = componentEntity; }
@@ -42,7 +41,7 @@ public class EventGenerator {
 		eventType.setData(eventData);
 		
 		ProcessIdentifierType processIdentifier = new ProcessIdentifierType();
-		processIdentifier.setUuid("PROCESS-" + id);
+		processIdentifier.setUuid( id);
 		
 		EntityIdentifierType entityIdentifier = new EntityIdentifierType();
 		entityIdentifier.setEntity(entity);

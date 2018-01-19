@@ -1,9 +1,9 @@
 package input.types;
 
+import com.hermod.bottomline.fps.types.FPSMessage;
+
 import java.util.ArrayList;
 import java.util.Collection;
-
-import com.hermod.bottomline.fps.types.FPSMessage;
 
 public class ContainerType implements FPSMessage{
 

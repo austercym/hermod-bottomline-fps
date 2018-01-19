@@ -10,8 +10,27 @@ public class PaymentBean implements Serializable{
     private String FPID;
     private String paymentID;
     private String responseMessage;
+    private String paymentType;
+    private String environmentMQ;
+
 
     private PaymentStatus status;
+
+    public String getPaymentType() {
+        return paymentType;
+    }
+
+    public void setPaymentType(String paymentType) {
+        this.paymentType = paymentType;
+    }
+
+    public String getEnvironmentMQ() {
+        return environmentMQ;
+    }
+
+    public void setEnvironmentMQ(String environmentMQ) {
+        this.environmentMQ = environmentMQ;
+    }
 
     public Date getTimestamp() {
         return timestamp;

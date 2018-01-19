@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns1:NetSenderCapStatusMessage xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                               xmlns:ns1="http://www.bottomline.com/directFPS/FPSUSMs"
+                               xmlns:ns2="http://www.bottomline.com/directFPS/ISO20022Types"
+                               xmlns:ns3="http://www.bottomline.com/directFPS/FPSUSMTypes"
+                               xmlns:ns4="http://www.bottomline.com/directFPS/FPSUSMElements">
+    <ns4:MessageID>4</ns4:MessageID>
+    <ns4:DateTime>2016-01-05T14:45:04</ns4:DateTime>
+    <ns4:FPSInst3rdPartyID>01900045</ns4:FPSInst3rdPartyID>
+    <ns4:FPSInst3rdPartyName>SOME BANK</ns4:FPSInst3rdPartyName>
+    <ns4:NetSenderCapStatus>PAYMENTSBLOCKED</ns4:NetSenderCapStatus>
+    <ns4:NetSenderCap Ccy="GBP">2000000</ns4:NetSenderCap>
+    <ns4:SettlementRiskPosition DRCR="CRDT"
+                                Ccy="GBP">999999</ns4:SettlementRiskPosition>
+    <ns4:FPID>PAYMENTREFERENCE011020160105826400328     </ns4:FPID>
+    <ns4:PaymentAmount Ccy="GBP">123.45</ns4:PaymentAmount>
+    <ns4:ResidualSettlementRiskPosition Ccy="GBP">1000001</ns4:ResidualSettlementRiskPosition>
+</ns1:NetSenderCapStatusMessage>

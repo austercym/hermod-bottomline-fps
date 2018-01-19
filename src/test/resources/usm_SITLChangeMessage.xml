@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns1:SITLChangeMessage xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                       xmlns:ns1="http://www.bottomline.com/directFPS/FPSUSMs"
+                       xmlns:ns2="http://www.bottomline.com/directFPS/ISO20022Types"
+                       xmlns:ns3="http://www.bottomline.com/directFPS/FPSUSMTypes"
+                       xmlns:ns4="http://www.bottomline.com/directFPS/FPSUSMElements">
+    <ns4:MessageID>5</ns4:MessageID>
+    <ns4:DateTime>2016-01-05T14:45:05</ns4:DateTime>
+    <ns4:SITLStatus>CHANGED</ns4:SITLStatus>
+    <ns4:NewSITL Ccy="GBP">100000</ns4:NewSITL>
+    <ns4:PreviousSITL Ccy="GBP">250000</ns4:PreviousSITL>
+</ns1:SITLChangeMessage>

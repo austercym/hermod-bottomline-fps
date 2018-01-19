@@ -1,10 +1,10 @@
 package com.hermod.bottomline.fps.spring.context;
 
-import java.util.Map;
-
 import com.hermod.bottomline.fps.spring.core.env.SpringArchaiusPropertySource;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
+
+import java.util.Map;
 
 public class SpringProfileSettingApplicationContextInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 

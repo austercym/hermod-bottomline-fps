@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns1:NetSenderThresholdMessage xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                               xmlns:ns1="http://www.bottomline.com/directFPS/FPSUSMs"
+                               xmlns:ns2="http://www.bottomline.com/directFPS/ISO20022Types"
+                               xmlns:ns3="http://www.bottomline.com/directFPS/FPSUSMTypes"
+                               xmlns:ns4="http://www.bottomline.com/directFPS/FPSUSMElements">
+    <ns4:MessageID>7</ns4:MessageID>
+    <ns4:DateTime>2016-01-05T14:45:07</ns4:DateTime>
+    <ns4:FPSInst3rdPartyID>01900045</ns4:FPSInst3rdPartyID>
+    <ns4:FPSInst3rdPartyName>SOME BANK</ns4:FPSInst3rdPartyName>
+    <ns4:NetSenderThresholdStatus>CHANGED</ns4:NetSenderThresholdStatus>
+    <ns4:NewNetSenderThreshold Ccy="GBP">1750000</ns4:NewNetSenderThreshold>
+    <ns4:NewNetSenderThresholdPc>7.5</ns4:NewNetSenderThresholdPc>
+    <ns4:PreviousNetSenderThreshold Ccy="GBP">1500000</ns4:PreviousNetSenderThreshold>
+    <ns4:PreviousNetSenderThresholdPc>7.5</ns4:PreviousNetSenderThresholdPc>
+</ns1:NetSenderThresholdMessage>

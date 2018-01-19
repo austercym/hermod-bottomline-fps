@@ -10,6 +10,7 @@ import org.springframework.jms.connection.JmsTransactionManager;
 import org.springframework.jms.core.JmsOperations;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.support.converter.MarshallingMessageConverter;
+import org.springframework.jms.support.converter.MessageType;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -41,12 +42,34 @@ public class JmsProducerConfig extends ComponentConfig {
 	    
 	    // Creating and assing the message converter for jmsTemplate
 	    MarshallingMessageConverter converter = new MarshallingMessageConverter();
-	    	converter.setMarshaller(marshaller());
-	    	converter.setUnmarshaller(marshaller());
-	    	// set this converter on the implicit Spring JMS template
-	    	jmsTemplate.setMessageConverter(converter);
-	    	    
+		converter.setTargetType(MessageType.TEXT);
+		converter.setMarshaller(marshaller());
+		converter.setUnmarshaller(marshaller());
+		// set this converter on the implicit Spring JMS template
+		jmsTemplate.setMessageConverter(converter);
+		jmsTemplate.setMessageIdEnabled(true);
+		jmsTemplate.setMessageTimestampEnabled(true);
+
 	    return jmsTemplate;
+	}
+
+	@Bean
+	public JmsOperations jmsOperationsSite2(CachingConnectionFactory cachingConnectionSite2Factory) {
+
+		JmsTemplate jmsTemplate = new JmsTemplate(cachingConnectionSite2Factory);
+		jmsTemplate.setReceiveTimeout(receiveTimeout);
+
+		// Creating and assing the message converter for jmsTemplate
+		MarshallingMessageConverter converter = new MarshallingMessageConverter();
+		converter.setTargetType(MessageType.TEXT);
+		converter.setMarshaller(marshaller());
+		converter.setUnmarshaller(marshaller());
+		// set this converter on the implicit Spring JMS template
+		jmsTemplate.setMessageConverter(converter);
+		jmsTemplate.setMessageIdEnabled(true);
+		jmsTemplate.setMessageTimestampEnabled(true);
+
+		return jmsTemplate;
 	}
 
 	@Bean

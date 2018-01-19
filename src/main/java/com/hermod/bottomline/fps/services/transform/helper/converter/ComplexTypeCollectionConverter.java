@@ -1,14 +1,14 @@
 package com.hermod.bottomline.fps.services.transform.helper.converter;
 
+import com.hermod.bottomline.fps.services.transform.helper.BuilderContext;
+import com.hermod.bottomline.fps.services.transform.helper.ConfigurationException;
+import com.hermod.bottomline.fps.services.transform.helper.ConversionException;
+import com.hermod.bottomline.fps.services.transform.helper.TransformationHelper;
+import com.hermod.bottomline.fps.services.transform.helper.builder.BuilderRuleIf;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.util.Collection;
-
-import com.hermod.bottomline.fps.services.transform.helper.ConversionException;
-import com.hermod.bottomline.fps.services.transform.helper.builder.BuilderRuleIf;
-import com.hermod.bottomline.fps.services.transform.helper.BuilderContext;
-import com.hermod.bottomline.fps.services.transform.helper.ConfigurationException;
-import com.hermod.bottomline.fps.services.transform.helper.TransformationHelper;
 
 public class ComplexTypeCollectionConverter implements ConverterEntryIf {
 	

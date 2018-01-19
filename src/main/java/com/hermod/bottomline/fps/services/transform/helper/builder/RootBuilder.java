@@ -1,8 +1,8 @@
 package com.hermod.bottomline.fps.services.transform.helper.builder;
 
-import java.util.Collection;
-
 import com.hermod.bottomline.fps.services.transform.helper.ConversionException;
+
+import java.util.Collection;
 
 public class RootBuilder implements BuilderRuleIf {
 	private String key;

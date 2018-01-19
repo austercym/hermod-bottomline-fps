@@ -3,9 +3,13 @@ package com.hermod.bottomline.fps.storage;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.boot.SpringBootConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.junit.Assert.assertThat;
 
 public class InMemoryPaymentStorageTest {
 
@@ -14,8 +18,8 @@ public class InMemoryPaymentStorageTest {
 
     @Before
     public void setUp() throws Exception {
-        messageStorage = InMemoryPaymentStorage.getInstance();
-        messageStorage.storePayment("fpid", "originalmessage", "paymentId");
+        messageStorage = InMemoryPaymentStorage.getInstance(20);
+        messageStorage.storePayment("fpid", "originalmessage", "paymentId", "paymentType", "bottomline1");
     }
 
     @After
@@ -43,7 +47,7 @@ public class InMemoryPaymentStorageTest {
 
     @Test
     public void storeDifferentPaymentWithSameFPID() throws Exception {
-        messageStorage.storePayment("fpid", "otheroriginalmessage", "paymentId2");
+        messageStorage.storePayment("fpid", "otheroriginalmessage", "paymentId2", "paymentType", "bottomline1");
         PaymentBean message = messageStorage.findPayment("fpid", "originalmessage");
         assertThat(message.getPaymentID(), is("paymentId"));
 

@@ -1,17 +1,15 @@
 package com.hermod.bottomline.fps.services.transform.test;
 
 
-import java.util.GregorianCalendar;
+import com.hermod.bottomline.fps.services.transform.Pasc002Transform;
+import com.hermod.bottomline.fps.types.FPSMessage;
+import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
+import iso.std.iso._20022.tech.xsd.pacs_002_001.*;
+import org.junit.Test;
 
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
-
-import com.hermod.bottomline.fps.services.transform.Pasc002Transform;
-import com.hermod.bottomline.fps.types.FPSMessage;
-import org.junit.Test;
-
-import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
-import iso.std.iso._20022.tech.xsd.pacs_002_001.*;
+import java.util.GregorianCalendar;
 
 public class Pasc002TransformTest {
 

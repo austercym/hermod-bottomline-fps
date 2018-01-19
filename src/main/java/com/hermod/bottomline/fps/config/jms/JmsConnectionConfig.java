@@ -1,9 +1,8 @@
 package com.hermod.bottomline.fps.config.jms;
 
-import javax.jms.ConnectionFactory;
-import javax.jms.QueueConnectionFactory;
-
 import com.hermod.bottomline.fps.config.ComponentConfig;
+import com.ibm.mq.jms.MQQueueConnectionFactory;
+import com.ibm.msg.client.wmq.WMQConstants;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,26 +15,26 @@ import org.springframework.jms.connection.UserCredentialsConnectionFactoryAdapte
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import com.ibm.mq.jms.MQQueueConnectionFactory;
-import com.ibm.msg.client.wmq.WMQConstants;
+import javax.jms.ConnectionFactory;
+import javax.jms.QueueConnectionFactory;
 
 @Configuration
 @EnableTransactionManagement
 public class JmsConnectionConfig extends ComponentConfig {
 
 	private Logger LOG = LogManager.getLogger(JmsConnectionConfig.class);
-	
-	@Value("${wq.mq.host}")
+
+	@Value("${wq.mq.site1.host}")
 	private String host;
-	@Value("${wq.mq.port}")
+	@Value("${wq.mq.site1.port}")
 	private Integer port;
-	@Value("${wq.mq.channel}")
+	@Value("${wq.mq.site1.channel}")
 	private String channel;
-	@Value("${wq.mq.queue.manager}")
+	@Value("${wq.mq.site1.queue.manager}")
 	private String queueManager;
-	@Value("${wq.mq.username}")
+	@Value("${wq.mq.site1.username}")
 	private String username;
-	@Value("${wq.mq.password}")
+	@Value("${wq.mq.site1.password}")
 	private String password;
 	
 	@Bean
@@ -77,7 +76,7 @@ public class JmsConnectionConfig extends ComponentConfig {
 	}
 	
 	@Bean
-	@Primary
+	//@Primary
 	public CachingConnectionFactory cachingConnectionFactory(UserCredentialsConnectionFactoryAdapter userCredentialsConnectionFactoryAdapter) {
 	    CachingConnectionFactory cachingConnectionFactory = new CachingConnectionFactory();
 	    cachingConnectionFactory.setTargetConnectionFactory(userCredentialsConnectionFactoryAdapter);

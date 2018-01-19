@@ -1,19 +1,16 @@
 package com.hermod.bottomline.fps.services.transform.test;
 
 
-import java.io.File;
+import com.hermod.bottomline.fps.services.transform.Pasc009Transform;
+import com.hermod.bottomline.fps.types.FPSMessage;
+import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
+import iso.std.iso._20022.tech.xsd.pacs_009_001.Document;
+import org.junit.Test;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Unmarshaller;
-
-import org.junit.Test;
-
-import com.hermod.bottomline.fps.services.transform.Pasc009Transform;
-import com.hermod.bottomline.fps.types.FPSMessage;
-import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
-
-import iso.std.iso._20022.tech.xsd.pacs_009_001.Document;
+import java.io.File;
 
 public class ConvertFullPacs009Test {
 

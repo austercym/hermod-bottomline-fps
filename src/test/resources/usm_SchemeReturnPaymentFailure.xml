@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns1:SchemeReturnPaymentFailure xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                                xmlns:ns1="http://www.bottomline.com/directFPS/FPSUSMs"
+                                xmlns:ns2="http://www.bottomline.com/directFPS/ISO20022Types"
+                                xmlns:ns3="http://www.bottomline.com/directFPS/FPSUSMTypes"
+                                xmlns:ns4="http://www.bottomline.com/directFPS/FPSUSMElements">
+    <ns4:MessageID>10</ns4:MessageID>
+    <ns4:DateTime>2016-01-05T14:45:10</ns4:DateTime>
+    <ns4:SendingInstitutionOrTPBID>01900045</ns4:SendingInstitutionOrTPBID>
+    <ns4:SendingInstitutionOrTPBName>SOME BANK</ns4:SendingInstitutionOrTPBName>
+    <ns4:SubmittingMemberID>01900055</ns4:SubmittingMemberID>
+    <ns4:SubmittingMemberName>OTHER BANK</ns4:SubmittingMemberName>
+    <ns4:ReceivingMemberID>01900045</ns4:ReceivingMemberID>
+    <ns4:ReceivingMemberName>OUR BANK</ns4:ReceivingMemberName>
+    <ns4:OriginalPaymentFPID>PAYMENTREFERENCE011020160105826400328     </ns4:OriginalPaymentFPID>
+    <ns4:Reason>9912</ns4:Reason>
+</ns1:SchemeReturnPaymentFailure>
