@@ -71,7 +71,8 @@ public class KafkaResponseReversalInboundListener extends KafkaInboundListener i
 			}
 
 			LOG.info("[FPS][PmtId: {}] Event type name {}.", key, eventPayment.getEvent().getName());
-			if(!eventPayment.getEvent().getName().equalsIgnoreCase(FPSEvents.FPS_RETURN_PROCESSED.getEventName())){
+			if(!eventPayment.getEvent().getName().equalsIgnoreCase(FPSEvents.FPS_RETURN_PROCESSED.getEventName()) &&
+					!eventPayment.getEvent().getName().equalsIgnoreCase(FPSEvents.FPS_PAYMENT_RETURNED.getEventName())	){
 				// Parse FPS Inbound Payment Rejection
 				LOG.info("[FPS][PmtId: {}] parsing response for FPS inbound reversal payment {}", key, eventPayment.getEvent().getData());
 				FPSOutboundReversalResponse fpsPaymentReversalResponse = null;
@@ -119,6 +120,11 @@ public class KafkaResponseReversalInboundListener extends KafkaInboundListener i
 						String environmentMQ = environmentPrimaryMQ;
 						if(headerSite != null){
 							environmentMQ = new String(headerSite.value(), "UTF-8");
+							LOG.debug("[FPS][PaymentType: {}][PmtId: {}] Get header FPS_SITE: {}",
+									paymentType, key, environmentMQ);
+						}else{
+							LOG.debug("[FPS][PaymentType: {}][PmtId: {}] No header FPS_SITE. Sending to primary MQ: {}",
+									paymentType, key, environmentMQ);
 						}
 						updatePaymentResponseInMemory(originalStr, FPID, rawMessage.toString(), key, paymentType, environmentMQ);
 						boolean reversalSent = sendToMQ(key, rawMessage.toString(), queueToSend, paymentType, environmentMQ);

@@ -1,5 +1,6 @@
 package com.hermod.bottomline.fps.utils.generators;
 
+import com.hermod.bottomline.fps.spring.core.env.SpringArchaiusPropertySource;
 import com.orwellg.yggdrasil.net.client.producer.CommandProducerConfig;
 import com.orwellg.yggdrasil.net.client.producer.GeneratorIdCommandProducer;
 import org.apache.kafka.clients.CommonClientConfigs;
@@ -39,7 +40,7 @@ public class IDGeneratorBean {
     private Properties getProperties() {
         Properties props  = new Properties();
         props.setProperty(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, SecurityProtocol.PLAINTEXT.name());
-        props.setProperty(CommandProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "hdf-node1:2181,hdf-node2:2181,hdf-node3:2181");
+        props.setProperty(CommandProducerConfig.BOOTSTRAP_SERVERS_CONFIG, SpringArchaiusPropertySource.getZookeeperHost());
         props.setProperty(CommandProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
         props.setProperty(CommandProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
         return props;

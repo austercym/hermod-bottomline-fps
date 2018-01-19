@@ -21,6 +21,8 @@ public class SpringArchaiusPropertySource extends PropertySource<Void> {
     
     private Map<String, Object> defaultPropertyValues;
     private Integer connectorId;
+
+    private static String zookeeperHost;
     
     public SpringArchaiusPropertySource(String propertiesFileName, Map<String, Object> defaultPropertyValues) {
         super(propertiesFileName);
@@ -29,8 +31,10 @@ public class SpringArchaiusPropertySource extends PropertySource<Void> {
         		PropertiesUtils props = new PropertiesUtils(name);
 
         		connectorId = props.getIntProperty("connector.id");
+
+        		LOG.info("[FPS] Reading properties connector {} listening port {}", connectorId, props.getIntProperty("server.port"));
         		
-        		String zookeeperHost = props.getStringProperty(ZK_HOST_KEY);
+        		zookeeperHost = props.getStringProperty(ZK_HOST_KEY);
         		String zookeeperPath = props.getStringProperty(ZK_PATH_KEY);
         		ZookeeperUtils.init(zookeeperHost, zookeeperPath);
         		dynamicPropertyFactory = ZookeeperUtils.getDynamicPropertyFactory();
@@ -38,6 +42,10 @@ public class SpringArchaiusPropertySource extends PropertySource<Void> {
         } catch (Exception e) {
             LOG.warn("Cannot initialize the system properties using the properties : {}. Message: {}.", name, e.getMessage(), e);
         }
+    }
+
+    public static String getZookeeperHost(){
+        return zookeeperHost;
     }
     
 	@Override

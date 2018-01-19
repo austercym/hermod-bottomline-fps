@@ -40,10 +40,12 @@ public class BaseListener {
 	protected boolean sendToMQ(String key, String rawMessage, String queueToSend, String paymentType, String environmentMQ) {
 		boolean messageSent = false;
 		int numAttempts = numMaxAttempts;
-		LOG.info("[FPS][PaymentType: {}][PmtId: {}] Sending message to queue {} to Bottomline. Attempts to try {}", paymentType, key, queueToSend, numAttempts);
+		LOG.info("[FPS][PaymentType: {}][PmtId: {}] Sending message to queue {} to Bottomline {}. Attempts to try {}",
+				paymentType, key, queueToSend, environmentMQ, numAttempts);
 		while (!messageSent && numAttempts>0) {
 			try {
-				LOG.info("[FPS][PaymentType: {}][PmtId: {}] Message to be sent to queue {} to Bottomline: {}", paymentType, key, queueToSend, rawMessage);
+				LOG.info("[FPS][PaymentType: {}][PmtId: {}] Message to be sent to queue {} to Bottomline {}: {}",
+						paymentType, key, queueToSend, environmentMQ, rawMessage);
 				if(environmentMQ.equalsIgnoreCase(environmentMQSite1)) {
 					jmsOperations.send(queueToSend, session -> session.createTextMessage(rawMessage));
 				}else{
@@ -53,7 +55,8 @@ public class BaseListener {
 			} catch (Exception ex) {
 				LOG.error("[FPS] Error sending message for testing. Error Message: {}", ex.getMessage());
 				numAttempts--;
-				LOG.info("[FPS][PaymentType: {}][PmtId: {}] Sending message to queue {} to Bottomline. Attempts to try {}", paymentType, key, queueToSend, numAttempts);
+				LOG.info("[FPS][PaymentType: {}][PmtId: {}] Sending message to queue {} to Bottomline {}. Attempts to try {}",
+						paymentType, key, queueToSend, environmentMQ, numAttempts);
 			}
 		}
 		if(!messageSent){
