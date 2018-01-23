@@ -27,6 +27,9 @@ public class BaseListener {
 	@Value("${jms.mq.bottomline.environment.1}")
 	private String environmentMQSite1;
 
+    @Value("${connector.%id.emergency.log}")
+    protected Boolean emergencyLog;
+
 	protected FPSTransform getTransform(String packageName) {
 		String beanKey = "transform_" + packageName.substring(packageName.lastIndexOf(".")+1);
 		return transforms.getOrDefault(beanKey, null);

@@ -17,15 +17,6 @@ public class DefaultPropertyValues {
 	private final static String MQ_DEFAULT_USERNAME = "ipagoo";
 	private final static String MQ_DEFAULT_PASSWORD = "";
 
-	/*
-	private final static String MQ_DEFAULT_HOST  = "localhost";
-	private final static Integer MQ_DEFAULT_PORT = 1414;
-	private final static String MQ_DEFAULT_QUEUE_MANAGER = "QM3";
-	private final static String MQ_DEFAULT_CHANNEL  = "DEV.APP.SVRCONN";
-	private final static String MQ_DEFAULT_USERNAME = "root";
-	private final static String MQ_DEFAULT_PASSWORD = "";
-	 */
-
     private final static String MQ_DEFAULT_SECONDARY_HOST  = "80.169.11.104";
     private final static Integer MQ_DEFAULT_SECONDARY_PORT = 49178;
     private final static String MQ_DEFAULT_SECONDARY_QUEUE_MANAGER = "BT.ORUN.UA.FPS.02";
@@ -83,6 +74,8 @@ public class DefaultPropertyValues {
 	private final static Long KAFKA_DEFAULT_CONSUMER_POLL_TIMEOUT = 3000L;
 	private final static Integer INMEMORY_DEFAULT_CACHE_EXPIRINGMINUTES = 30;
 	private final static String CONNECTOR_DEFAULT_MQ_SITE_PRIMARY = "COLT";
+
+	private final static Boolean CONNECTOR_EMERGENCY_PAYLOAD_LOG = false;
 
 	
 	private final static Map<String, Object> defaultValues;
@@ -162,6 +155,8 @@ public class DefaultPropertyValues {
 
 		defaultValues.put("connector.1.groupId", KAFKA_DEFAULT_CONSUMER_INMEMORY_GROUP_ID);
 		defaultValues.put("connector.1.mq_primary", CONNECTOR_DEFAULT_MQ_SITE_PRIMARY);
+
+		defaultValues.put("connector.1.emergency.log", CONNECTOR_EMERGENCY_PAYLOAD_LOG);
 	}
 
 	public static Map<String, Object> getDefaultValues() {

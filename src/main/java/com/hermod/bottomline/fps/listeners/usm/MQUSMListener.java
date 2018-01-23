@@ -112,11 +112,15 @@ public class MQUSMListener extends BaseListener implements MessageListener {
         if (reader != null) {
             String message = "";
             try {
-                String uuid = StringUtils.isNotEmpty(id)?id:IDGeneratorBean.getInstance().generatorID().getFasterPaymentUniqueId();
                 StringWriter writer = new StringWriter();
                 IOUtils.copy(reader, writer);
                 message = writer.toString();
 
+                if(emergencyLog){
+                    LOG.warn("[FPS][PaymentType: {}] Payload received {}", PAYMENT_TYPE, message);
+                }
+
+                String uuid = StringUtils.isNotEmpty(id)?id:IDGeneratorBean.getInstance().generatorID().getFasterPaymentUniqueId();
                 //Send mq message to logging topic
                 kafkaSender.sendRawMessage(loggingTopic, message, uuid);
 
