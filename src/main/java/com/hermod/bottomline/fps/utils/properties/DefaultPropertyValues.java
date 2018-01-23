@@ -156,7 +156,7 @@ public class DefaultPropertyValues {
 		defaultValues.put("connector.1.groupId", KAFKA_DEFAULT_CONSUMER_INMEMORY_GROUP_ID);
 		defaultValues.put("connector.1.mq_primary", CONNECTOR_DEFAULT_MQ_SITE_PRIMARY);
 
-		defaultValues.put("connector.1.emergency.log", CONNECTOR_EMERGENCY_PAYLOAD_LOG);
+		defaultValues.put("connector.emergency.log", CONNECTOR_EMERGENCY_PAYLOAD_LOG);
 	}
 
 	public static Map<String, Object> getDefaultValues() {

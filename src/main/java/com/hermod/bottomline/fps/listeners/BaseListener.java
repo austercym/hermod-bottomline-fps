@@ -27,7 +27,7 @@ public class BaseListener {
 	@Value("${jms.mq.bottomline.environment.1}")
 	private String environmentMQSite1;
 
-    @Value("${connector.%id.emergency.log}")
+    @Value("${connector.emergency.log}")
     protected Boolean emergencyLog;
 
 	protected FPSTransform getTransform(String packageName) {
