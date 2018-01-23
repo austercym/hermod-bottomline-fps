@@ -53,7 +53,7 @@ public class ConvertUSMFPSInst3rdPartyStatusMessageTest {
 
 	private final static FPSMessage readMessage() throws Exception {
 
-		final File xmlFile = new File("src/test/resources/usm_FPSInst3RdPartyStatusMessage.xml");
+		final File xmlFile = new File("src/test/resources/usm_PartyStatusMessage.xml");
 
 		FPSInst3RdPartyStatusMessageType serviceStatusMessage = JAXB.unmarshal(xmlFile, FPSInst3RdPartyStatusMessageType.class);
 		return serviceStatusMessage;
@@ -62,7 +62,7 @@ public class ConvertUSMFPSInst3rdPartyStatusMessageTest {
 
 	private final static FPSMessage readMessage2() throws Exception {
 
-		final File xmlFile = new File("src/test/resources/usm_FPSInst3RdPartyStatusMessage_2.xml");
+		final File xmlFile = new File("src/test/resources/usm_PartyStatusMessage2.xml");
 
 		FPSInst3RdPartyStatusMessageType serviceStatusMessage = JAXB.unmarshal(xmlFile, FPSInst3RdPartyStatusMessageType.class);
 		return serviceStatusMessage;
