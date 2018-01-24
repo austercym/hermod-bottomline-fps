@@ -65,6 +65,9 @@ public class DefaultPropertyValues {
 	private final static String KAFKA_DEFAULT_INBOUND_REVERSAL_REQUEST_TOPIC = "com.orwellg.yggdrasil.dsl.fps.inbound.reversal.request.1";
 	private final static String KAFKA_DEFAULT_INBOUND_REVERSAL_RESPONSE_TOPIC  = "com.orwellg.yggdrasil.dsl.fps.inbound.reversal.response.1";
 
+	private final static String KAFKA_DEFAULT_CONSUMER_CACHE_REQUEST_TOPIC  = "com.orwellg.hermod.bottomline.fps.cache.payment.request.1";
+	private final static String KAFKA_DEFAULT_CONSUMER_CACHE_RESPONSE_TOPIC  = "com.orwellg.hermod.bottomline.fps.cache.payment.response.1";
+
 	private final static String KAFKA_DEFAULT_MESSAGE_LOGGING_TOPIC   = "com.orwellg.logging.message";
 
 	private final static Integer KAFKA_DEFAULT_OUTBOUND_TOPIC_PARTITIONS = 3;
@@ -157,6 +160,8 @@ public class DefaultPropertyValues {
 		defaultValues.put("connector.1.mq_primary", CONNECTOR_DEFAULT_MQ_SITE_PRIMARY);
 
 		defaultValues.put("connector.emergency.log", CONNECTOR_EMERGENCY_PAYLOAD_LOG);
+		defaultValues.put("kafka.topic.cache.request", KAFKA_DEFAULT_CONSUMER_CACHE_REQUEST_TOPIC);
+		defaultValues.put("kafka.topic.cache.response", KAFKA_DEFAULT_CONSUMER_CACHE_RESPONSE_TOPIC);
 	}
 
 	public static Map<String, Object> getDefaultValues() {

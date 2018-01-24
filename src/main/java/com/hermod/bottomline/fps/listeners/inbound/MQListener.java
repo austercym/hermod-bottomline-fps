@@ -268,6 +268,17 @@ public abstract class MQListener extends BaseListener implements MessageListener
                                 LOG.info("[FPS][PmtId: {}] Sending FPS Inbound reversal request", uuid);
                                 sendToKafka(inboundReversalTopic, uuid, event, paymentTypeCode, environmentMQ);
                             }
+/*
+                            Event event = EventGenerator.generateEvent(
+                                    this.getClass().getName(),
+                                    FPSEvents.FPS_REVERSAL_RECEIVED.getEventName(),
+                                    uuid,
+                                    originalPaymentMessage,
+                                    entity,
+                                    brand
+                            );
+                            sendToKafka(uuid, event, paymentTypeCode, environmentMQ);
+                            /*/
 
                             LOG.info("[FPS][PmtId: {}] Sent FPS Inbound payment request", uuid);
                         } else {

@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.map.PassiveExpiringMap;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.util.DigestUtils;
 
 public class InMemoryOutboundPaymentStorage {
 
