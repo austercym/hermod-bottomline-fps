@@ -1,0 +1,99 @@
+package com.orwellg.hermod.bottomline.fps.listeners.storage;
+
+
+import com.google.gson.Gson;
+import com.orwellg.hermod.bottomline.fps.listeners.outbound.KafkaOutboundListener;
+import com.orwellg.hermod.bottomline.fps.services.kafka.KafkaSender;
+import com.orwellg.hermod.bottomline.fps.services.transform.FPSTransform;
+import com.orwellg.hermod.bottomline.fps.storage.*;
+import com.orwellg.hermod.bottomline.fps.types.FPSMessage;
+import com.orwellg.hermod.bottomline.fps.utils.Constants;
+import com.orwellg.hermod.bottomline.fps.utils.generators.EventGenerator;
+import com.orwellg.hermod.bottomline.fps.utils.generators.SchemeValidatorBean;
+import com.orwellg.umbrella.avro.types.event.Event;
+import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
+import com.orwellg.umbrella.avro.types.payment.fps.FPSInboundPayment;
+import com.orwellg.umbrella.avro.types.payment.fps.FPSInboundReversal;
+import com.orwellg.umbrella.avro.types.payment.fps.FPSOutboundPayment;
+import com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Document;
+import com.orwellg.umbrella.commons.types.utils.avro.RawMessageUtils;
+import com.orwellg.umbrella.commons.utils.enums.FPSEvents;
+import com.orwellg.umbrella.commons.utils.enums.KafkaHeaders;
+import org.apache.activemq.util.ByteArrayInputStream;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.common.header.Header;
+import org.apache.kafka.common.header.Headers;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.listener.KafkaDataListener;
+import org.springframework.kafka.listener.MessageListener;
+import org.springframework.messaging.converter.MessageConversionException;
+import org.springframework.stereotype.Component;
+import org.xml.sax.SAXException;
+
+import javax.jms.BytesMessage;
+import javax.jms.TextMessage;
+import javax.xml.transform.Source;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Validator;
+import java.io.*;
+import java.util.Date;
+
+
+@Component(value = "kafkaRequestInMemoryListener")
+public class KafkaRequestInMemoryListener  implements MessageListener<String, String>, KafkaDataListener<ConsumerRecord<String, String>> {
+
+    private static Logger LOG = LogManager.getLogger(KafkaRequestInMemoryListener.class);
+
+    @Value("${inmemory.cache.expiringMinutes}")
+    private int expiringMinutes;
+
+    @Override
+    public void onMessage(ConsumerRecord<String, String> message) {
+
+        String key = message.key();
+        String value = message.value();
+
+        LOG.info("[FPS][PmtId: {}] Receiving a request to store inmemory", key);
+        try {
+            // Parse Event Message
+            Event eventPayment = null;
+            try {
+                eventPayment = RawMessageUtils.decodeFromString(Event.SCHEMA$, value);
+            } catch (Exception ex) {
+                LOG.error("[FPS][PmtId: {}] Error decoding event request for FPS inbound payment. Error Message: {}", key, ex.getMessage(), ex);
+            }
+
+            // Parse FPS Outbound Payment Request
+            Headers headers = message.headers();
+            Header header = headers.lastHeader(KafkaHeaders.FPS_PAYMENT_TYPE.getKafkaHeader());
+            String paymentType = new String(header.value(), "UTF-8");
+            Header headerFPID = headers.lastHeader(KafkaHeaders.FPS_PAYMENT_FPID.getKafkaHeader());
+            String FPID = new String(headerFPID.value(), "UTF-8");
+            Header headerEnvironment = headers.lastHeader(KafkaHeaders.FPS_SITE.getKafkaHeader());
+            String environmentMQ = new String(headerEnvironment.value(), "UTF-8");
+            String originalPaymentMessage =eventPayment.getEvent().getData();
+
+            storePaymentRequest(originalPaymentMessage,key, FPID, paymentType, environmentMQ);
+
+        } catch (Exception e) {
+            throw new MessageConversionException("Exception in message emission. Message: " + e.getMessage(), e);
+        }
+
+    }
+
+    private PaymentBean storePaymentRequest(String message, String uuid, String FPID, String paymentType, String environmentMQ) {
+        PaymentBean resendPreviousResponse = null;
+        InMemoryPaymentStorage storage = InMemoryPaymentStorage.getInstance(expiringMinutes);
+        PaymentBean payment = storage.findPayment(FPID, message);
+        if (payment != null && payment.getStatus().equals(PaymentStatus.PROCESSED)){
+            resendPreviousResponse = payment;
+        }else{
+            storage.storePayment(FPID, message, uuid, paymentType, environmentMQ);
+        }
+        return resendPreviousResponse;
+    }
+
+}
