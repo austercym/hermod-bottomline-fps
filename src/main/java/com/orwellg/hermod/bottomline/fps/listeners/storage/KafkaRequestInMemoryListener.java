@@ -1,45 +1,22 @@
 package com.orwellg.hermod.bottomline.fps.listeners.storage;
 
 
-import com.google.gson.Gson;
-import com.orwellg.hermod.bottomline.fps.listeners.outbound.KafkaOutboundListener;
-import com.orwellg.hermod.bottomline.fps.services.kafka.KafkaSender;
-import com.orwellg.hermod.bottomline.fps.services.transform.FPSTransform;
-import com.orwellg.hermod.bottomline.fps.storage.*;
-import com.orwellg.hermod.bottomline.fps.types.FPSMessage;
-import com.orwellg.hermod.bottomline.fps.utils.Constants;
-import com.orwellg.hermod.bottomline.fps.utils.generators.EventGenerator;
-import com.orwellg.hermod.bottomline.fps.utils.generators.SchemeValidatorBean;
+import com.orwellg.hermod.bottomline.fps.storage.InMemoryPaymentStorage;
+import com.orwellg.hermod.bottomline.fps.storage.PaymentBean;
+import com.orwellg.hermod.bottomline.fps.storage.PaymentStatus;
 import com.orwellg.umbrella.avro.types.event.Event;
-import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
-import com.orwellg.umbrella.avro.types.payment.fps.FPSInboundPayment;
-import com.orwellg.umbrella.avro.types.payment.fps.FPSInboundReversal;
-import com.orwellg.umbrella.avro.types.payment.fps.FPSOutboundPayment;
-import com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Document;
 import com.orwellg.umbrella.commons.types.utils.avro.RawMessageUtils;
-import com.orwellg.umbrella.commons.utils.enums.FPSEvents;
 import com.orwellg.umbrella.commons.utils.enums.KafkaHeaders;
-import org.apache.activemq.util.ByteArrayInputStream;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.Headers;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.listener.KafkaDataListener;
 import org.springframework.kafka.listener.MessageListener;
 import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.stereotype.Component;
-import org.xml.sax.SAXException;
-
-import javax.jms.BytesMessage;
-import javax.jms.TextMessage;
-import javax.xml.transform.Source;
-import javax.xml.transform.stream.StreamSource;
-import javax.xml.validation.Validator;
-import java.io.*;
-import java.util.Date;
 
 
 @Component(value = "kafkaRequestInMemoryListener")

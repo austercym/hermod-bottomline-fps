@@ -5,7 +5,6 @@ import com.google.gson.Gson;
 import com.orwellg.hermod.bottomline.fps.services.kafka.KafkaSender;
 import com.orwellg.hermod.bottomline.fps.services.transform.FPSTransform;
 import com.orwellg.hermod.bottomline.fps.storage.InMemoryOutboundPaymentStorage;
-import com.orwellg.hermod.bottomline.fps.storage.PaymentBean;
 import com.orwellg.hermod.bottomline.fps.storage.PaymentOutboundBean;
 import com.orwellg.hermod.bottomline.fps.storage.PaymentStatus;
 import com.orwellg.hermod.bottomline.fps.types.FPSMessage;

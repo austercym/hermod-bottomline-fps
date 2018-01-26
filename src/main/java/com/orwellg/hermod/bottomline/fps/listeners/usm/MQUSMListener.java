@@ -39,7 +39,7 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Validator;
 import java.io.*;
 
-    @Component(value = "mqUSMListener")
+@Component(value = "mqUSMListener")
 @Scope("prototype")
 public class MQUSMListener extends BaseListener implements MessageListener {
 
