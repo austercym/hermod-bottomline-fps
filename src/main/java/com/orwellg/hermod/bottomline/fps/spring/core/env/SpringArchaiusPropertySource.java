@@ -6,9 +6,12 @@ import com.orwellg.umbrella.commons.utils.config.PropertiesUtils;
 import com.orwellg.umbrella.commons.utils.config.ZookeeperUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.PropertySource;
 
+import java.io.InputStream;
 import java.util.Map;
+import java.util.Properties;
 
 public class SpringArchaiusPropertySource extends PropertySource<Void> {
 

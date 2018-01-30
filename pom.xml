@@ -246,9 +246,6 @@
 			<build>
 				<resources>
 					<resource>
-						<directory>src/main/resources/production</directory>
-					</resource>
-					<resource>
 						<directory>src/main/resources</directory>
 					</resource>
 				</resources>

@@ -118,6 +118,7 @@ public class KafkaResponseInMemoryListener extends KafkaInboundListener implemen
         LOG.debug("[FPS][PmtId: {}] Storing response message to in-memory storage with FPID {}", paymentId, FPID);
         PaymentBean payment = storage.findPayment(FPID, originalStr);
         if (payment == null) {
+            LOG.debug("FPS][PmtId: {}] Payment not found in cache", paymentId);
             storage.storePayment(FPID, originalStr, paymentId, paymentType, environmentMQ);
         }
         payment = storage.completePaymentResponse(FPID, originalStr, responseMessage);

@@ -66,8 +66,10 @@ public class KafkaRequestInMemoryListener  implements MessageListener<String, St
         InMemoryPaymentStorage storage = InMemoryPaymentStorage.getInstance(expiringMinutes);
         PaymentBean payment = storage.findPayment(FPID, message);
         if (payment != null && payment.getStatus().equals(PaymentStatus.PROCESSED)){
+            LOG.debug("FPS][PmtId: {}] Payment found in cache", uuid);
             resendPreviousResponse = payment;
         }else{
+            LOG.debug("FPS][PmtId: {}] Payment not found in cache, storing into it", uuid);
             storage.storePayment(FPID, message, uuid, paymentType, environmentMQ);
         }
         return resendPreviousResponse;

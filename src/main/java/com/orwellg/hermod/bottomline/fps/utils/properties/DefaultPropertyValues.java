@@ -158,6 +158,8 @@ public class DefaultPropertyValues {
 
 		defaultValues.put("connector.1.groupId", KAFKA_DEFAULT_CONSUMER_INMEMORY_GROUP_ID);
 		defaultValues.put("connector.1.mq_primary", CONNECTOR_DEFAULT_MQ_SITE_PRIMARY);
+		defaultValues.put("connector.2.groupId", "hermod-bottomline-fps-inmemory.2");
+		defaultValues.put("connector.2.mq_primary", CONNECTOR_DEFAULT_MQ_SITE_PRIMARY);
 
 		defaultValues.put("connector.emergency.log", CONNECTOR_EMERGENCY_PAYLOAD_LOG);
 		defaultValues.put("kafka.topic.cache.request", KAFKA_DEFAULT_CONSUMER_CACHE_REQUEST_TOPIC);
