@@ -1,6 +1,6 @@
 package input.types;
 
-import com.hermod.bottomline.fps.types.FPSMessage;
+import com.orwellg.hermod.bottomline.fps.types.FPSMessage;
 
 import java.util.ArrayList;
 import java.util.Collection;
