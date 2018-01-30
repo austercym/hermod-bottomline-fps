@@ -273,7 +273,7 @@ public abstract class MQListener extends BaseListener implements MessageListener
                                 LOG.info("[FPS][PmtId: {}] Sending FPS Inbound reversal request", uuid);
                                 sendToKafka(inboundReversalTopic, uuid, event, paymentTypeCode, environmentMQ);
 
-                                // TODO change type of Event
+
                                 event = EventGenerator.generateEvent(
                                         this.getClass().getName(),
                                         FPSEvents.FPS_REVERSAL_RECEIVED.getEventName(),
@@ -328,7 +328,7 @@ public abstract class MQListener extends BaseListener implements MessageListener
                             }
                         }
                     }
-                    // TODO change type of Event?
+                    
                     event = EventGenerator.generateEvent(
                             this.getClass().getName(),
                             FPSEvents.FPS_PAYMENT_RECEIVED.getEventName(),

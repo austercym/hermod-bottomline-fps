@@ -123,7 +123,7 @@ public class KafkaResponseReversalInboundListener extends KafkaInboundListener i
 						updatePaymentResponseInMemory(originalStr, FPID, rawMessage.toString(), key, paymentType, environmentMQ);
 						boolean reversalSent = sendToMQ(key, rawMessage.toString(), queueToSend, paymentType, environmentMQ);
 
-						// TODO change type of Event
+
 						Event event = EventGenerator.generateEvent(
 								this.getClass().getName(),
 								FPSEvents.FPS_PAYMENT_SENT.getEventName(),
