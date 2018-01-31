@@ -132,7 +132,6 @@
 
 	<xs:simpleType name="SchemeReturnPaymentFailureReasonType">
 		<xs:restriction base="xs:string">
-			<xs:enumeration value="TBD"/>
 		</xs:restriction>
 	</xs:simpleType>
 
