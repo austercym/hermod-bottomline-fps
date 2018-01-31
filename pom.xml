@@ -233,9 +233,6 @@
 			<build>
 				<resources>
 					<resource>
-						<directory>src/main/resources/development</directory>
-					</resource>
-					<resource>
 						<directory>src/main/resources</directory>
 					</resource>
 				</resources>
@@ -255,9 +252,6 @@
 			<id>uat</id>
 			<build>
 				<resources>
-					<resource>
-						<directory>src/main/resources/uat</directory>
-					</resource>
 					<resource>
 						<directory>src/main/resources</directory>
 					</resource>
