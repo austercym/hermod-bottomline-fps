@@ -18,6 +18,9 @@ public class BaseListener {
 	@Value("${wq.mq.num.max.attempts}")
 	private int numMaxAttempts;
 
+	@Value("${jms.mq.send.messages}")
+	private Boolean sendMessageToBL;
+
 	@Autowired
 	private JmsOperations jmsOperations;
 
@@ -43,27 +46,28 @@ public class BaseListener {
 	protected boolean sendToMQ(String key, String rawMessage, String queueToSend, String paymentType, String environmentMQ) {
 		boolean messageSent = false;
 		int numAttempts = numMaxAttempts;
-		LOG.info("[FPS][PaymentType: {}][PmtId: {}] Sending message to queue {} to Bottomline {}. Attempts to try {}",
-				paymentType, key, queueToSend, environmentMQ, numAttempts);
-		while (!messageSent && numAttempts>0) {
-			try {
-				LOG.info("[FPS][PaymentType: {}][PmtId: {}] Message to be sent to queue {} to Bottomline {}: {}",
-						paymentType, key, queueToSend, environmentMQ, rawMessage);
-				if(environmentMQ.equalsIgnoreCase(environmentMQSite1)) {
-					jmsOperations.send(queueToSend, session -> session.createTextMessage(rawMessage));
-				}else{
-					jmsOperationsSite2.send(queueToSend, session -> session.createTextMessage(rawMessage));
+		if(sendMessageToBL) {
+			LOG.info("[FPS][PaymentType: {}][PmtId: {}] Sending message to queue {} to Bottomline {}. Attempts to try {}", paymentType, key, queueToSend, environmentMQ, numAttempts);
+			while (!messageSent && numAttempts > 0) {
+				try {
+					LOG.info("[FPS][PaymentType: {}][PmtId: {}] Message to be sent to queue {} to Bottomline {}: {}", paymentType, key, queueToSend, environmentMQ, rawMessage);
+					if (environmentMQ.equalsIgnoreCase(environmentMQSite1)) {
+						jmsOperations.send(queueToSend, session -> session.createTextMessage(rawMessage));
+					} else {
+						jmsOperationsSite2.send(queueToSend, session -> session.createTextMessage(rawMessage));
+					}
+					messageSent = true;
+				} catch (Exception ex) {
+					LOG.error("[FPS] Error sending message for testing. Error Message: {}", ex.getMessage());
+					numAttempts--;
+					LOG.info("[FPS][PaymentType: {}][PmtId: {}] Sending message to queue {} to Bottomline {}. Attempts to try {}", paymentType, key, queueToSend, environmentMQ, numAttempts);
 				}
-				messageSent = true;
-			} catch (Exception ex) {
-				LOG.error("[FPS] Error sending message for testing. Error Message: {}", ex.getMessage());
-				numAttempts--;
-				LOG.info("[FPS][PaymentType: {}][PmtId: {}] Sending message to queue {} to Bottomline {}. Attempts to try {}",
-						paymentType, key, queueToSend, environmentMQ, numAttempts);
 			}
-		}
-		if(!messageSent){
-			LOG.error("[FPS][PmtId: {}] Error sending message to {} queue. Max number of attempts reached", key, queueToSend);
+			if (!messageSent) {
+				LOG.error("[FPS][PmtId: {}] Error sending message to {} queue. Max number of attempts reached", key, queueToSend);
+			}
+		}else{
+			LOG.debug("[FPS][PaymentType: {}][PmtId: {}] Message NOT SENT to queue {} to Bottomline {}", paymentType, key, queueToSend, environmentMQ);
 		}
 		return messageSent;
 	}

@@ -72,7 +72,7 @@ public class SimulateSendEventToKafka {
     @RequestMapping(method= RequestMethod.GET, value="/resetstorage")
     public ResponseEntity<String> cleanMemory() {
         InMemoryPaymentStorage inmemoryStorage = InMemoryPaymentStorage.getInstance(expiringMinutes);
-        inmemoryStorage.cleanStorage();
+        inmemoryStorage.clearStorage();
         return new ResponseEntity<>("Memory reset", HttpStatus.OK);
     }
 

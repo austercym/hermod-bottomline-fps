@@ -21,7 +21,7 @@ public class InMemoryPaymentStorageTest {
 
     @After
     public void tearDown() throws Exception {
-        messageStorage.cleanStorage();
+        messageStorage.clearStorage();
     }
 
     @Test
@@ -59,6 +59,16 @@ public class InMemoryPaymentStorageTest {
 
         assertThat(message.getStatus(), is(PaymentStatus.PROCESSED));
         assertThat(message.getResponseMessage(), is("responseMessage"));
+
+    }
+
+    @Test
+    public void getOriginalMessageWithOutCreDtTm() throws Exception {
+
+        String otheroriginalMessage = "{\"GrpHdr\":{\"MsgId\":\"008-FPS1812392313901--4020180206826\",\"CreDtTm\":1517917547000,\"NbOfTxs\":\"1\",\"SttlmInf\"";
+        String updateMessage = messageStorage.getMessageWithOutHeader(otheroriginalMessage);
+        assertThat(updateMessage, is("{\"GrpHdr\":{\"MsgId\":\"008-FPS1812392313901--4020180206826\",\"NbOfTxs\":\"1\",\"SttlmInf\""));
+
 
     }
 

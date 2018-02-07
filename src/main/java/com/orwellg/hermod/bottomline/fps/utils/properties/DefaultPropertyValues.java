@@ -79,6 +79,7 @@ public class DefaultPropertyValues {
 	private final static String CONNECTOR_DEFAULT_MQ_SITE_PRIMARY = "COLT";
 
 	private final static Boolean CONNECTOR_EMERGENCY_PAYLOAD_LOG = false;
+	private final static Boolean SEND_MESSAGES_TO_BOTTOMLINE = true;
 
 	
 	private final static Map<String, Object> defaultValues;
@@ -164,6 +165,8 @@ public class DefaultPropertyValues {
 		defaultValues.put("connector.emergency.log", CONNECTOR_EMERGENCY_PAYLOAD_LOG);
 		defaultValues.put("kafka.topic.cache.request", KAFKA_DEFAULT_CONSUMER_CACHE_REQUEST_TOPIC);
 		defaultValues.put("kafka.topic.cache.response", KAFKA_DEFAULT_CONSUMER_CACHE_RESPONSE_TOPIC);
+
+		defaultValues.put("jms.mq.send.messages", SEND_MESSAGES_TO_BOTTOMLINE);
 	}
 
 	public static Map<String, Object> getDefaultValues() {

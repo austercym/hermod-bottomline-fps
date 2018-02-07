@@ -51,7 +51,7 @@ public class InMemoryOutboundPaymentStorage {
     }
 
 
-    public void cleanStorage() {
+    public void clearStorage() {
         storage.clear();
     }
 

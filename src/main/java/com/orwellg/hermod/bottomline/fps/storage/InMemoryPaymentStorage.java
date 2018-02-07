@@ -1,6 +1,8 @@
 package com.orwellg.hermod.bottomline.fps.storage;
 
 import org.apache.commons.collections4.map.PassiveExpiringMap;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.util.DigestUtils;
 
 import java.util.Collections;
@@ -9,6 +11,8 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class InMemoryPaymentStorage {
+
+    private static Logger LOG = LogManager.getLogger(InMemoryPaymentStorage.class);
 
     private Integer timeToExpire;
 
@@ -66,14 +70,26 @@ public class InMemoryPaymentStorage {
         return messageToUpdate;
     }
 
-    public void cleanStorage() {
+    public void clearStorage() {
         storage.clear();
     }
 
     private String generateHash(String FPID, String originalMessage){
-        StringBuilder keyBuilder = (new StringBuilder(FPID)).append(originalMessage);
+        String originalMessagewithOutHeader = getMessageWithOutHeader(originalMessage);
+        StringBuilder keyBuilder = (new StringBuilder(FPID)).append(originalMessagewithOutHeader);
         byte[] key = keyBuilder.toString().getBytes();
         String md5Hex = DigestUtils.md5DigestAsHex(key);
         return md5Hex;
+    }
+
+    public String getMessageWithOutHeader(String messageToReview){
+        String messageUpdated = messageToReview;
+        int dateTimeStartAt = messageToReview.toLowerCase().indexOf("\"credttm\"");
+        int dateTimeEndsAt = messageToReview.toLowerCase().indexOf(",",dateTimeStartAt)+1;
+        if(dateTimeEndsAt>-1 && dateTimeStartAt> -1) {
+            String credttmNode = messageToReview.substring(dateTimeStartAt, dateTimeEndsAt);
+            messageUpdated = messageToReview.replace(credttmNode, "");
+        }
+        return messageUpdated;
     }
 }
