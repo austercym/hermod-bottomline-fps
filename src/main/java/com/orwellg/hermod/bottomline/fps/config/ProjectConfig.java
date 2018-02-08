@@ -1,5 +1,6 @@
 package com.orwellg.hermod.bottomline.fps.config;
 
+import com.orwellg.hermod.bottomline.fps.utils.generators.SchemeValidatorBean;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,6 +73,11 @@ public class ProjectConfig extends ComponentConfig {
 	@EventListener(ApplicationReadyEvent.class)
 	public void startListeners() {
 	    LOG.info("Connector to Bottomline start. Starting containers....");
+		try{
+			SchemeValidatorBean.getInstance();
+		}catch(Exception e){
+			LOG.error("[FPS] Error creating scheme validators to validate payment messages");
+		}
 		jmsSIPListenerContainer.start();
 		jmsASYNCListenerContainer.start();
 		jmsSTANDINListenerContainer.start();

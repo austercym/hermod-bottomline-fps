@@ -38,6 +38,7 @@ import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Validator;
 import java.io.*;
+import java.util.Date;
 
 import static com.orwellg.hermod.bottomline.fps.utils.Constants.RESP_SUFFIX;
 
@@ -134,7 +135,11 @@ public abstract class MQOutboundListener extends BaseListener implements Message
                     Source src = new StreamSource(new StringReader(message));
                     // Validate against scheme
                     Validator validator = SchemeValidatorBean.getInstance().getValidatorPacs002();
-                    validator.validate(src);
+                    long timeStart = new Date().getTime();
+                    synchronized (validator) {
+                        validator.validate(src);
+                    }
+                    LOG.debug("[FPS] Validate against scheme last {} ms", new Date().getTime()-timeStart);
                 } catch (SAXException ex) {
                     schemaValidation = false;
                     LOG.error("[FPS][PaymentType: {}] Error Validating message against scheme. Error:{} Message: {}", paymentType, ex.getMessage(), message);

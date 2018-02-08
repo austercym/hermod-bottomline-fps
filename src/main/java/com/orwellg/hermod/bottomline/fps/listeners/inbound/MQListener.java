@@ -156,7 +156,11 @@ public abstract class MQListener extends BaseListener implements MessageListener
                         // Validate against scheme
                         Source src = new StreamSource(new StringReader(message));
                         Validator validator = SchemeValidatorBean.getInstance().getValidatorPacs008();
-                        validator.validate(src);
+                        long timeStart = new Date().getTime();
+                        synchronized (validator) {
+                            validator.validate(src);
+                        }
+                        LOG.debug("[FPS] Validate against scheme last {} ms", new Date().getTime()-timeStart);
                     } catch (SAXException ex) {
                         schemaValidation = false;
                         errorMessage = ex.getMessage();
@@ -169,8 +173,13 @@ public abstract class MQListener extends BaseListener implements MessageListener
                         try {
                             // Validate against scheme
                             Source src = new StreamSource(new StringReader(message));
+
                             Validator validator = SchemeValidatorBean.getInstance().getValidatorPacs007();
-                            validator.validate(src);
+                            long timeStart = new Date().getTime();
+                            synchronized (validator) {
+                                validator.validate(src);
+                            }
+                            LOG.debug("[FPS] Validate against scheme last {} ms", new Date().getTime()-timeStart);
                             schemaValidation = true;
                             isReversal = true;
                         } catch (SAXException ex) {

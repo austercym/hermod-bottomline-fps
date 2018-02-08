@@ -38,6 +38,7 @@ import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Validator;
 import java.io.*;
+import java.util.Date;
 
 @Component(value = "mqUSMListener")
 @Scope("prototype")
@@ -181,7 +182,11 @@ public class MQUSMListener extends BaseListener implements MessageListener {
         try {
             Source src = new StreamSource(new StringReader(message));
             Validator validator = SchemeValidatorBean.getInstance().getValidatorUSM();
-            validator.validate(src);
+            long timeStart = new Date().getTime();
+            synchronized (validator) {
+                validator.validate(src);
+            }
+            LOG.debug("[FPS] Validate against scheme last {} ms", new Date().getTime()-timeStart);
         } catch (SAXException ex) {
             schemaValidation = false;
             LOG.error("[FPS][USM] Error Validating message against scheme. Error:{} Message: {}", ex.getMessage(),

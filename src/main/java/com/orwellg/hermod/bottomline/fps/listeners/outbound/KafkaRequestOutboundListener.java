@@ -133,7 +133,11 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
                     try {
                         Source src = new StreamSource(new StringReader(rawMessage.toString()));
                         Validator validator = SchemeValidatorBean.getInstance().getValidatorPacs008();
-                        validator.validate(src);
+                        long timeStart = new Date().getTime();
+                        synchronized (validator) {
+                            validator.validate(src);
+                        }
+                        LOG.debug("[FPS] Validate against scheme last {} ms", new Date().getTime()-timeStart);
                     } catch (SAXException ex) {
                         schemaValidation = false;
                         LOG.error("[FPS][PaymentType: {}] Error Validating message against scheme. Error:{} Message: {}",
