@@ -1,5 +1,6 @@
 package com.orwellg.hermod.bottomline.fps.services.transform.helper.builder;
 
+import com.esotericsoftware.reflectasm.MethodAccess;
 import com.orwellg.hermod.bottomline.fps.services.transform.helper.BuilderContext;
 import com.orwellg.hermod.bottomline.fps.services.transform.helper.ConfigurationException;
 import com.orwellg.hermod.bottomline.fps.services.transform.helper.ConversionException;
@@ -24,8 +25,10 @@ public class ConversionBuilderRule implements BuilderRuleIf {
 	public void apply(final Object source, Object target) throws ConversionException {
 		try {
 			if (null == source) return;
-			
-			final Object sourceValue = this.ctx.getGetter().invoke(source);
+			MethodAccess access = MethodAccess.get(this.ctx.getGetter().getDeclaringClass());
+			int indexMethod = access.getIndex(this.ctx.getGetter().getName());
+			final Object sourceValue = access.invoke(source,indexMethod);
+			//final Object sourceValue = this.ctx.getGetter().invoke(source);
 			if (null == sourceValue) return;
 			final Object targetValue = this.convertMethod.convert(sourceValue, target);
 			this.ctx.updateTargetObject(target,  targetValue);

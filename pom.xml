@@ -41,6 +41,11 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>com.esotericsoftware</groupId>
+			<artifactId>reflectasm</artifactId>
+			<version>1.11.3</version>
+		</dependency>
+		<dependency>
 			<groupId>com.ibm.mq</groupId>
 			<artifactId>allclient</artifactId>
 			<version>${com.ibm.mq.version}</version>
@@ -222,41 +227,4 @@
 	<finalName>hermod-bottomline-fps-${project.version}</finalName>
 
  </build>
-
-	<profiles>
-		<profile>
-			<id>dev</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-			<build>
-				<resources>
-					<resource>
-						<directory>src/main/resources</directory>
-					</resource>
-				</resources>
-			</build>
-		</profile>
-		<profile>
-			<id>integration-test</id>
-			<build>
-				<resources>
-					<resource>
-						<directory>src/main/resources</directory>
-					</resource>
-				</resources>
-			</build>
-		</profile>
-		<profile>
-			<id>uat</id>
-			<build>
-				<resources>
-					<resource>
-						<directory>src/main/resources</directory>
-					</resource>
-				</resources>
-			</build>
-		</profile>
-	</profiles>
-  
 </project>

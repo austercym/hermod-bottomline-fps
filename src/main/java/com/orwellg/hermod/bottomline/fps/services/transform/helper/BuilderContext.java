@@ -1,5 +1,6 @@
 package com.orwellg.hermod.bottomline.fps.services.transform.helper;
 
+import com.esotericsoftware.reflectasm.MethodAccess;
 import io.reactivex.Flowable;
 
 import java.lang.reflect.Field;
@@ -44,7 +45,10 @@ public class BuilderContext {
 	
 	public Object createTargetObject(final Object containerObject) throws InvocationTargetException, IllegalAccessException, InstantiationException {
 		if (propertyIsReadonly) {
-			return targetValueAccessor.invoke(containerObject);
+			MethodAccess methodAccess = MethodAccess.get(targetValueAccessor.getDeclaringClass());
+			int indexMethod = methodAccess.getIndex(targetValueAccessor.getName());
+			return methodAccess.invoke(containerObject, indexMethod);
+			//return targetValueAccessor.invoke(containerObject);
 		} else if (Collection.class.isAssignableFrom(setterType)){
 			return new ArrayList<Object>();
 		} else {
@@ -54,7 +58,12 @@ public class BuilderContext {
 	
 	public void updateTargetObject(final Object containerObject, final Object targetValue) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		if (propertyIsReadonly) return;
-		targetValueAccessor.invoke(containerObject, targetValue);
+		MethodAccess methodAccess = MethodAccess.get(targetValueAccessor.getDeclaringClass());
+		int methodIndex = methodAccess.getIndex(targetValueAccessor.getName()); // used to improve performance
+		methodAccess.invoke(containerObject, methodIndex, targetValue);
+
+
+		//targetValueAccessor.invoke(containerObject, targetValue);
 	}
 
 	public Method getGetter() {
