@@ -86,6 +86,7 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
         String key = message.key();
         String value = message.value();
 
+        long startTime = new Date().getTime();
         LOG.info("[FPS][PmtId: {}] Processing event request for FPS outbound payment", key);
         try {
             // Parse Event Message
@@ -213,6 +214,8 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
                         paymentId, ex.getMessage(), ex);
             }
 
+        LOG.debug("[FPS][PmtId: {}] Time to process outbound payment request: {} ms",
+                paymentId, new Date().getTime()-startTime);
         } catch (Exception e) {
             throw new MessageConversionException("Exception in message emission. Message: " + e.getMessage(), e);
         }

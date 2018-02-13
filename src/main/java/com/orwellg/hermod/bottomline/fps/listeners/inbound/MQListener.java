@@ -137,6 +137,7 @@ public abstract class MQListener extends BaseListener implements MessageListener
         if (reader != null) {
             String message = "";
             try {
+                long startTime = new Date().getTime();
                 StringWriter writer = new StringWriter();
                 IOUtils.copy(reader, writer);
                 message = writer.toString();
@@ -352,6 +353,8 @@ public abstract class MQListener extends BaseListener implements MessageListener
                 } else {
                     throw new MessageConversionException("Exception in message reception. The transform for the class " + fpsMessage.getClass().getName() + " is null");
                 }
+                LOG.debug("[FPS][PmtId: {}] Time to process inbound payment request: {} ms",
+                        uuid, new Date().getTime()-startTime);
             }catch (ConversionException convEx){
                 LOG.error("[FPS][PaymentType: {}]Error generating Avro file. Error: {} Message: {}", 
                         paymentType, convEx.getMessage(), message);

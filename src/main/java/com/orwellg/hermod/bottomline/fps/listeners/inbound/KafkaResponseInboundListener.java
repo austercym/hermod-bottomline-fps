@@ -27,6 +27,7 @@ import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.stereotype.Component;
 
 import java.io.StringWriter;
+import java.util.Date;
 
 import static com.orwellg.hermod.bottomline.fps.utils.Constants.RESP_SUFFIX;
 
@@ -55,6 +56,7 @@ public class KafkaResponseInboundListener extends KafkaInboundListener implement
 		String key = message.key();
 		String value = message.value();
 		try {
+			long startTime = new Date().getTime();
 			LOG.info("[FPS][PmtId: {}] Processing event response for FPS inbound payment", key);
 			// Parse Event Message
 			Event eventPayment = null;
@@ -146,9 +148,11 @@ public class KafkaResponseInboundListener extends KafkaInboundListener implement
 			}else{
 				LOG.info("[FPS][PmtId: {}] Finish no sending return message processed ", key);
 			}
-		 } catch (Exception e) {
-     		throw new MessageConversionException("Exception in message emission. Message: " + e.getMessage(), e);
-		 }
+			LOG.debug("[FPS][PmtId: {}] Time to process inbound payment response: {} ms",
+					key, new Date().getTime()-startTime);
+		} catch (Exception e) {
+			throw new MessageConversionException("Exception in message emission. Message: " + e.getMessage(), e);
+		}
 	}
 
 	private FPSAvroMessage generateFPSPacs002Response(FPSOutboundPaymentResponse fpsPaymentResponse) {
