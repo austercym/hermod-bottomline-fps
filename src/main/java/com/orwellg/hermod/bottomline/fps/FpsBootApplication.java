@@ -13,10 +13,11 @@ public class FpsBootApplication {
 	private static final Logger LOG = LogManager.getLogger(FpsBootApplication.class);
 
     public static void main(String[] args) {
-    	LOG.info("[FPS Starting connector]");
-		new SpringApplicationBuilder(FpsBootApplication.class)
-			.initializers(new SpringProfileSettingApplicationContextInitializer("hermod-bottomline-fps.properties", DefaultPropertyValues.getDefaultValues()))
-			.run(args);
+    	try {
+			new SpringApplicationBuilder(FpsBootApplication.class).initializers(new SpringProfileSettingApplicationContextInitializer("hermod-bottomline-fps.properties", DefaultPropertyValues.getDefaultValues())).run(args);
+		}catch(Exception e){
+    		LOG.error("[FPS] Error running connector {}", e.getMessage(), e);
+		}
     }
 
 }

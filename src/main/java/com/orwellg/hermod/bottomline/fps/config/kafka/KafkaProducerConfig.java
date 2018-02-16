@@ -2,9 +2,16 @@ package com.orwellg.hermod.bottomline.fps.config.kafka;
 
 import com.orwellg.hermod.bottomline.fps.config.ComponentConfig;
 import com.orwellg.hermod.bottomline.fps.services.kafka.KafkaSender;
+import com.orwellg.umbrella.commons.config.KafkaConfig;
+import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.config.SslConfigs;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
@@ -19,8 +26,11 @@ import java.util.Map;
 @EnableKafka
 public class KafkaProducerConfig extends ComponentConfig {
 
+	private static Logger LOG = LogManager.getLogger(KafkaProducerConfig.class);
+
 	@Value("${kafka.bootstrap.host}")
 	private String bootstrap;
+    @Autowired private ApplicationContext applicationContext;
 	
 	@Bean
 	public Map<String, Object> producerConfigs() {
@@ -29,7 +39,22 @@ public class KafkaProducerConfig extends ComponentConfig {
 	    props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrap);
 	    props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
 	    props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-	
+
+        KafkaConfig kafkaConnectorLocal = (KafkaConfig) (applicationContext.getBean("kafkaConnectorConfig"));
+
+	    if(kafkaConnectorLocal != null) {
+            if(kafkaConnectorLocal.getSslParams() != null) {
+                props.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, kafkaConnectorLocal.getSslParams().getSecurityProtocol());
+                props.put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, kafkaConnectorLocal.getSslParams().getSslTruststorePath());
+                props.put(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG, kafkaConnectorLocal.getSslParams().getSslTruststorePassword());
+                props.put(SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG, kafkaConnectorLocal.getSslParams().getSslKeystorePath());
+                props.put(SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG, kafkaConnectorLocal.getSslParams().getSslKeystorePassword());
+            }else {
+                LOG.error("[FPS] Error loading params ssl from KafkaConfig");
+            }
+		}else{
+			LOG.error("[FPS] Error loading params from KafkaConfig");
+		}
 	    return props;
 	}
 

@@ -24,8 +24,9 @@ public class MessageTestQueueSender extends BaseListener {
     public void sendMessage(String message, String key) {
 
         boolean messageSent = false;
+        int numAttemps =numMaxAttempts;
 
-        while (!messageSent && numMaxAttempts>0) {
+        while (!messageSent && numAttemps>0) {
             try {
 
                 jmsOperations.send(testQueue, session -> {
@@ -35,7 +36,7 @@ public class MessageTestQueueSender extends BaseListener {
                 messageSent = true;
             } catch (Exception ex) {
                 LOG.error("[FPS] Error sending message for testing. Error Message: {}", ex.getMessage());
-                numMaxAttempts--;
+                numAttemps--;
             }
         }
 
