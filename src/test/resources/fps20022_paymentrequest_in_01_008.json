@@ -1,0 +1,182 @@
+{
+  "FIToFICstmrCdtTrf": {
+    "GrpHdr": {
+      "MsgId": "332256570118537216-1518106965153",
+      "CreDtTm": 1518106965153,
+      "BtchBookg": null,
+      "NbOfTxs": "1",
+      "CtrlSum": null,
+      "TtlIntrBkSttlmAmt": null,
+      "IntrBkSttlmDt": null,
+      "SttlmInf": {
+        "SttlmMtd": "CLRG",
+        "SttlmAcct": null,
+        "ClrSys": null,
+        "InstgRmbrsmntAgt": null,
+        "InstgRmbrsmntAgtAcct": null,
+        "InstdRmbrsmntAgt": null,
+        "InstdRmbrsmntAgtAcct": null,
+        "ThrdRmbrsmntAgt": null,
+        "ThrdRmbrsmntAgtAcct": null
+      },
+      "PmtTpInf": null,
+      "InstgAgt": {
+        "FinInstnId": {
+          "BICFI": null,
+          "ClrSysMmbId": {
+            "ClrSysId": {
+              "Cd": "GBDSC",
+              "Prtry": null
+            },
+            "MmbId": "235889"
+          },
+          "Nm": null,
+          "PstlAdr": null,
+          "Othr": null
+        },
+        "BrnchId": null
+      },
+      "InstdAgt": null
+    },
+    "CdtTrfTxInf": [
+      {
+        "PmtId": {
+          "InstrId": null,
+          "EndToEndId": "332256570118537216",
+          "TxId": "332256570118537216",
+          "ClrSysRef": null
+        },
+        "PmtTpInf": {
+          "InstrPrty": null,
+          "ClrChanl": null,
+          "SvcLvl": {
+            "Cd": "URNS",
+            "Prtry": null
+          },
+          "LclInstrm": {
+            "Cd": null,
+            "Prtry": "SIP"
+          },
+          "CtgyPurp": null
+        },
+        "IntrBkSttlmAmt": {
+          "value": {
+            "value": 11.00
+          },
+          "Ccy": "GBP"
+        },
+        "IntrBkSttlmDt": "2018-02-08",
+        "SttlmPrty": null,
+        "SttlmTmIndctn": null,
+        "SttlmTmReq": null,
+        "AccptncDtTm": null,
+        "PoolgAdjstmntDt": null,
+        "InstdAmt": null,
+        "XchgRate": null,
+        "ChrgBr": "SHAR",
+        "ChrgsInf": null,
+        "PrvsInstgAgt": null,
+        "PrvsInstgAgtAcct": null,
+        "InstgAgt": null,
+        "InstdAgt": null,
+        "IntrmyAgt1": null,
+        "IntrmyAgt1Acct": null,
+        "IntrmyAgt2": null,
+        "IntrmyAgt2Acct": null,
+        "IntrmyAgt3": null,
+        "IntrmyAgt3Acct": null,
+        "UltmtDbtr": null,
+        "InitgPty": null,
+        "Dbtr": {
+          "Nm": "Valentine Gillian Acosta",
+          "PstlAdr": null,
+          "Id": null,
+          "CtryOfRes": null,
+          "CtctDtls": null
+        },
+        "DbtrAcct": {
+          "Id": {
+            "IBAN": null,
+            "Othr": {
+              "Id": "89989983",
+              "SchmeNm": null,
+              "Issr": null
+            }
+          },
+          "Tp": null,
+          "Ccy": null,
+          "Nm": null
+        },
+        "DbtrAgt": {
+          "FinInstnId": {
+            "BICFI": null,
+            "ClrSysMmbId": {
+              "ClrSysId": {
+                "Cd": "GBDSC",
+                "Prtry": null
+              },
+              "MmbId": "235889"
+            },
+            "Nm": null,
+            "PstlAdr": null,
+            "Othr": null
+          },
+          "BrnchId": null
+        },
+        "DbtrAgtAcct": null,
+        "CdtrAgt": {
+          "FinInstnId": {
+            "BICFI": null,
+            "ClrSysMmbId": {
+              "ClrSysId": {
+                "Cd": "GBDSC",
+                "Prtry": null
+              },
+              "MmbId": "301432"
+            },
+            "Nm": null,
+            "PstlAdr": null,
+            "Othr": null
+          },
+          "BrnchId": null
+        },
+        "CdtrAgtAcct": null,
+        "Cdtr": {
+          "Nm": "Crystal Chandelier",
+          "PstlAdr": null,
+          "Id": null,
+          "CtryOfRes": null,
+          "CtctDtls": null
+        },
+        "CdtrAcct": {
+          "Id": {
+            "IBAN": null,
+            "Othr": {
+              "Id": "10000568",
+              "SchmeNm": null,
+              "Issr": null
+            }
+          },
+          "Tp": null,
+          "Ccy": null,
+          "Nm": null
+        },
+        "UltmtCdtr": null,
+        "InstrForCdtrAgt": null,
+        "InstrForNxtAgt": [
+          {
+            "Cd": null,
+            "InstrInf": "/FPID/3322565701185372161020180208826235889     "
+          }
+        ],
+        "Purp": null,
+        "RgltryRptg": null,
+        "Tax": null,
+        "RltdRmtInf": null,
+        "RmtInf": null,
+        "SplmtryData": null
+      }
+    ],
+    "SplmtryData": null
+  }
+}
