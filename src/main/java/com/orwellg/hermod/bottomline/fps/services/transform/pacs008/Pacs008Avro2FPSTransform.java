@@ -185,25 +185,27 @@ public class Pacs008Avro2FPSTransform {
                         iso.std.iso._20022.tech.xsd.pacs_008_001.RemittanceInformation10 rmtInf2 = new iso.std.iso._20022.tech.xsd.pacs_008_001.RemittanceInformation10();
                         List<StructuredRemittanceInformation12> strdList = rmtInf.getStrd();
                         List<iso.std.iso._20022.tech.xsd.pacs_008_001.StructuredRemittanceInformation12> strdLst = rmtInf2.getStrd();
-                        for (StructuredRemittanceInformation12 strd: strdList){
-                            CreditorReferenceInformation2 cdtrRefInf = strd.getCdtrRefInf();
-                            iso.std.iso._20022.tech.xsd.pacs_008_001.StructuredRemittanceInformation12 strd1 = new iso.std.iso._20022.tech.xsd.pacs_008_001.StructuredRemittanceInformation12();
-                            if(cdtrRefInf != null){
-                                iso.std.iso._20022.tech.xsd.pacs_008_001.CreditorReferenceInformation2 cdtrRefInf1 = new iso.std.iso._20022.tech.xsd.pacs_008_001.CreditorReferenceInformation2();
-                                String ref = cdtrRefInf.getRef();
-                                if(StringUtils.isNotEmpty(ref)){
-                                    cdtrRefInf1.setRef(ref);
-                                    strd1.setCdtrRefInf(cdtrRefInf1);
+                        if(strdList !=null) {
+                            for (StructuredRemittanceInformation12 strd : strdList) {
+                                CreditorReferenceInformation2 cdtrRefInf = strd.getCdtrRefInf();
+                                iso.std.iso._20022.tech.xsd.pacs_008_001.StructuredRemittanceInformation12 strd1 = new iso.std.iso._20022.tech.xsd.pacs_008_001.StructuredRemittanceInformation12();
+                                if (cdtrRefInf != null) {
+                                    iso.std.iso._20022.tech.xsd.pacs_008_001.CreditorReferenceInformation2 cdtrRefInf1 = new iso.std.iso._20022.tech.xsd.pacs_008_001.CreditorReferenceInformation2();
+                                    String ref = cdtrRefInf.getRef();
+                                    if (StringUtils.isNotEmpty(ref)) {
+                                        cdtrRefInf1.setRef(ref);
+                                        strd1.setCdtrRefInf(cdtrRefInf1);
+                                    }
                                 }
-                            }
-                            List<String> addtlRmtInfList = strd.getAddtlRmtInf();
-                            if(addtlRmtInfList != null) {
-                                for (String addtlRmtInf : addtlRmtInfList) {
-                                    strd1.getAddtlRmtInf().add(addtlRmtInf);
+                                List<String> addtlRmtInfList = strd.getAddtlRmtInf();
+                                if (addtlRmtInfList != null) {
+                                    for (String addtlRmtInf : addtlRmtInfList) {
+                                        strd1.getAddtlRmtInf().add(addtlRmtInf);
+                                    }
                                 }
-                            }
 
-                            strdLst.add(strd1);
+                                strdLst.add(strd1);
+                            }
                         }
 
                         creditTransferTransaction19.setRmtInf(rmtInf2);
@@ -303,17 +305,19 @@ public class Pacs008Avro2FPSTransform {
                         for (RegulatoryReporting3 rgltryRptg : rgltryRptgLst) {
                             iso.std.iso._20022.tech.xsd.pacs_008_001.RegulatoryReporting3 rgltryRptgLst1 = new iso.std.iso._20022.tech.xsd.pacs_008_001.RegulatoryReporting3();
                             List<StructuredRegulatoryReporting3> dtlsLst = rgltryRptg.getDtls();
+                            if(dtlsLst != null) {
+                                for (StructuredRegulatoryReporting3 dtls : dtlsLst) {
+                                    iso.std.iso._20022.tech.xsd.pacs_008_001.StructuredRegulatoryReporting3 dtls2 = new iso.std.iso._20022.tech.xsd.pacs_008_001.StructuredRegulatoryReporting3();
 
-                            for (StructuredRegulatoryReporting3 dtls : dtlsLst) {
-                                iso.std.iso._20022.tech.xsd.pacs_008_001.StructuredRegulatoryReporting3 dtls2 = new iso.std.iso._20022.tech.xsd.pacs_008_001.StructuredRegulatoryReporting3();
-
-                                List<String> infLst = dtls.getInf();
-                                for (String inf : infLst) {
-                                    dtls2.getInf().add(inf);
+                                    List<String> infLst = dtls.getInf();
+                                    if(infLst != null) {
+                                        for (String inf : infLst) {
+                                            dtls2.getInf().add(inf);
+                                        }
+                                    }
+                                    rgltryRptgLst1.getDtls().add(dtls2);
                                 }
-                                rgltryRptgLst1.getDtls().add(dtls2);
                             }
-
                             creditTransferTransaction19.getRgltryRptg().add(rgltryRptgLst1);
                         }
                     }
@@ -571,13 +575,14 @@ public class Pacs008Avro2FPSTransform {
                 }
                 PostalAddress6 pstlAdr = cdtr1.getPstlAdr();
                 if(pstlAdr != null){
-                    if(pstlAdr.getAdrLine() != null) {
+                    List<String> adrLine = pstlAdr.getAdrLine();
+                    if(adrLine != null) {
                         iso.std.iso._20022.tech.xsd.pacs_008_001.PostalAddress6 pstlAdr1 = new iso.std.iso._20022.tech.xsd.pacs_008_001.PostalAddress6();
                         List<String> postalAddressLines = new ArrayList<>();
                         if(pstlAdr1.getAdrLine() != null){
                             postalAddressLines = pstlAdr1.getAdrLine();
                         }
-                        for (String addrLn : pstlAdr.getAdrLine()) {
+                        for (String addrLn : adrLine) {
                             postalAddressLines.add(addrLn);
                         }
                         cdtr.setPstlAdr(pstlAdr1);
@@ -601,13 +606,14 @@ public class Pacs008Avro2FPSTransform {
                 }
                 PostalAddress6 pstlAdr = dbtr1.getPstlAdr();
                 if(pstlAdr != null){
-                    if(pstlAdr.getAdrLine() != null) {
+                    List<String> adrLine = pstlAdr.getAdrLine();
+                    if(adrLine != null) {
                         iso.std.iso._20022.tech.xsd.pacs_008_001.PostalAddress6 pstlAdr1 = new iso.std.iso._20022.tech.xsd.pacs_008_001.PostalAddress6();
                         List<String> postalAddressLines = new ArrayList<>();
                         if(pstlAdr1.getAdrLine() != null){
                             postalAddressLines = pstlAdr1.getAdrLine();
                         }
-                        for (String addrLn : pstlAdr.getAdrLine()) {
+                        for (String addrLn : adrLine) {
                             postalAddressLines.add(addrLn);
                         }
                         dbtr.setPstlAdr(pstlAdr1);
