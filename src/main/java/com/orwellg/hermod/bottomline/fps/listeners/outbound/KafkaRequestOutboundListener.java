@@ -22,9 +22,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.kafka.listener.KafkaDataListener;
 import org.springframework.kafka.listener.MessageListener;
 import org.springframework.messaging.converter.MessageConversionException;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.xml.sax.SAXException;
 
@@ -78,147 +80,159 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
     @Autowired
     private KafkaSender kafkaSender;
 
+    @Autowired
+    private TaskExecutor taskOutboundRequestExecutor;
+
     @Override
     public void onMessage(ConsumerRecord<String, String> message) {
 
-        Gson gson = new Gson();
-
-        String key = message.key();
-        String value = message.value();
-
-        long startTime = new Date().getTime();
-        LOG.info("[FPS][PmtId: {}] Processing event request for FPS outbound payment", key);
         try {
-            // Parse Event Message
-            Event eventPayment = null;
-            try {
-                eventPayment = RawMessageUtils.decodeFromString(Event.SCHEMA$, value);
-            } catch (Exception ex) {
-                LOG.error("[FPS][PmtId: {}] Error decoding event request for FPS outbound payment. Error Message: {}", key, ex.getMessage(), ex);
-            }
-
-            // Parse FPS Outbound Payment Request
-            LOG.info("[FPS][PmtId: {}] parsing request for FPS outbound payment", key);
-            FPSOutboundPayment fpsOutboundPayment = null;
-            try {
-                fpsOutboundPayment = gson.fromJson(eventPayment.getEvent().getData(), FPSOutboundPayment.class);
-            } catch (Exception ex) {
-                LOG.error("[FPS][PmtId: {}] Error parsing request for FPS outbound payment. Error Message: {}", key, ex.getMessage(), ex);
-            }
-            LOG.info("[FPS][PmtId: {}]  Request parsed for FPS outbound payment. Request message: {}", key, fpsOutboundPayment.toString());
-
-            Document fpsDocument = fpsOutboundPayment.getPaymentDocument();
-            String paymentType = fpsOutboundPayment.getPaymentType();
-            String paymentId = fpsOutboundPayment.getPaymentId();
-
-            try {
-                // Call the correspondent transform
-                // Generate Request Reject
-                FPSAvroMessage avroMessage = new FPSAvroMessage();
-                avroMessage.setMessage(fpsDocument);
-
-                FPSTransform transform = transforms.get("transform_pacs_008_001");
-
-                if (transform != null) {
-                    LOG.info("[FPS][PmtId: {}]  Transform FPS outbound payment from avro file.", key);
-                    FPSMessage fpsMessage = transform.avro2fps(avroMessage);
-                    //boolean isValid = validMessage(fpsDocument);
-
-                    StringWriter rawMessage = transformRequestToString(fpsMessage);
-
-                    LOG.info("[FPS][PmtId: {}] XML Request generated for FPS outbound payment. Request: {}", paymentId, rawMessage.toString());
-                    kafkaSender.sendRawMessage(loggingTopic, rawMessage.toString(), key);
-
-                    boolean schemaValidation = true;
-                    // Validate against scheme
-                    try {
-                        Source src = new StreamSource(new StringReader(rawMessage.toString()));
-                        Validator validator = SchemeValidatorBean.getInstance().getValidatorPacs008();
-                        long timeStart = new Date().getTime();
-                        synchronized (validator) {
-                            validator.validate(src);
-                        }
-                        LOG.debug("[FPS] Validate against scheme last {} ms", new Date().getTime()-timeStart);
-                    } catch (SAXException ex) {
-                        schemaValidation = false;
-                        LOG.error("[FPS][PaymentType: {}] Error Validating message against scheme. Error:{} Message: {}",
-                                paymentType, ex.getMessage(), rawMessage);
-                    } catch (IOException e) {
-                        schemaValidation = false;
-                        LOG.error("[FPS][PaymentType: {}] I/O Error. Error:{} Message: {}", paymentType, e.getMessage(),
-                                rawMessage);
-                    }
-
-                    Event event = null;
-
-                    if (schemaValidation) {
-
-                        //Send to MQ (Environment=Queue)
-                        String queueToSend = outboundAsyncQueue;
-
-                        if(paymentType.equalsIgnoreCase("SIP")){
-                            queueToSend = outboundQueue;
-                        }
-
-                        boolean paymentSent = sendToMQ(key, rawMessage.toString(), queueToSend, paymentType, environmentMQ);
-                        if(!paymentSent){
-                            String alternativeEnvironmentMQ = environmentMQSite1;
-                            if(environmentMQ.equalsIgnoreCase(environmentMQSite1)){
-                                alternativeEnvironmentMQ = environmentMQSite2;
-                            }
-                            paymentSent = sendToMQ(key, rawMessage.toString(), queueToSend, paymentType, alternativeEnvironmentMQ);
-                        }
-
-                        fpsOutboundPayment.setTxSts("SENT");
-
-                        String eventName = FPSEvents.FPS_PAYMENT_SENT.getEventName();
-                        if (eventPayment.getEvent().getName().equalsIgnoreCase(FPSEvents.FPS_SEND_RETURN.getEventName())) {
-                            eventName = FPSEvents.FPS_RETURN_SENT.getEventName();
-                        }
-                        event = EventGenerator.generateEvent(this.getClass().getName(), eventName, paymentId, gson.toJson(fpsOutboundPayment), entity, brand);
-
-                        LOG.info("[FPS][PmtId: {}] Sending Message to Topic {}", key, outboundResponseTopic);
-                        sendToKafka(outboundResponseTopic, key, event);
-
-                        storeOutboundPayment(paymentId, fpsOutboundPayment);
-
-                        LOG.info("[FPS][PmtId: {}] Finish sending FPS Outbound payment", paymentId);
-
-                    } else {
-                        LOG.info("[FPS][PmtId: {}] Generating reject because of invalid message format FPS Outbound payment",
-                                paymentId);
-
-                        fpsOutboundPayment.setTxSts(Constants.REJECT_CODE);
-                        fpsOutboundPayment.setStsRsn(Constants.NO_VALIDATION_CODE);
-                        fpsOutboundPayment.setPaymentTimestamp(new Date().getTime());
-
-                        event = EventGenerator.generateEvent(
-                                this.getClass().getName(),
-                                FPSEvents.FPS_VALIDATION_ERROR.getEventName(),
-                                paymentId,
-                                gson.toJson(fpsOutboundPayment),
-                                entity,
-                                brand
-                        );
-
-                        LOG.info("[FPS][PmtId: {}] Sending Message to Topic {}", key, outboundResponseTopic);
-                        sendToKafka(outboundResponseTopic, key, event);
-                        LOG.error("[FPS][PmtId: {}] Finish validating FPS Outbound payment request. Message {}",
-                                paymentId, rawMessage);
-                    }
-                } else {
-                    throw new MessageConversionException("Exception in message emission. The transform for pacs_008_001 is null");
+            String key = message.key();
+            String value = message.value();
+            LOG.debug("[FPS][PmtId: {}] Processing event request for FPS outbound payment", key);
+            taskOutboundRequestExecutor.execute(new Runnable(){
+                @Override
+                public void run() {
+                    processOutboundPayment(key, value);
                 }
-            } catch (Exception ex) {
-                LOG.error("[FPS][PmtId: {}] Error generating request for FPS outbound payment. Error Message: {}",
-                        paymentId, ex.getMessage(), ex);
-            }
-
-        LOG.debug("[FPS][PmtId: {}] Time to process outbound payment request: {} ms",
-                paymentId, new Date().getTime()-startTime);
+            } );
+            LOG.debug("[FPS][PmtId: {}] End processing event request for FPS outbound payment", key);
         } catch (Exception e) {
             throw new MessageConversionException("Exception in message emission. Message: " + e.getMessage(), e);
         }
+    }
+
+    @Async("taskOutboundRequestExecutor")
+    public void processOutboundPayment(String key, String value) {
+        long startTime = new Date().getTime();
+        Gson gson = new Gson();
+        // Parse Event Message
+        Event eventPayment = null;
+        try {
+            eventPayment = RawMessageUtils.decodeFromString(Event.SCHEMA$, value);
+        } catch (Exception ex) {
+            LOG.error("[FPS][PmtId: {}] Error decoding event request for FPS outbound payment. Error Message: {}", key, ex.getMessage(), ex);
+        }
+
+        // Parse FPS Outbound Payment Request
+        LOG.info("[FPS][PmtId: {}] parsing request for FPS outbound payment", key);
+        FPSOutboundPayment fpsOutboundPayment = null;
+        try {
+            fpsOutboundPayment = gson.fromJson(eventPayment.getEvent().getData(), FPSOutboundPayment.class);
+        } catch (Exception ex) {
+            LOG.error("[FPS][PmtId: {}] Error parsing request for FPS outbound payment. Error Message: {}", key, ex.getMessage(), ex);
+        }
+        LOG.info("[FPS][PmtId: {}]  Request parsed for FPS outbound payment. Request message: {}", key, fpsOutboundPayment.toString());
+
+        Document fpsDocument = fpsOutboundPayment.getPaymentDocument();
+        String paymentType = fpsOutboundPayment.getPaymentType();
+        String paymentId = fpsOutboundPayment.getPaymentId();
+
+        try {
+            // Call the correspondent transform
+            // Generate Request Reject
+            FPSAvroMessage avroMessage = new FPSAvroMessage();
+            avroMessage.setMessage(fpsDocument);
+
+            FPSTransform transform = transforms.get("transform_pacs_008_001");
+
+            if (transform != null) {
+                LOG.info("[FPS][PmtId: {}]  Transform FPS outbound payment from avro file.", key);
+                FPSMessage fpsMessage = transform.avro2fps(avroMessage);
+                //boolean isValid = validMessage(fpsDocument);
+
+                StringWriter rawMessage = transformRequestToString(fpsMessage);
+
+                LOG.info("[FPS][PmtId: {}] XML Request generated for FPS outbound payment. Request: {}", paymentId, rawMessage.toString());
+                kafkaSender.sendRawMessage(loggingTopic, rawMessage.toString(), key);
+
+                boolean schemaValidation = true;
+                // Validate against scheme
+                try {
+                    Source src = new StreamSource(new StringReader(rawMessage.toString()));
+                    Validator validator = SchemeValidatorBean.getInstance().getValidatorPacs008();
+                    long timeStart = new Date().getTime();
+                    synchronized (validator) {
+                        validator.validate(src);
+                    }
+                    LOG.debug("[FPS] Validate against scheme last {} ms", new Date().getTime()-timeStart);
+                } catch (SAXException ex) {
+                    schemaValidation = false;
+                    LOG.error("[FPS][PaymentType: {}] Error Validating message against scheme. Error:{} Message: {}",
+                            paymentType, ex.getMessage(), rawMessage);
+                } catch (IOException e) {
+                    schemaValidation = false;
+                    LOG.error("[FPS][PaymentType: {}] I/O Error. Error:{} Message: {}", paymentType, e.getMessage(),
+                            rawMessage);
+                }
+
+                Event event = null;
+
+                if (schemaValidation) {
+
+                    //Send to MQ (Environment=Queue)
+                    String queueToSend = outboundAsyncQueue;
+
+                    if(paymentType.equalsIgnoreCase("SIP")){
+                        queueToSend = outboundQueue;
+                    }
+
+                    boolean paymentSent = sendToMQ(key, rawMessage.toString(), queueToSend, paymentType, environmentMQ);
+                    if(!paymentSent){
+                        String alternativeEnvironmentMQ = environmentMQSite1;
+                        if(environmentMQ.equalsIgnoreCase(environmentMQSite1)){
+                            alternativeEnvironmentMQ = environmentMQSite2;
+                        }
+                        paymentSent = sendToMQ(key, rawMessage.toString(), queueToSend, paymentType, alternativeEnvironmentMQ);
+                    }
+
+                    fpsOutboundPayment.setTxSts("SENT");
+
+                    String eventName = FPSEvents.FPS_PAYMENT_SENT.getEventName();
+                    if (eventPayment.getEvent().getName().equalsIgnoreCase(FPSEvents.FPS_SEND_RETURN.getEventName())) {
+                        eventName = FPSEvents.FPS_RETURN_SENT.getEventName();
+                    }
+                    event = EventGenerator.generateEvent(this.getClass().getName(), eventName, paymentId, gson.toJson(fpsOutboundPayment), entity, brand);
+
+                    LOG.info("[FPS][PmtId: {}] Sending Message to Topic {}", key, outboundResponseTopic);
+                    sendToKafka(outboundResponseTopic, key, event);
+
+                    storeOutboundPayment(paymentId, fpsOutboundPayment);
+
+                    LOG.info("[FPS][PmtId: {}] Finish sending FPS Outbound payment", paymentId);
+
+                } else {
+                    LOG.info("[FPS][PmtId: {}] Generating reject because of invalid message format FPS Outbound payment",
+                            paymentId);
+
+                    fpsOutboundPayment.setTxSts(Constants.REJECT_CODE);
+                    fpsOutboundPayment.setStsRsn(Constants.NO_VALIDATION_CODE);
+                    fpsOutboundPayment.setPaymentTimestamp(new Date().getTime());
+
+                    event = EventGenerator.generateEvent(
+                            this.getClass().getName(),
+                            FPSEvents.FPS_VALIDATION_ERROR.getEventName(),
+                            paymentId,
+                            gson.toJson(fpsOutboundPayment),
+                            entity,
+                            brand
+                    );
+
+                    LOG.info("[FPS][PmtId: {}] Sending Message to Topic {}", key, outboundResponseTopic);
+                    sendToKafka(outboundResponseTopic, key, event);
+                    LOG.error("[FPS][PmtId: {}] Finish validating FPS Outbound payment request. Message {}",
+                            paymentId, rawMessage);
+                }
+            } else {
+                throw new MessageConversionException("Exception in message emission. The transform for pacs_008_001 is null");
+            }
+        } catch (Exception ex) {
+            LOG.error("[FPS][PmtId: {}] Error generating request for FPS outbound payment. Error Message: {}",
+                    paymentId, ex.getMessage(), ex);
+        }
+
+        LOG.debug("[FPS][PmtId: {}] Time to process outbound payment request: {} ms",
+                paymentId, new Date().getTime()-startTime);
     }
 
     private PaymentOutboundBean storeOutboundPayment(String paymentId, FPSOutboundPayment outboundPayment) {

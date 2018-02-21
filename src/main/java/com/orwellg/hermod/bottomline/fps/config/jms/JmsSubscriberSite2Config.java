@@ -62,7 +62,7 @@ public class JmsSubscriberSite2Config extends ComponentConfig {
     private String bottomlineSite2Env;
 	
 	@Bean
-    public DefaultMessageListenerContainer jmsSIPListenerSite2Container(ConnectionFactory connectionFactory)
+    public DefaultMessageListenerContainer jmsSIPListenerSite2Container(ConnectionFactory connectionSite2Factory)
     {
         DefaultMessageListenerContainer listenerContainer = new DefaultMessageListenerContainer();
         listenerContainer.setConnectionFactory((ConnectionFactory) (applicationContext.getBean("mqQueueConnectionSite2Factory")));
@@ -75,7 +75,7 @@ public class JmsSubscriberSite2Config extends ComponentConfig {
     }
 
     @Bean
-    public DefaultMessageListenerContainer jmsASYNCListenerSite2Container(ConnectionFactory connectionFactory)
+    public DefaultMessageListenerContainer jmsASYNCListenerSite2Container(ConnectionFactory connectionSite2Factory)
     {
         DefaultMessageListenerContainer listenerContainer = new DefaultMessageListenerContainer();
         listenerContainer.setConnectionFactory((ConnectionFactory) (applicationContext.getBean("mqQueueConnectionSite2Factory")));
@@ -88,7 +88,7 @@ public class JmsSubscriberSite2Config extends ComponentConfig {
     }
 
     @Bean
-    public DefaultMessageListenerContainer jmsSTANDINListenerSite2Container(ConnectionFactory connectionFactory)
+    public DefaultMessageListenerContainer jmsSTANDINListenerSite2Container(ConnectionFactory connectionSite2Factory)
     {
         DefaultMessageListenerContainer listenerContainer = new DefaultMessageListenerContainer();
         listenerContainer.setConnectionFactory((ConnectionFactory) (applicationContext.getBean("mqQueueConnectionSite2Factory")));
@@ -101,7 +101,7 @@ public class JmsSubscriberSite2Config extends ComponentConfig {
     }
 
     @Bean
-    public DefaultMessageListenerContainer jmsPOOListenerSite2Container(ConnectionFactory connectionFactory)
+    public DefaultMessageListenerContainer jmsPOOListenerSite2Container(ConnectionFactory connectionSite2Factory)
     {
         DefaultMessageListenerContainer listenerContainer = new DefaultMessageListenerContainer();
         listenerContainer.setConnectionFactory((ConnectionFactory) (applicationContext.getBean("mqQueueConnectionSite2Factory")));
@@ -114,7 +114,7 @@ public class JmsSubscriberSite2Config extends ComponentConfig {
     }
 
     @Bean
-    public DefaultMessageListenerContainer jmsSIPOutboundListenerSite2Container(ConnectionFactory connectionFactory)
+    public DefaultMessageListenerContainer jmsSIPOutboundListenerSite2Container(ConnectionFactory connectionSite2Factory)
     {
         DefaultMessageListenerContainer listenerContainer = new DefaultMessageListenerContainer();
         listenerContainer.setConnectionFactory((ConnectionFactory) (applicationContext.getBean("mqQueueConnectionSite2Factory")));
@@ -127,7 +127,7 @@ public class JmsSubscriberSite2Config extends ComponentConfig {
     }
 
     @Bean
-    public DefaultMessageListenerContainer jmsAsynOutboundListenerSite2Container(ConnectionFactory connectionFactory)
+    public DefaultMessageListenerContainer jmsAsynOutboundListenerSite2Container(ConnectionFactory connectionSite2Factory)
     {
         DefaultMessageListenerContainer listenerContainer = new DefaultMessageListenerContainer();
         listenerContainer.setConnectionFactory((ConnectionFactory) (applicationContext.getBean("mqQueueConnectionSite2Factory")));
@@ -141,7 +141,7 @@ public class JmsSubscriberSite2Config extends ComponentConfig {
     }
 
     @Bean
-    public DefaultMessageListenerContainer jmsUSMListenerSite2Container(ConnectionFactory connectionFactory)
+    public DefaultMessageListenerContainer jmsUSMListenerSite2Container(ConnectionFactory connectionSite2Factory)
     {
         DefaultMessageListenerContainer listenerContainer = new DefaultMessageListenerContainer();
         listenerContainer.setConnectionFactory((ConnectionFactory) (applicationContext.getBean("mqQueueConnectionSite2Factory")));

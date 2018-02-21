@@ -74,6 +74,7 @@ public class MQUSMListener extends BaseListener implements MessageListener {
         LOG.info("[FPS] Getting usm message...............");
         InputStream stream = null;
         Reader reader = null;
+        StringWriter writer = new StringWriter();
 
         try {
             if (message instanceof TextMessage) {
@@ -88,7 +89,8 @@ public class MQUSMListener extends BaseListener implements MessageListener {
             } else {
                 throw new MessageConversionException("The received message with type " + message.getJMSType() + " is not recognized.");
             }
-            sendMessageToTopic(reader);
+            IOUtils.copy(reader, writer);
+            sendMessageToTopic(writer, null);
         } catch (Exception e) {
             throw new MessageConversionException("Exception in message reception. Message: " + e.getMessage(), e);
         } finally {
@@ -96,6 +98,7 @@ public class MQUSMListener extends BaseListener implements MessageListener {
                 if (reader != null) {
                     reader.close();
                 }
+                writer.close();
                 if (stream != null) {
                     stream.close();
                 }
@@ -105,16 +108,11 @@ public class MQUSMListener extends BaseListener implements MessageListener {
         }
     }
 
-    public void sendMessageToTopic(Reader reader) {
-        this.sendMessageToTopic(reader, null);
-    }
 
-    public void sendMessageToTopic(Reader reader, String id) {
-        if (reader != null) {
+    public void sendMessageToTopic(Writer writer, String id) {
+        if (writer != null) {
             String message = "";
             try {
-                StringWriter writer = new StringWriter();
-                IOUtils.copy(reader, writer);
                 message = writer.toString();
 
                 if(emergencyLog){

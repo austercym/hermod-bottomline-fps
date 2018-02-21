@@ -7,6 +7,7 @@ import com.orwellg.hermod.bottomline.fps.listeners.outbound.MQSIPOutboundRecvLis
 import com.orwellg.hermod.bottomline.fps.listeners.usm.MQUSMListener;
 import com.orwellg.hermod.bottomline.fps.storage.InMemoryPaymentStorage;
 import com.orwellg.hermod.bottomline.fps.utils.mq.MessageTestQueueSender;
+import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.Reader;
-import java.io.StringReader;
+import java.io.*;
 
 
 @RestController
@@ -24,7 +24,7 @@ public class SimulateSendEventToKafka {
 
     private static Logger LOG = LogManager.getLogger(SimulateSendEventToKafka.class);
 
-    @Autowired
+    /*@Autowired
     MQSIPListener mqSIPListener;
 
     @Autowired
@@ -38,6 +38,7 @@ public class SimulateSendEventToKafka {
 
     @Autowired
     MQSIPOutboundRecvListener mqOutboundListener;
+    */
 
     @Autowired
     MessageTestQueueSender messageTestQueueSender;
@@ -48,25 +49,80 @@ public class SimulateSendEventToKafka {
     @RequestMapping(method= RequestMethod.POST, value="/sip")
     public ResponseEntity<String> sendSIP(@RequestBody String queueMessage,
                                           @RequestHeader("x-process-id") String key) {
+        Writer writer = null;
+        try {
+            writer = getStringWriter(queueMessage);
+            MQSIPListener mqSIPListener = new MQSIPListener();
+            mqSIPListener.sendMessageToTopic(writer, MQSIPListener.PAYMENT_TYPE, key);
+            return new ResponseEntity<>("Message sent ", HttpStatus.OK);
+        }catch(IOException e){
+            LOG.error("Error processing message: {}", e.getMessage());
+            return new ResponseEntity<>("Message not sent ", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        finally {
+            try {
+                if (writer != null) {
+                    writer.close();
+                }
+            }catch (Exception e) {
+                LOG.error("[FPS] Error closing streams resources. Message: {}", e.getMessage());
+            }
+        }
+    }
+
+    private Writer getStringWriter(@RequestBody String queueMessage) throws IOException {
         Reader reader = new StringReader(queueMessage);
-        mqSIPListener.sendMessageToTopic(reader, MQSIPListener.PAYMENT_TYPE, key);
-        return new ResponseEntity<>("Message sent ", HttpStatus.OK);
+        Writer writer = new StringWriter();
+        IOUtils.copy(reader, writer);
+        return writer;
     }
 
     @RequestMapping(method= RequestMethod.POST, value="/poo")
     public ResponseEntity<String> sendPOO(@RequestBody String queueMessage,
                                           @RequestHeader("x-process-id") String key) {
-        Reader reader = new StringReader(queueMessage);
-        mqPOOListener.sendMessageToTopic(reader, MQSIPListener.PAYMENT_TYPE, key);
-        return new ResponseEntity<>("Message sent ", HttpStatus.OK);
+        Writer writer = null;
+        try {
+            writer = getStringWriter(queueMessage);
+            MQPOOListener mqPOOListener = new MQPOOListener();
+            mqPOOListener.sendMessageToTopic(writer, MQSIPListener.PAYMENT_TYPE, key);
+            return new ResponseEntity<>("Message sent ", HttpStatus.OK);
+        }catch(IOException e){
+            LOG.error("Error processing message: {}", e.getMessage());
+            return new ResponseEntity<>("Message not sent ", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        finally {
+            try {
+                if (writer != null) {
+                    writer.close();
+                }
+            }catch (Exception e) {
+                LOG.error("[FPS] Error closing streams resources. Message: {}", e.getMessage());
+            }
+        }
     }
 
     @RequestMapping(method= RequestMethod.POST, value="/asyn")
     public ResponseEntity<String> sendMQSOP(@RequestBody String queueMessage,
                                             @RequestHeader("x-process-id") String key) {
-        Reader reader = new StringReader(queueMessage);
-        mqASYNCListener.sendMessageToTopic(reader, MQASYNListener.PAYMENT_TYPE, key);
-        return new ResponseEntity<>("Message sent ", HttpStatus.OK);
+        Writer writer = null;
+        try {
+            writer = getStringWriter(queueMessage);
+            MQASYNListener mqASYNCListener = new MQASYNListener();
+            mqASYNCListener.sendMessageToTopic(writer, MQASYNListener.PAYMENT_TYPE, key);
+            return new ResponseEntity<>("Message sent ", HttpStatus.OK);
+        }catch(IOException e){
+            LOG.error("Error processing message: {}", e.getMessage());
+            return new ResponseEntity<>("Message not sent ", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        finally {
+            try {
+                if (writer != null) {
+                    writer.close();
+                }
+            }catch (Exception e) {
+                LOG.error("[FPS] Error closing streams resources. Message: {}", e.getMessage());
+            }
+        }
     }
 
     @RequestMapping(method= RequestMethod.GET, value="/resetstorage")
@@ -78,22 +134,54 @@ public class SimulateSendEventToKafka {
 
     @RequestMapping(method= RequestMethod.POST, value="/messageResponse")
     public ResponseEntity<String> sendMQSIPOutboundResponse(@RequestBody String queueMessage) {
-        Reader reader = new StringReader(queueMessage);
-        mqOutboundListener.sendMessageToTopic(reader, MQSIPOutboundRecvListener.PAYMENT_TYPE, null);
-        return new ResponseEntity<>("Message sent ", HttpStatus.OK);
+        Writer writer = null;
+        try {
+            writer = getStringWriter(queueMessage);
+            MQSIPOutboundRecvListener mqOutboundListener = new MQSIPOutboundRecvListener();
+            mqOutboundListener.sendMessageToTopic(writer, MQSIPOutboundRecvListener.PAYMENT_TYPE, null);
+            return new ResponseEntity<>("Message sent ", HttpStatus.OK);
+        }catch(IOException e){
+            LOG.error("Error processing message: {}", e.getMessage());
+            return new ResponseEntity<>("Message not sent ", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        finally {
+            try {
+                if (writer != null) {
+                    writer.close();
+                }
+            }catch (Exception e) {
+                LOG.error("[FPS] Error closing streams resources. Message: {}", e.getMessage());
+            }
+        }
     }
 
     @RequestMapping(method= RequestMethod.POST, value="/usm")
     public ResponseEntity<String> sendUSM(@RequestBody String queueMessage,
                                           @RequestHeader("x-process-id") String key) {
-        Reader reader = new StringReader(queueMessage);
-        mqUSMListener.sendMessageToTopic(reader, key);
-        return new ResponseEntity<>("Message sent ", HttpStatus.OK);
+        Writer writer = null;
+        try{
+            writer= getStringWriter(queueMessage);
+            MQUSMListener mqUSMListener = new MQUSMListener();
+            mqUSMListener.sendMessageToTopic(writer, key);
+            return new ResponseEntity<>("Message sent ", HttpStatus.OK);
+        }catch(IOException e){
+            LOG.error("Error processing message: {}", e.getMessage());
+            return new ResponseEntity<>("Message not sent ", HttpStatus.INTERNAL_SERVER_ERROR);
+        }finally {
+            try {
+                if (writer != null) {
+                    writer.close();
+                }
+            }catch (Exception e) {
+                LOG.error("[FPS] Error closing streams resources. Message: {}", e.getMessage());
+            }
+        }
     }
 
     @RequestMapping(method= RequestMethod.POST, value="/testMessage")
     public ResponseEntity<String> sendTestMessage(@RequestBody String queueMessage,
                                           @RequestHeader("x-process-id") String key) {
+        //MessageTestQueueSender messageTestQueueSender = new MessageTestQueueSender();
         messageTestQueueSender.sendMessage(queueMessage, key);
         return new ResponseEntity<>("Message sent ", HttpStatus.OK);
     }

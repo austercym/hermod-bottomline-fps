@@ -1,6 +1,7 @@
 package com.orwellg.hermod.bottomline.fps.config.kafka;
 
 import com.orwellg.umbrella.commons.config.KafkaConfig;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.config.SslConfigs;
@@ -49,13 +50,22 @@ public class KafkaConsumerConfig {
         KafkaConfig kafkaConfigLocal = (KafkaConfig) (applicationContext.getBean("kafkaConnectorConfig"));
 
         if(kafkaConfigLocal != null) {
-            LOG.debug("GEt kafka config {}", kafkaConfigLocal.getBootstrapHosts());
             if(kafkaConfigLocal.getSslParams() != null) {
-                props.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, kafkaConfigLocal.getSslParams().getSecurityProtocol());
-                props.put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, kafkaConfigLocal.getSslParams().getSslTruststorePath());
-                props.put(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG, kafkaConfigLocal.getSslParams().getSslTruststorePassword());
-                props.put(SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG, kafkaConfigLocal.getSslParams().getSslKeystorePath());
-                props.put(SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG, kafkaConfigLocal.getSslParams().getSslKeystorePassword());
+                if(StringUtils.isNotEmpty(kafkaConfigLocal.getSslParams().getSecurityProtocol())) {
+                    props.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, kafkaConfigLocal.getSslParams().getSecurityProtocol());
+                }
+                if(StringUtils.isNotEmpty(kafkaConfigLocal.getSslParams().getSslTruststorePath())) {
+                    props.put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, kafkaConfigLocal.getSslParams().getSslTruststorePath());
+                }
+                if(StringUtils.isNotEmpty(kafkaConfigLocal.getSslParams().getSslTruststorePassword())) {
+                    props.put(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG, kafkaConfigLocal.getSslParams().getSslTruststorePassword());
+                }
+                if(StringUtils.isNotEmpty(kafkaConfigLocal.getSslParams().getSslKeystorePath())) {
+                    props.put(SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG, kafkaConfigLocal.getSslParams().getSslKeystorePath());
+                }
+                if(StringUtils.isNotEmpty(kafkaConfigLocal.getSslParams().getSslKeystorePassword())) {
+                    props.put(SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG, kafkaConfigLocal.getSslParams().getSslKeystorePassword());
+                }
             }else {
                 LOG.error("[FPS] Error loading params ssl from KafkaConfig");
             }

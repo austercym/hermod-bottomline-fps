@@ -25,8 +25,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
+import org.springframework.scheduling.annotation.Async;
 import org.xml.sax.SAXException;
 
 import javax.jms.BytesMessage;
@@ -73,11 +75,15 @@ public abstract class MQOutboundListener extends BaseListener implements Message
     @Value("${inmemory.cache.expiringMinutes}")
     private int expiringMinutes;
 
+    @Autowired
+    private TaskExecutor taskOutboundResponseExecutor;
+
     protected void onMessage(Message message, String paymentType) {
 
-        LOG.info("[FPS][PaymentType: {}] Receiving outbound payment response message from Bottomline", paymentType);
+        LOG.debug("[FPS][PaymentType: {}] Receiving outbound payment response message from Bottomline", paymentType);
         InputStream stream = null;
         Reader reader = null;
+        Writer writer = new StringWriter();
 
         try {
             if (message instanceof TextMessage) {
@@ -92,7 +98,14 @@ public abstract class MQOutboundListener extends BaseListener implements Message
             } else {
                 throw new MessageConversionException("The received message with type " + message.getJMSType() + " is not recognized.");
             }
-            sendMessageToTopic(reader, paymentType);
+            IOUtils.copy(reader, writer);
+            taskOutboundResponseExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    sendMessageToTopic(writer, paymentType, null);
+                }
+            });
+            LOG.debug("[FPS][PaymentType: {}] End processing outbound payment response", paymentType);
         } catch (Exception e) {
             throw new MessageConversionException("Exception in message reception. Message: " + e.getMessage(), e);
         } finally {
@@ -100,6 +113,7 @@ public abstract class MQOutboundListener extends BaseListener implements Message
                 if (reader != null) {
                     reader.close();
                 }
+                writer.close();
                 if (stream != null) {
                     stream.close();
                 }
@@ -110,22 +124,17 @@ public abstract class MQOutboundListener extends BaseListener implements Message
         }
     }
 
-    public void sendMessageToTopic(Reader reader, String paymentType) {
-        this.sendMessageToTopic(reader, paymentType, null);
-    }
-
-    public void sendMessageToTopic(Reader reader, String paymentType, String id) {
-        if (reader != null) {
+    @Async("taskOutboundResponseExecutor")
+    public void sendMessageToTopic(Writer writer, String paymentType, String id) {
+        if (writer != null) {
             String message = "";
             try {
                 long startTime = new Date().getTime();
                 LOG.info("[FPS] Transform MQ message to raw message");
-                StringWriter writer = new StringWriter();
-                IOUtils.copy(reader, writer);
                 message = writer.toString();
 
                 if(emergencyLog){
-                    LOG.warn("[FPS][PaymentType: {}] Payload received {}",paymentType, message);
+                    LOG.debug("[FPS][PaymentType: {}] Payload received {}",paymentType, message);
                 }
 
                 String uuid = StringUtils.isNotEmpty(id) ? id : IDGeneratorBean.getInstance().generatorID().getFasterPaymentUniqueId();

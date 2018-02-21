@@ -25,8 +25,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
+import org.springframework.scheduling.annotation.Async;
 import org.xml.sax.SAXException;
 
 import javax.jms.BytesMessage;
@@ -90,11 +92,15 @@ public abstract class MQListener extends BaseListener implements MessageListener
     @Value("${connector.%id.mq_primary}")
     private String environmentMQ;
 
+    @Autowired
+    private TaskExecutor taskInboundRequestExecutor;
+
     protected void onMessage(Message message, String paymentType) {
 
-        LOG.info("[FPS][PaymentType: {}] Getting inbound payment message...............", paymentType);
+        LOG.debug("[FPS][PaymentType: {}] Receiving inbound payment reequest message from Bottomline", paymentType);
         InputStream stream = null;
         Reader reader = null;
+        Writer writer = new StringWriter();
 
         try {
             if (message instanceof TextMessage) {
@@ -109,7 +115,14 @@ public abstract class MQListener extends BaseListener implements MessageListener
             } else {
                 throw new MessageConversionException("The received message with type " + message.getJMSType() + " is not recognized.");
             }
-            sendMessageToTopic(reader, paymentType);
+            IOUtils.copy(reader, writer);
+            taskInboundRequestExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    sendMessageToTopic(writer, paymentType, null);
+                }
+            });
+            LOG.debug("[FPS][PaymentType: {}] End processing inbound payment request", paymentType);
         } catch (Exception e) {
             throw new MessageConversionException("Exception in message reception. Message: " + e.getMessage(), e);
         } finally {
@@ -117,6 +130,7 @@ public abstract class MQListener extends BaseListener implements MessageListener
                 if (reader != null) {
                     reader.close();
                 }
+                writer.close();
                 if (stream != null) {
                     stream.close();
                 }
@@ -127,19 +141,14 @@ public abstract class MQListener extends BaseListener implements MessageListener
         }
     }
 
-    public void sendMessageToTopic(Reader reader, String paymentType) {
-        this.sendMessageToTopic(reader, paymentType, null);
-    }
-
-    public void sendMessageToTopic(Reader reader, String paymentType, String id) {
+    @Async("taskInboundRequestExecutor")
+    public void sendMessageToTopic(Writer writer, String paymentType, String id) {
         boolean schemaValidation = true;
         Event event =  null;
-        if (reader != null) {
+        if (writer != null) {
             String message = "";
             try {
                 long startTime = new Date().getTime();
-                StringWriter writer = new StringWriter();
-                IOUtils.copy(reader, writer);
                 message = writer.toString();
 
                 if(emergencyLog){

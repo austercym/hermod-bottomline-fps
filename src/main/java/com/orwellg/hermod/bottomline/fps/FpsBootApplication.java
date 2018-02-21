@@ -7,10 +7,58 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.context.annotation.Bean;
+import org.springframework.core.task.TaskExecutor;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 @SpringBootApplication
+@EnableAsync
 public class FpsBootApplication {
 	private static final Logger LOG = LogManager.getLogger(FpsBootApplication.class);
+
+	@Bean
+	public TaskExecutor taskOutboundRequestExecutor() {
+		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+		executor.setCorePoolSize(5);
+		executor.setMaxPoolSize(10);
+		executor.setQueueCapacity(25);
+		executor.setThreadNamePrefix("task_outbound_request_executor_thread");
+		executor.initialize();
+		return executor;
+	}
+	@Bean
+	public TaskExecutor taskOutboundResponseExecutor() {
+		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+		executor.setCorePoolSize(5);
+		executor.setMaxPoolSize(10);
+		executor.setQueueCapacity(25);
+		executor.setThreadNamePrefix("task_outbound_response_executor_thread");
+		executor.initialize();
+		return executor;
+	}
+
+	@Bean
+	public TaskExecutor taskInboundResponseExecutor() {
+		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+		executor.setCorePoolSize(5);
+		executor.setMaxPoolSize(10);
+		executor.setQueueCapacity(25);
+		executor.setThreadNamePrefix("task_inbound_response_executor_thread");
+		executor.initialize();
+		return executor;
+	}
+
+	@Bean
+	public TaskExecutor taskInboundRequestExecutor() {
+		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+		executor.setCorePoolSize(5);
+		executor.setMaxPoolSize(10);
+		executor.setQueueCapacity(25);
+		executor.setThreadNamePrefix("task_inbound_request_executor_thread");
+		executor.initialize();
+		return executor;
+	}
 
     public static void main(String[] args) {
     	try {
