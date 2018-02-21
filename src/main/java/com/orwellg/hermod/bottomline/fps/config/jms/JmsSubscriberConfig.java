@@ -76,6 +76,10 @@ public class JmsSubscriberConfig extends ComponentConfig {
         listenerContainer.setMessageListener(mqSIPListener);
         listenerContainer.setMaxConcurrentConsumers(maxConcurrentConsumers);
         listenerContainer.setSessionTransacted(true);
+        listenerContainer.setReceiveTimeout(200);
+        listenerContainer.setRecoveryInterval(100);
+        listenerContainer.setIdleConsumerLimit(5);
+        listenerContainer.setIdleTaskExecutionLimit(10);
 
         return listenerContainer;
     }

@@ -58,6 +58,7 @@ public class JmsConnectionSite2Config extends ComponentConfig {
 	        mqQueueConnectionFactory.setChannel(channel);
 	        mqQueueConnectionFactory.setPort(port);
 	        mqQueueConnectionFactory.setQueueManager(queueManager);
+			mqQueueConnectionFactory.setPollingInterval(200);
 	    } catch (Exception e) {
 	    		LOG.error("Error creating the MQ Connection Site 2 Factory. Message: {}", e.getMessage(), e);
 	    }

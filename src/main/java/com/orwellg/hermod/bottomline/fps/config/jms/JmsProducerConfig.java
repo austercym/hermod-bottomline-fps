@@ -14,6 +14,8 @@ import org.springframework.jms.support.converter.MessageType;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import static org.springframework.jms.support.destination.JmsDestinationAccessor.RECEIVE_TIMEOUT_NO_WAIT;
+
 @Configuration
 @EnableJms
 public class JmsProducerConfig extends ComponentConfig {
@@ -38,8 +40,9 @@ public class JmsProducerConfig extends ComponentConfig {
 	public JmsOperations jmsOperations(CachingConnectionFactory cachingConnectionFactory) {
 		
 		JmsTemplate jmsTemplate = new JmsTemplate(cachingConnectionFactory);
-	    jmsTemplate.setReceiveTimeout(receiveTimeout);
-	    
+	    //jmsTemplate.setReceiveTimeout(receiveTimeout);
+	    jmsTemplate.setReceiveTimeout(RECEIVE_TIMEOUT_NO_WAIT);
+
 	    // Creating and assing the message converter for jmsTemplate
 	    MarshallingMessageConverter converter = new MarshallingMessageConverter();
 		converter.setTargetType(MessageType.TEXT);
@@ -57,7 +60,8 @@ public class JmsProducerConfig extends ComponentConfig {
 	public JmsOperations jmsOperationsSite2(CachingConnectionFactory cachingConnectionSite2Factory) {
 
 		JmsTemplate jmsTemplate = new JmsTemplate(cachingConnectionSite2Factory);
-		jmsTemplate.setReceiveTimeout(receiveTimeout);
+		//jmsTemplate.setReceiveTimeout(receiveTimeout);
+		jmsTemplate.setReceiveTimeout(RECEIVE_TIMEOUT_NO_WAIT);
 
 		// Creating and assing the message converter for jmsTemplate
 		MarshallingMessageConverter converter = new MarshallingMessageConverter();

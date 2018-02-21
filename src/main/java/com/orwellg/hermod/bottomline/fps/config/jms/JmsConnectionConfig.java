@@ -58,6 +58,7 @@ public class JmsConnectionConfig extends ComponentConfig {
 	        mqQueueConnectionFactory.setChannel(channel);
 	        mqQueueConnectionFactory.setPort(port);
 	        mqQueueConnectionFactory.setQueueManager(queueManager);
+			mqQueueConnectionFactory.setPollingInterval(200);
 	    } catch (Exception e) {
 	    		LOG.error("Error creating the MQ Connection Factory. Message: {}", e.getMessage(), e);
 	    }
