@@ -3,6 +3,7 @@ package com.orwellg.hermod.bottomline.fps.services.transform;
 import com.orwellg.hermod.bottomline.fps.services.transform.helper.ConversionException;
 import com.orwellg.hermod.bottomline.fps.services.transform.helper.TransformationHelper;
 import com.orwellg.hermod.bottomline.fps.services.transform.pacs008.Pacs008Avro2FPSTransform;
+import com.orwellg.hermod.bottomline.fps.services.transform.pacs008.Pacs008FPS2AvroTransform;
 import com.orwellg.hermod.bottomline.fps.types.FPSMessage;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
 import com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.*;
@@ -50,7 +51,8 @@ public class Pasc008Transform implements FPSTransform {
 		final com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Document target = 
 				new com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Document();
         long startTransformation = new Date().getTime();
-		TransformationHelper.updateTargetValues(source, target);
+		Pacs008FPS2AvroTransform.transform(source, target);
+		//TransformationHelper.updateTargetValues(source, target);
         LOG.debug("[FPS] Transform from FPS to Avro lasts {} ms ", new Date().getTime()-startTransformation);
         startTransformation = new Date().getTime();
 		FPSAvroMessage avroMessage = new FPSAvroMessage(target);
@@ -74,11 +76,10 @@ public class Pasc008Transform implements FPSTransform {
 		}
 
 		final iso.std.iso._20022.tech.xsd.pacs_008_001.Document target = new iso.std.iso._20022.tech.xsd.pacs_008_001.Document();
-		final iso.std.iso._20022.tech.xsd.pacs_008_001.Document target2 = new iso.std.iso._20022.tech.xsd.pacs_008_001.Document();
 
 		long startTransformation = new Date().getTime();
 		Pacs008Avro2FPSTransform.transform((com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Document)avroMessage, target);
-        //TransformationHelper.updateTargetValues(avroMessage, target2);
+        //TransformationHelper.updateTargetValues(avroMessage, target);
         LOG.debug("[FPS] Transform from avro to FPS last {} ms ", new Date().getTime()-startTransformation);
 
 
