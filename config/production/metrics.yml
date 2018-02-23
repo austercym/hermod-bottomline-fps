@@ -1,0 +1,10 @@
+---
+lowercaseOutputName: true 
+whitelistObjectNames: ["metrics:name=fps_connector.inbound.requests.count,*","metrics:name=fps_connector.inbound.responses.count,*","metrics:name=fps_connector.inbound.requests.failures.count,*","metrics:name=fps_connector.inbound.responses.failures.count,*"]
+rules:
+   - pattern: metrics<name=(.+)><>(Count)
+     name: $1
+     type: COUNTER
+   - pattern: metrics<name=(.+)><>(MeanRate)
+        name: $1
+        type: COUNTER
