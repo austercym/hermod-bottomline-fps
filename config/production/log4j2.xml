@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="debug">
     <Appenders>
-        <Console name="CONSOLE" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d %-5p [%t] %C{2} (%F:%L) - %m%n" />
-        </Console>
         <!--<Kafka name="KAFKA" topic="log_hermod_bottomline_fps_001" syncsend="true" ignoreexceptions="false">
             <PatternLayout pattern="%d %-5p [%t] %C{2} (%F:%L) - %m%n"/>
             <Property name="bootstrap.servers">confluent-node1:9092,confluent-node2:9092,confluent-node3:9092,confluent-node4:9092,confluent-node5:9092,confluent-node6:9092</Property>
@@ -20,7 +17,6 @@
         <Async name="ASYNC">
             <!--<AppenderRef ref="KAFKA" />-->
             <AppenderRef ref="FILE" />
-            <AppenderRef ref="CONSOLE" />
         </Async>
     </Appenders>
     <Loggers>
