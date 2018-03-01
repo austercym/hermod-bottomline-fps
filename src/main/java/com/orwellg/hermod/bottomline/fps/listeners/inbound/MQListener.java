@@ -10,9 +10,9 @@ import com.orwellg.hermod.bottomline.fps.storage.PaymentBean;
 import com.orwellg.hermod.bottomline.fps.storage.PaymentStatus;
 import com.orwellg.hermod.bottomline.fps.types.FPSMessage;
 import com.orwellg.hermod.bottomline.fps.utils.Constants;
-import com.orwellg.hermod.bottomline.fps.utils.generators.EventGenerator;
-import com.orwellg.hermod.bottomline.fps.utils.generators.IDGeneratorBean;
-import com.orwellg.hermod.bottomline.fps.utils.generators.SchemeValidatorBean;
+import com.orwellg.hermod.bottomline.fps.utils.singletons.EventGenerator;
+import com.orwellg.hermod.bottomline.fps.utils.singletons.IDGeneratorBean;
+import com.orwellg.hermod.bottomline.fps.utils.singletons.SchemeValidatorBean;
 import com.orwellg.umbrella.avro.types.event.Event;
 import com.orwellg.umbrella.avro.types.payment.fps.*;
 import com.orwellg.umbrella.commons.types.utils.avro.RawMessageUtils;
@@ -97,7 +97,7 @@ public abstract class MQListener extends BaseListener implements MessageListener
 
     protected void onMessage(Message message, String paymentType) {
 
-        LOG.debug("[FPS][PaymentType: {}] Receiving inbound payment reequest message from Bottomline", paymentType);
+        LOG.debug("[FPS][PaymentType: {}] Receiving inbound payment request message from Bottomline", paymentType);
         InputStream stream = null;
         Reader reader = null;
         Writer writer = new StringWriter();

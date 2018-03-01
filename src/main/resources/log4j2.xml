@@ -18,7 +18,6 @@
         <Async name="ASYNC">
             <!--<AppenderRef ref="KAFKA" />-->
             <AppenderRef ref="FILE" />
-            <AppenderRef ref="CONSOLE" />
         </Async>
     </Appenders>
     <Loggers>

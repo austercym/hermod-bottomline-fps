@@ -1,4 +1,4 @@
-package com.orwellg.hermod.bottomline.fps.utils.generators;
+package com.orwellg.hermod.bottomline.fps.utils.singletons;
 
 import com.orwellg.hermod.bottomline.fps.spring.core.env.SpringArchaiusPropertySource;
 import com.orwellg.yggdrasil.net.client.producer.CommandProducerConfig;
