@@ -5,6 +5,7 @@ import com.orwellg.hermod.bottomline.fps.listeners.BaseListener;
 import com.orwellg.hermod.bottomline.fps.storage.InMemoryPaymentStorage;
 import com.orwellg.hermod.bottomline.fps.storage.PaymentBean;
 import com.orwellg.hermod.bottomline.fps.types.FPSMessage;
+import com.orwellg.hermod.bottomline.fps.utils.singletons.JAXBContextBean;
 import com.orwellg.umbrella.commons.utils.enums.CurrencyCodes;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,8 +26,8 @@ public class KafkaOutboundListener extends BaseListener {
 
     protected StringWriter transformRequestToString(FPSMessage fpsMessage) throws JAXBException {
         StringWriter rawMessage = new StringWriter();
-        final JAXBContext jc = JAXBContext.newInstance(iso.std.iso._20022.tech.xsd.pacs_008_001.Document.class);
-        final Marshaller marshaller = jc.createMarshaller();
+
+        final Marshaller marshaller = JAXBContextBean.getInstance().getJaxbContextPacs008().createMarshaller();
 
         marshaller.marshal(fpsMessage, new StreamResult(rawMessage));
         return rawMessage;
@@ -67,14 +68,5 @@ public class KafkaOutboundListener extends BaseListener {
             FPID = txId+paymentTypeCode+dateSent+currency+sendingFPSInstitution;
         }
         return FPID;
-    }
-
-    protected StringWriter transformPaymentRequestToString(FPSMessage fpsMessage) throws JAXBException {
-        StringWriter rawMessage = new StringWriter();
-        final JAXBContext jc = JAXBContext.newInstance(com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Document.class);
-        final Marshaller marshaller = jc.createMarshaller();
-
-        marshaller.marshal(fpsMessage, new StreamResult(rawMessage));
-        return rawMessage;
     }
 }

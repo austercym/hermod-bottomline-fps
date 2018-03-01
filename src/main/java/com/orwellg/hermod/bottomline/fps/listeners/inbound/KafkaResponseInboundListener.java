@@ -5,7 +5,7 @@ import com.google.gson.Gson;
 import com.orwellg.hermod.bottomline.fps.services.kafka.KafkaSender;
 import com.orwellg.hermod.bottomline.fps.services.transform.FPSTransform;
 import com.orwellg.hermod.bottomline.fps.types.FPSMessage;
-import com.orwellg.hermod.bottomline.fps.utils.generators.EventGenerator;
+import com.orwellg.hermod.bottomline.fps.utils.singletons.EventGenerator;
 import com.orwellg.umbrella.avro.types.event.Event;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSOutboundPaymentResponse;
@@ -58,19 +58,19 @@ public class KafkaResponseInboundListener extends KafkaInboundListener implement
 	@Override
 	public void onMessage(ConsumerRecord<String, String> message) {
 
+		String key = message.key();
+		String value = message.value();
 		try{
-			String key = message.key();
-			String value = message.value();
 			LOG.debug("[FPS][PmtId: {}] Processing event response for FPS inbound payment", key);
 			taskInboundResponseExecutor.execute(new Runnable() {
 				@Override
 				public void run() {
 					processInboundPaymentResponse(message, key, value);
-
 				}
 			});
 			LOG.debug("[FPS][PmtId: {}] End processing event response for FPS inbound payment", key);
 		} catch (Exception e) {
+			LOG.error("[FPS][PmtId: {}] Exception in message emission. Message:", key, e.getMessage());
 			throw new MessageConversionException("Exception in message emission. Message: " + e.getMessage(), e);
 		}
 	}

@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.orwellg.hermod.bottomline.fps.services.kafka.KafkaSender;
 import com.orwellg.hermod.bottomline.fps.services.transform.FPSTransform;
 import com.orwellg.hermod.bottomline.fps.types.FPSMessage;
-import com.orwellg.hermod.bottomline.fps.utils.generators.EventGenerator;
+import com.orwellg.hermod.bottomline.fps.utils.singletons.EventGenerator;
 import com.orwellg.umbrella.avro.types.event.Event;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSOutboundReversalResponse;
@@ -74,7 +74,8 @@ public class KafkaResponseReversalInboundListener extends KafkaInboundListener i
 			throw new MessageConversionException("Exception in message emission. Message: " + e.getMessage(), e);
 		}
 	}
-	@Async("taskInboundResponseExecutor")
+
+	@Async("taskInboundReversalExecutor")
 	private void processInboundPaymentResponseReversal(ConsumerRecord<String, String> message, String key, String value) {
 		long startTime = new Date().getTime();
 		LOG.info("[FPS][PmtId: {}] Processing event reversal response for FPS inbound reversal payment", key);
