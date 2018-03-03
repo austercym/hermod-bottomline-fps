@@ -7,9 +7,9 @@ import com.orwellg.hermod.bottomline.fps.services.kafka.KafkaSender;
 import com.orwellg.hermod.bottomline.fps.services.transform.FPSTransform;
 import com.orwellg.hermod.bottomline.fps.services.transform.helper.ConversionException;
 import com.orwellg.hermod.bottomline.fps.utils.USMMessage;
-import com.orwellg.hermod.bottomline.fps.utils.generators.EventGenerator;
-import com.orwellg.hermod.bottomline.fps.utils.generators.IDGeneratorBean;
-import com.orwellg.hermod.bottomline.fps.utils.generators.SchemeValidatorBean;
+import com.orwellg.hermod.bottomline.fps.utils.singletons.EventGenerator;
+import com.orwellg.hermod.bottomline.fps.utils.singletons.IDGeneratorBean;
+import com.orwellg.hermod.bottomline.fps.utils.singletons.SchemeValidatorBean;
 import com.orwellg.umbrella.avro.types.event.Event;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSInboundUSM;
@@ -24,7 +24,9 @@ import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.stereotype.Component;
 import org.xml.sax.SAXException;
@@ -41,7 +43,7 @@ import java.io.*;
 import java.util.Date;
 
 @Component(value = "mqUSMListener")
-@Scope("prototype")
+@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class MQUSMListener extends BaseListener implements MessageListener {
 
     private static Logger LOG = LogManager.getLogger(MQUSMListener.class);

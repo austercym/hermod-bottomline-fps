@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.orwellg.hermod.bottomline.fps.services.kafka.KafkaSender;
 import com.orwellg.hermod.bottomline.fps.services.transform.FPSTransform;
 import com.orwellg.hermod.bottomline.fps.types.FPSMessage;
-import com.orwellg.hermod.bottomline.fps.utils.generators.EventGenerator;
+import com.orwellg.hermod.bottomline.fps.utils.singletons.EventGenerator;
 import com.orwellg.umbrella.avro.types.event.Event;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSOutboundReversalResponse;
@@ -53,7 +53,7 @@ public class KafkaResponseReversalInboundListener extends KafkaInboundListener i
 	private KafkaSender kafkaSender;
 
 	@Autowired
-	private TaskExecutor taskInboundResponseExecutor;
+	private TaskExecutor taskInboundReversalExecutor;
 
 	@Override
 	public void onMessage(ConsumerRecord<String, String> message) {
@@ -62,7 +62,7 @@ public class KafkaResponseReversalInboundListener extends KafkaInboundListener i
 			String key = message.key();
 			String value = message.value();
 			LOG.debug("[FPS][PmtId: {}] Processing event reversal response for FPS inbound payment", key);
-			taskInboundResponseExecutor.execute(new Runnable() {
+			taskInboundReversalExecutor.execute(new Runnable() {
 				@Override
 				public void run() {
 					processInboundPaymentResponseReversal(message, key, value);
@@ -74,7 +74,8 @@ public class KafkaResponseReversalInboundListener extends KafkaInboundListener i
 			throw new MessageConversionException("Exception in message emission. Message: " + e.getMessage(), e);
 		}
 	}
-	@Async("taskInboundResponseExecutor")
+
+	@Async("taskInboundReversalExecutor")
 	private void processInboundPaymentResponseReversal(ConsumerRecord<String, String> message, String key, String value) {
 		long startTime = new Date().getTime();
 		LOG.info("[FPS][PmtId: {}] Processing event reversal response for FPS inbound reversal payment", key);

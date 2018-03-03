@@ -1,4 +1,4 @@
-package com.orwellg.hermod.bottomline.fps.utils.generators;
+package com.orwellg.hermod.bottomline.fps.utils.singletons;
 
 import com.orwellg.umbrella.avro.types.event.EntityIdentifierType;
 import com.orwellg.umbrella.avro.types.event.Event;
