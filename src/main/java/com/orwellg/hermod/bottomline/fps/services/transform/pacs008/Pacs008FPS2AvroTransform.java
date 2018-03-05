@@ -103,6 +103,9 @@ public class Pacs008FPS2AvroTransform {
 
                     List<InstructionForCreditorAgent1> instrForCdtrAgt = cdtTrfTxInf.getInstrForCdtrAgt();
                     if(instrForCdtrAgt != null) {
+                        if(!instrForCdtrAgt.isEmpty()){
+                            creditTransferTransaction19.setInstrForCdtrAgt(new ArrayList<com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.InstructionForCreditorAgent1>());
+                        }
                         for (InstructionForCreditorAgent1 instructionForCreditorAgent1 : instrForCdtrAgt) {
                             com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.InstructionForCreditorAgent1 instructionForCreditorAgent2 = getInstrForCdtrAgt(instructionForCreditorAgent1);
                             creditTransferTransaction19.getInstrForCdtrAgt().add(instructionForCreditorAgent2);
@@ -162,9 +165,12 @@ public class Pacs008FPS2AvroTransform {
 
                     List<Charges2> chrgsInf = cdtTrfTxInf.getChrgsInf();
                     if(chrgsInf!= null) {
-                        for (Charges2 chrgInf : chrgsInf) {
-                            com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Charges2 chrgInf1 = getChrgInf(chrgInf);
-                            creditTransferTransaction19.getChrgsInf().add(chrgInf1);
+                        if(!chrgsInf.isEmpty()) {
+                            creditTransferTransaction19.setChrgsInf(new ArrayList<com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Charges2>());
+                            for (Charges2 chrgInf : chrgsInf) {
+                                com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Charges2 chrgInf1 = getChrgInf(chrgInf);
+                                creditTransferTransaction19.getChrgsInf().add(chrgInf1);
+                            }
                         }
                     }
 
@@ -178,41 +184,45 @@ public class Pacs008FPS2AvroTransform {
                         }
                     }
 
-
                     RemittanceInformation10 rmtInf = cdtTrfTxInf.getRmtInf();
                     if(rmtInf!= null) {
                         com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.RemittanceInformation10 rmtInf2 = new com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.RemittanceInformation10();
+
                         List<StructuredRemittanceInformation12> strdList = rmtInf.getStrd();
                         List<com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.StructuredRemittanceInformation12> strdLst = rmtInf2.getStrd();
                         if(strdList !=null) {
-                            for (StructuredRemittanceInformation12 strd : strdList) {
-                                CreditorReferenceInformation2 cdtrRefInf = strd.getCdtrRefInf();
-                                com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.StructuredRemittanceInformation12 strd1 = new com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.StructuredRemittanceInformation12();
-                                if (cdtrRefInf != null) {
-                                    com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.CreditorReferenceInformation2 cdtrRefInf1 = new com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.CreditorReferenceInformation2();
-                                    String ref = cdtrRefInf.getRef();
-                                    if (StringUtils.isNotEmpty(ref)) {
-                                        cdtrRefInf1.setRef(ref);
-                                        strd1.setCdtrRefInf(cdtrRefInf1);
+                            if(!strdList.isEmpty()) {
+                                for (StructuredRemittanceInformation12 strd : strdList) {
+                                    CreditorReferenceInformation2 cdtrRefInf = strd.getCdtrRefInf();
+                                    com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.StructuredRemittanceInformation12 strd1 = new com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.StructuredRemittanceInformation12();
+                                    if (cdtrRefInf != null) {
+                                        com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.CreditorReferenceInformation2 cdtrRefInf1 = new com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.CreditorReferenceInformation2();
+                                        String ref = cdtrRefInf.getRef();
+                                        if (StringUtils.isNotEmpty(ref)) {
+                                            cdtrRefInf1.setRef(ref);
+                                            strd1.setCdtrRefInf(cdtrRefInf1);
+                                        }
                                     }
-                                }
-                                List<String> addtlRmtInfList = strd.getAddtlRmtInf();
-                                if (addtlRmtInfList != null) {
-                                    for (String addtlRmtInf : addtlRmtInfList) {
-                                        strd1.getAddtlRmtInf().add(addtlRmtInf);
+                                    List<String> addtlRmtInfList = strd.getAddtlRmtInf();
+                                    if (addtlRmtInfList != null) {
+                                        if (!addtlRmtInfList.isEmpty()) {
+                                            strd1.setAddtlRmtInf(new ArrayList<>());
+                                            for (String addtlRmtInf : addtlRmtInfList) {
+                                                strd1.getAddtlRmtInf().add(addtlRmtInf);
+                                            }
+                                        }
                                     }
-                                }
 
-                                if(strdLst == null){
-                                    strdLst = new ArrayList<com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.StructuredRemittanceInformation12>();
+                                    if (strdLst == null) {
+                                        strdLst = new ArrayList<com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.StructuredRemittanceInformation12>();
+                                    }
+                                    strdLst.add(strd1);
                                 }
-                                strdLst.add(strd1);
                             }
                         }
 
                         creditTransferTransaction19.setRmtInf(rmtInf2);
                     }
-
 
                     // Intermediary Agent
                     BranchAndFinancialInstitutionIdentification5 intrmyAgt11 = cdtTrfTxInf.getIntrmyAgt1();
@@ -316,6 +326,9 @@ public class Pacs008FPS2AvroTransform {
                                             dtls2.getInf().add(inf);
                                         }
                                     }
+                                    if(rgltryRptgLst1.getDtls() == null){
+                                        rgltryRptgLst1.setDtls(new ArrayList<com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.StructuredRegulatoryReporting3 >());
+                                    }
                                     rgltryRptgLst1.getDtls().add(dtls2);
                                 }
                             }
@@ -357,9 +370,6 @@ public class Pacs008FPS2AvroTransform {
 
                     String iban = id1.getIBAN();
                     if (StringUtils.isNotEmpty(iban)) {
-                        if(cdtrAcct == null) {
-                            cdtrAcct = new com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.CashAccount24();
-                        }
                         id.setIBAN(iban);
                     }
                     if(cdtrAcct == null){
@@ -557,9 +567,6 @@ public class Pacs008FPS2AvroTransform {
 
                     String iban = id1.getIBAN();
                     if (StringUtils.isNotEmpty(iban)) {
-                        if(dbtrAcct == null) {
-                            dbtrAcct = new com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.CashAccount24();
-                        }
                         id.setIBAN(iban);
                     }
                     if(dbtrAcct == null){
@@ -585,9 +592,17 @@ public class Pacs008FPS2AvroTransform {
                 }
                 PostalAddress6 pstlAdr = cdtr1.getPstlAdr();
                 if(pstlAdr != null){
+                    com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.PostalAddress6 pstlAdr1 = null;
+                    String ctry = pstlAdr.getCtry();
+                    if(StringUtils.isNotEmpty(ctry)){
+                        pstlAdr1 = new  com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.PostalAddress6();
+                        pstlAdr1.setCtry(ctry);
+                    }
                     List<String> adrLine = pstlAdr.getAdrLine();
                     if(adrLine != null) {
-                        com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.PostalAddress6 pstlAdr1 = new com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.PostalAddress6();
+                         if(pstlAdr == null){
+                             pstlAdr1 = new com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.PostalAddress6();
+                         }
                         List<String> postalAddressLines = new ArrayList<>();
                         if(pstlAdr1.getAdrLine() != null){
                             postalAddressLines = pstlAdr1.getAdrLine();
@@ -619,9 +634,17 @@ public class Pacs008FPS2AvroTransform {
                 }
                 PostalAddress6 pstlAdr = dbtr1.getPstlAdr();
                 if(pstlAdr != null){
+                    com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.PostalAddress6 pstlAdr1 = null;
+                    String ctry = pstlAdr.getCtry();
+                    if(StringUtils.isNotEmpty(ctry)){
+                        pstlAdr1 = new  com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.PostalAddress6();
+                        pstlAdr1.setCtry(ctry);
+                    }
                     List<String> adrLine = pstlAdr.getAdrLine();
                     if(adrLine != null) {
-                        com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.PostalAddress6 pstlAdr1 =new  com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.PostalAddress6();
+                        if( pstlAdr1 == null){
+                            pstlAdr1 = new  com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.PostalAddress6();
+                        }
                         List<String> postalAddressLines = new ArrayList<>();
                         if(pstlAdr1.getAdrLine() != null){
                             postalAddressLines = pstlAdr1.getAdrLine();
