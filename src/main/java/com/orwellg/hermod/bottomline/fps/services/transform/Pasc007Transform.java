@@ -2,6 +2,7 @@ package com.orwellg.hermod.bottomline.fps.services.transform;
 
 import com.orwellg.hermod.bottomline.fps.services.transform.helper.ConversionException;
 import com.orwellg.hermod.bottomline.fps.services.transform.helper.TransformationHelper;
+import com.orwellg.hermod.bottomline.fps.services.transform.pacs007.Pacs007FPS2AvroTransform;
 import com.orwellg.hermod.bottomline.fps.types.FPSMessage;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
 import org.springframework.stereotype.Component;
@@ -39,8 +40,10 @@ public class Pasc007Transform implements FPSTransform {
 		
 		final com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs007_001_05.Document target = 
 				new com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs007_001_05.Document();
-		
-		TransformationHelper.updateTargetValues(source, target);
+
+		//TransformationHelper.updateTargetValues(source, target);
+		Pacs007FPS2AvroTransform.transform(source, target);
+
 		
 		FPSAvroMessage avroMessage = new FPSAvroMessage(target);
 				
