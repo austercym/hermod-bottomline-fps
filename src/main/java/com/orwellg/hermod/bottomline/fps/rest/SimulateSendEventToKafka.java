@@ -1,5 +1,6 @@
 package com.orwellg.hermod.bottomline.fps.rest;
 
+import com.codahale.metrics.MetricRegistry;
 import com.orwellg.hermod.bottomline.fps.listeners.inbound.MQASYNListener;
 import com.orwellg.hermod.bottomline.fps.listeners.inbound.MQPOOListener;
 import com.orwellg.hermod.bottomline.fps.listeners.inbound.MQSIPListener;
@@ -23,6 +24,9 @@ import java.io.*;
 public class SimulateSendEventToKafka {
 
     private static Logger LOG = LogManager.getLogger(SimulateSendEventToKafka.class);
+
+    @Autowired
+    MetricRegistry metricRegistry;
 
     /*@Autowired
     MQSIPListener mqSIPListener;
@@ -137,7 +141,7 @@ public class SimulateSendEventToKafka {
         Writer writer = null;
         try {
             writer = getStringWriter(queueMessage);
-            MQSIPOutboundRecvListener mqOutboundListener = new MQSIPOutboundRecvListener();
+            MQSIPOutboundRecvListener mqOutboundListener = new MQSIPOutboundRecvListener(metricRegistry);
             mqOutboundListener.sendMessageToTopic(writer, MQSIPOutboundRecvListener.PAYMENT_TYPE, null);
             return new ResponseEntity<>("Message sent ", HttpStatus.OK);
         }catch(IOException e){

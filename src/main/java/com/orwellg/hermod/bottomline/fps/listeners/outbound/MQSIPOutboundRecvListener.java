@@ -1,5 +1,7 @@
 package com.orwellg.hermod.bottomline.fps.listeners.outbound;
 
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.jmx.JmxReporter;
 import com.orwellg.umbrella.avro.types.event.Event;
 import com.orwellg.umbrella.commons.types.utils.avro.RawMessageUtils;
 import org.apache.logging.log4j.LogManager;
@@ -9,12 +11,25 @@ import org.springframework.stereotype.Component;
 
 import javax.jms.Message;
 
+import static com.codahale.metrics.MetricRegistry.name;
+
 @Component(value = "mqSIPOutboundRecvListener")
 @Scope("prototype")
 public class MQSIPOutboundRecvListener extends MQOutboundListener {
 
     public static final String PAYMENT_TYPE = "SIP";
     private static Logger LOG = LogManager.getLogger(MQSIPOutboundRecvListener.class);
+
+    public MQSIPOutboundRecvListener(MetricRegistry metricRegistry){
+        if(metricRegistry!= null) {
+            responses = metricRegistry.timer(name("fps_connector", "inbound", "responses", "count"));
+            responses_failures = metricRegistry.timer(name("fps_connector", "inbound", "responses", "failures", "count"));
+            final JmxReporter reporterJMX = JmxReporter.forRegistry(metricRegistry).build();
+            reporterJMX.start();
+        }else{
+            LOG.error("No existe metrics registry");
+        }
+    }
 
     @Override
     public void onMessage(Message message) {

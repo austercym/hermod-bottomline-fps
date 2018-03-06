@@ -1,6 +1,10 @@
 package com.orwellg.hermod.bottomline.fps.listeners.outbound;
 
 
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
+import com.codahale.metrics.jmx.JmxReporter;
 import com.google.gson.Gson;
 import com.orwellg.hermod.bottomline.fps.services.kafka.KafkaSender;
 import com.orwellg.hermod.bottomline.fps.services.transform.FPSTransform;
@@ -37,6 +41,8 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Date;
+
+import static com.codahale.metrics.MetricRegistry.name;
 
 
 @Component(value = "kafkaRequestOutboundListener")
@@ -83,8 +89,24 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
     @Autowired
     private TaskExecutor taskOutboundRequestExecutor;
 
+    private Timer requests;
+    private Timer requests_failures;
+
+    public KafkaRequestOutboundListener(MetricRegistry metricRegistry){
+        if(metricRegistry!= null) {
+            requests = metricRegistry.timer(name("fps_connector", "inbound", "requests", "count"));
+            requests_failures = metricRegistry.timer(name("fps_connector", "inbound", "requests", "failures", "count"));
+
+            final JmxReporter reporterJMX = JmxReporter.forRegistry(metricRegistry).build();
+            reporterJMX.start();
+        }else{
+            LOG.error("No existe metrics registry");
+        }
+    }
+
     @Override
     public void onMessage(ConsumerRecord<String, String> message) {
+        final Timer.Context context = requests.time();
 
         try {
             String key = message.key();
@@ -99,6 +121,8 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
             LOG.debug("[FPS][PmtId: {}] End processing event request for FPS outbound payment", key);
         } catch (Exception e) {
             throw new MessageConversionException("Exception in message emission. Message: " + e.getMessage(), e);
+        }finally {
+            context.stop();
         }
     }
 
@@ -227,8 +251,10 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
                 throw new MessageConversionException("Exception in message emission. The transform for pacs_008_001 is null");
             }
         } catch (Exception ex) {
+            final Timer.Context context_failures = requests_failures.time();
             LOG.error("[FPS][PmtId: {}] Error generating request for FPS outbound payment. Error Message: {}",
                     paymentId, ex.getMessage(), ex);
+            context_failures.stop();
         }
 
         LOG.debug("[FPS][PmtId: {}] Time to process outbound payment request: {} ms",

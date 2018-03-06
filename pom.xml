@@ -4,7 +4,7 @@
 
 	<groupId>com.orwellg.hermod.bottomline.fps</groupId>
   	<artifactId>hermod-bottomline-fps</artifactId>
-	<version>0.0.6-SNAPSHOT</version>
+	<version>0.0.7-SNAPSHOT</version>
 	<name>hermod-bottomline-fps</name>
 	<description>Project to connect to Bottomline and send/retrieve messages to Kafka</description>
 
@@ -44,6 +44,21 @@
 			<groupId>com.esotericsoftware</groupId>
 			<artifactId>reflectasm</artifactId>
 			<version>1.11.3</version>
+		</dependency>
+		<dependency>
+			<groupId>io.dropwizard.metrics</groupId>
+			<artifactId>metrics-core</artifactId>
+			<version>4.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>io.dropwizard.metrics</groupId>
+			<artifactId>metrics-jmx</artifactId>
+			<version>4.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jolokia</groupId>
+			<artifactId>jolokia-core</artifactId>
+			<version>1.5.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.ibm.mq</groupId>
