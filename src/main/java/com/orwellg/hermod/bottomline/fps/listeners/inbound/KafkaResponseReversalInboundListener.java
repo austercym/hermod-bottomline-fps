@@ -1,10 +1,14 @@
 package com.orwellg.hermod.bottomline.fps.listeners.inbound;
 
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
+import com.codahale.metrics.jmx.JmxReporter;
 import com.google.gson.Gson;
 import com.orwellg.hermod.bottomline.fps.services.kafka.KafkaSender;
 import com.orwellg.hermod.bottomline.fps.services.transform.FPSTransform;
 import com.orwellg.hermod.bottomline.fps.types.FPSMessage;
-import com.orwellg.hermod.bottomline.fps.utils.generators.EventGenerator;
+import com.orwellg.hermod.bottomline.fps.utils.singletons.EventGenerator;
 import com.orwellg.umbrella.avro.types.event.Event;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSOutboundReversalResponse;
@@ -29,14 +33,18 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.Date;
 
+import static com.codahale.metrics.MetricRegistry.name;
 import static com.orwellg.hermod.bottomline.fps.utils.Constants.RESP_SUFFIX;
 
 @Component(value="kafkaResponseReversalInboundListener")
 public class KafkaResponseReversalInboundListener extends KafkaInboundListener implements MessageListener<String, String>, KafkaDataListener<ConsumerRecord<String, String>> {
 
 	private static Logger LOG = LogManager.getLogger(KafkaResponseReversalInboundListener.class);
+	private Counter inbound_asyn_reversal_responses;
+	private Counter inbound_sync_reversal_responses;
 
 	@Value("${wq.mq.queue.sip.inbound.resp}")
 	private String outboundQueue;
@@ -53,7 +61,20 @@ public class KafkaResponseReversalInboundListener extends KafkaInboundListener i
 	private KafkaSender kafkaSender;
 
 	@Autowired
-	private TaskExecutor taskInboundResponseExecutor;
+	private TaskExecutor taskInboundReversalExecutor;
+
+	public KafkaResponseReversalInboundListener(MetricRegistry metricRegistry){
+		if(metricRegistry!= null) {
+			inbound_asyn_reversal_responses = metricRegistry.counter(name("fps_connector", "inbound", "asyn", "reversal", "responses", "count"));
+
+			inbound_sync_reversal_responses = metricRegistry.counter(name("fps_connector", "inbound", "sync", "reversal", "responses", "count"));
+
+			//final JmxReporter reporterJMX = JmxReporter.forRegistry(metricRegistry).build();
+			//reporterJMX.start();
+		}else{
+			LOG.error("No exists metrics registry");
+		}
+	}
 
 	@Override
 	public void onMessage(ConsumerRecord<String, String> message) {
@@ -62,7 +83,7 @@ public class KafkaResponseReversalInboundListener extends KafkaInboundListener i
 			String key = message.key();
 			String value = message.value();
 			LOG.debug("[FPS][PmtId: {}] Processing event reversal response for FPS inbound payment", key);
-			taskInboundResponseExecutor.execute(new Runnable() {
+			taskInboundReversalExecutor.execute(new Runnable() {
 				@Override
 				public void run() {
 					processInboundPaymentResponseReversal(message, key, value);
@@ -74,7 +95,8 @@ public class KafkaResponseReversalInboundListener extends KafkaInboundListener i
 			throw new MessageConversionException("Exception in message emission. Message: " + e.getMessage(), e);
 		}
 	}
-	@Async("taskInboundResponseExecutor")
+
+	@Async("taskInboundReversalExecutor")
 	private void processInboundPaymentResponseReversal(ConsumerRecord<String, String> message, String key, String value) {
 		long startTime = new Date().getTime();
 		LOG.info("[FPS][PmtId: {}] Processing event reversal response for FPS inbound reversal payment", key);
@@ -101,6 +123,10 @@ public class KafkaResponseReversalInboundListener extends KafkaInboundListener i
 
 			// Generate Reversal Response
 			FPSAvroMessage fpsPacs002Response = null;
+			String paymentType = "SIP";
+			String queueToSend = outboundAsynQueue;
+			String environmentMQ = environmentPrimaryMQ;
+
 			try {
 				fpsPacs002Response = generateFPSPacs002ReversalResponse(fpsPaymentReversalResponse);
 				LOG.info("[FPS][PmtId: {}] Response generated for FPS inbound reversal payment. Response: {}", key, fpsPacs002Response.toString());
@@ -121,19 +147,19 @@ public class KafkaResponseReversalInboundListener extends KafkaInboundListener i
 					String FPID = extractFPID(fpsPaymentReversalResponse.getRvsdDocument());
 
 					//Send to MQ (Environment=Queue)
-					String queueToSend = outboundAsynQueue;
 					Headers headers = message.headers();
 					Header header = headers.lastHeader(KafkaHeaders.FPS_PAYMENT_TYPE.getKafkaHeader());
-					String paymentType = "SIP";
 					if (header != null) {
 						paymentType = new String(header.value(), "UTF-8");
 					}
 					if (paymentType.equalsIgnoreCase("SIP")) {
 						queueToSend = outboundQueue;
+						inbound_sync_reversal_responses.inc();
+					} else {
+						inbound_asyn_reversal_responses.inc();
 					}
 
 					Header headerSite = headers.lastHeader(KafkaHeaders.FPS_SITE.getKafkaHeader());
-					String environmentMQ = environmentPrimaryMQ;
 					if(headerSite != null){
 						environmentMQ = new String(headerSite.value(), "UTF-8");
 						LOG.debug("[FPS][PaymentType: {}][PmtId: {}] Get header FPS_SITE: {}",

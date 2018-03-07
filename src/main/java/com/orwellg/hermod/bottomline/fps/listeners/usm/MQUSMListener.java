@@ -1,15 +1,18 @@
 package com.orwellg.hermod.bottomline.fps.listeners.usm;
 
 import com.bottomline.directfps.fpsusmelements.*;
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.jmx.JmxReporter;
 import com.google.gson.Gson;
 import com.orwellg.hermod.bottomline.fps.listeners.BaseListener;
 import com.orwellg.hermod.bottomline.fps.services.kafka.KafkaSender;
 import com.orwellg.hermod.bottomline.fps.services.transform.FPSTransform;
 import com.orwellg.hermod.bottomline.fps.services.transform.helper.ConversionException;
 import com.orwellg.hermod.bottomline.fps.utils.USMMessage;
-import com.orwellg.hermod.bottomline.fps.utils.generators.EventGenerator;
-import com.orwellg.hermod.bottomline.fps.utils.generators.IDGeneratorBean;
-import com.orwellg.hermod.bottomline.fps.utils.generators.SchemeValidatorBean;
+import com.orwellg.hermod.bottomline.fps.utils.singletons.EventGenerator;
+import com.orwellg.hermod.bottomline.fps.utils.singletons.IDGeneratorBean;
+import com.orwellg.hermod.bottomline.fps.utils.singletons.SchemeValidatorBean;
 import com.orwellg.umbrella.avro.types.event.Event;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSInboundUSM;
@@ -24,7 +27,9 @@ import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.stereotype.Component;
 import org.xml.sax.SAXException;
@@ -40,13 +45,16 @@ import javax.xml.validation.Validator;
 import java.io.*;
 import java.util.Date;
 
+import static com.codahale.metrics.MetricRegistry.name;
+
 @Component(value = "mqUSMListener")
-@Scope("prototype")
+@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class MQUSMListener extends BaseListener implements MessageListener {
 
     private static Logger LOG = LogManager.getLogger(MQUSMListener.class);
 
     public static String PAYMENT_TYPE = "USM";
+    private  Counter inbound_usm_requests;
 
     @Autowired
     private Gson gson;
@@ -68,8 +76,20 @@ public class MQUSMListener extends BaseListener implements MessageListener {
     @Value("${connector.%id.mq_primary}")
     private String environmentMQ;
 
+    public MQUSMListener(MetricRegistry metricRegistry){
+        if(metricRegistry!= null) {
+            inbound_usm_requests = metricRegistry.counter(name("fps_connector", "inbound", "usm", "requests", "count"));
+          //  final JmxReporter reporterJMX = JmxReporter.forRegistry(metricRegistry).build();
+          //  reporterJMX.start();
+        }else{
+            LOG.error("No exists metrics registry");
+        }
+    }
 
-        public void onMessage(Message message) {
+    @Override
+    public void onMessage(Message message) {
+
+        inbound_usm_requests.inc();
 
         LOG.info("[FPS] Getting usm message...............");
         InputStream stream = null;

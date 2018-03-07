@@ -5,7 +5,8 @@ import com.orwellg.hermod.bottomline.fps.listeners.BaseListener;
 import com.orwellg.hermod.bottomline.fps.storage.InMemoryPaymentStorage;
 import com.orwellg.hermod.bottomline.fps.storage.PaymentBean;
 import com.orwellg.hermod.bottomline.fps.types.FPSMessage;
-import com.orwellg.hermod.bottomline.fps.utils.generators.IDGeneratorBean;
+import com.orwellg.hermod.bottomline.fps.utils.singletons.IDGeneratorBean;
+import com.orwellg.hermod.bottomline.fps.utils.singletons.JAXBContextBean;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSOutboundReversalResponse;
 import com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs002_001_06.*;
@@ -42,8 +43,7 @@ public class KafkaInboundListener extends BaseListener {
 
     protected StringWriter transformResponseToString(FPSMessage fpsMessage) throws JAXBException {
         StringWriter rawMessage = new StringWriter();
-        final JAXBContext jc = JAXBContext.newInstance(iso.std.iso._20022.tech.xsd.pacs_002_001.Document.class);
-        final Marshaller marshaller = jc.createMarshaller();
+        final Marshaller marshaller = JAXBContextBean.getInstance().getJaxbContextPacs002().createMarshaller();
 
         marshaller.marshal(fpsMessage, new StreamResult(rawMessage));
         return rawMessage;
@@ -74,8 +74,10 @@ public class KafkaInboundListener extends BaseListener {
         fpsPacs002Response.getFIToFIPmtStsRpt().getGrpHdr().setMsgId(msgId002);
         fpsPacs002Response.getFIToFIPmtStsRpt().getGrpHdr().setCreDtTm(new Date().getTime());
         // Instructing Agent - from instructed agent on original payment
-        BranchAndFinancialInstitutionIdentification5 instgAgt = gson.fromJson(gson.toJson(originalDocument.getFIToFICstmrCdtTrf().getGrpHdr().getInstdAgt()), BranchAndFinancialInstitutionIdentification5.class);
-        fpsPacs002Response.getFIToFIPmtStsRpt().getGrpHdr().setInstgAgt(instgAgt);
+        if(originalDocument.getFIToFICstmrCdtTrf().getGrpHdr().getInstdAgt() != null) {
+            BranchAndFinancialInstitutionIdentification5 instgAgt = gson.fromJson(gson.toJson(originalDocument.getFIToFICstmrCdtTrf().getGrpHdr().getInstdAgt()), BranchAndFinancialInstitutionIdentification5.class);
+            fpsPacs002Response.getFIToFIPmtStsRpt().getGrpHdr().setInstgAgt(instgAgt);
+        }
 
         // Transaction Information and Status
         List<PaymentTransaction52> listTxInfAndSts = new ArrayList<PaymentTransaction52>();
@@ -148,15 +150,6 @@ public class KafkaInboundListener extends BaseListener {
         payment = storage.completePaymentResponse(FPID, originalStr, responseMessage);
 
         return payment;
-    }
-
-    protected StringWriter transformPaymentRequestToString(FPSMessage fpsMessage) throws JAXBException {
-        StringWriter rawMessage = new StringWriter();
-        final JAXBContext jc = JAXBContext.newInstance(com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Document.class);
-        final Marshaller marshaller = jc.createMarshaller();
-
-        marshaller.marshal(fpsMessage, new StreamResult(rawMessage));
-        return rawMessage;
     }
 
     protected FPSAvroMessage generateFPSPacs002ReversalResponse(FPSOutboundReversalResponse fpsPaymentResponse) {

@@ -13,8 +13,8 @@ import com.orwellg.hermod.bottomline.fps.storage.PaymentOutboundBean;
 import com.orwellg.hermod.bottomline.fps.storage.PaymentStatus;
 import com.orwellg.hermod.bottomline.fps.types.FPSMessage;
 import com.orwellg.hermod.bottomline.fps.utils.Constants;
-import com.orwellg.hermod.bottomline.fps.utils.generators.EventGenerator;
-import com.orwellg.hermod.bottomline.fps.utils.generators.SchemeValidatorBean;
+import com.orwellg.hermod.bottomline.fps.utils.singletons.EventGenerator;
+import com.orwellg.hermod.bottomline.fps.utils.singletons.SchemeValidatorBean;
 import com.orwellg.umbrella.avro.types.event.Event;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSOutboundPayment;
@@ -89,24 +89,23 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
     @Autowired
     private TaskExecutor taskOutboundRequestExecutor;
 
-    private Timer requests;
-    private Timer requests_failures;
+    private Counter outbound_sync_requests;
+    private Counter outbound_asyn_requests;
 
     public KafkaRequestOutboundListener(MetricRegistry metricRegistry){
         if(metricRegistry!= null) {
-            requests = metricRegistry.timer(name("fps_connector", "inbound", "requests", "count"));
-            requests_failures = metricRegistry.timer(name("fps_connector", "inbound", "requests", "failures", "count"));
+            outbound_asyn_requests = metricRegistry.counter(name("fps_connector", "outbound", "asyn", "requests", "count"));
+            outbound_sync_requests = metricRegistry.counter(name("fps_connector", "outbound", "sync", "requests", "count"));
 
-            final JmxReporter reporterJMX = JmxReporter.forRegistry(metricRegistry).build();
-            reporterJMX.start();
+         //   final JmxReporter reporterJMX = JmxReporter.forRegistry(metricRegistry).build();
+         //   reporterJMX.start();
         }else{
-            LOG.error("No existe metrics registry");
+            LOG.error("No exists metrics registry");
         }
     }
 
     @Override
     public void onMessage(ConsumerRecord<String, String> message) {
-        final Timer.Context context = requests.time();
 
         try {
             String key = message.key();
@@ -121,8 +120,6 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
             LOG.debug("[FPS][PmtId: {}] End processing event request for FPS outbound payment", key);
         } catch (Exception e) {
             throw new MessageConversionException("Exception in message emission. Message: " + e.getMessage(), e);
-        }finally {
-            context.stop();
         }
     }
 
@@ -151,6 +148,11 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
         Document fpsDocument = fpsOutboundPayment.getPaymentDocument();
         String paymentType = fpsOutboundPayment.getPaymentType();
         String paymentId = fpsOutboundPayment.getPaymentId();
+        if(paymentType.equalsIgnoreCase("SIP")) {
+            outbound_sync_requests.inc();
+        }else{
+            outbound_asyn_requests.inc();
+        }
 
         try {
             // Call the correspondent transform
@@ -199,6 +201,7 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
 
                     if(paymentType.equalsIgnoreCase("SIP")){
                         queueToSend = outboundQueue;
+
                     }
 
                     boolean paymentSent = sendToMQ(key, rawMessage.toString(), queueToSend, paymentType, environmentMQ);
@@ -251,10 +254,8 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
                 throw new MessageConversionException("Exception in message emission. The transform for pacs_008_001 is null");
             }
         } catch (Exception ex) {
-            final Timer.Context context_failures = requests_failures.time();
             LOG.error("[FPS][PmtId: {}] Error generating request for FPS outbound payment. Error Message: {}",
                     paymentId, ex.getMessage(), ex);
-            context_failures.stop();
         }
 
         LOG.debug("[FPS][PmtId: {}] Time to process outbound payment request: {} ms",

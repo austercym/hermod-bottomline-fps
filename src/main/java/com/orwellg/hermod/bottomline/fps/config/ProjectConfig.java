@@ -1,6 +1,8 @@
 package com.orwellg.hermod.bottomline.fps.config;
 
-import com.orwellg.hermod.bottomline.fps.utils.generators.SchemeValidatorBean;
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.jmx.JmxReporter;
+import com.orwellg.hermod.bottomline.fps.utils.singletons.SchemeValidatorBean;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,9 +72,15 @@ public class ProjectConfig extends ComponentConfig {
 	@Autowired
 	private DefaultMessageListenerContainer jmsAsynOutboundListenerSite2Container;
 
+	@Autowired
+	private MetricRegistry metricRegistry;
+
 	@EventListener(ApplicationReadyEvent.class)
 	public void startListeners() {
 	    LOG.info("Connector to Bottomline start. Starting containers....");
+
+		final JmxReporter reporterJMX = JmxReporter.forRegistry(metricRegistry).build();
+		reporterJMX.start();
 		try{
 			SchemeValidatorBean.getInstance();
 		}catch(Exception e){

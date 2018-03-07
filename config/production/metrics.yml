@@ -1,10 +1,8 @@
 ---
 lowercaseOutputName: true 
-whitelistObjectNames: ["metrics:name=fps_connector.inbound.requests.count,*","metrics:name=fps_connector.inbound.responses.count,*","metrics:name=fps_connector.inbound.requests.failures.count,*","metrics:name=fps_connector.inbound.responses.failures.count,*"]
+whitelistObjectNames: ["metrics:name=fps_connector.inbound.asyn.requests.count,*","metrics:name=fps_connector.inbound.sync.requests.count,*","metrics:name=fps_connector.inbound.asyn.reversal.responses.count,*","metrics:name=fps_connector.inbound.sync.reversal.requests.count,*","metrics:name=fps_connector.inbound.asyn.responses.count,*","metrics:name=fps_connector.inbound.sync.responses.count,*",
+"metrics:name=fps_connector.inbound.usm.requests.count,*","metrics:name=fps_connector.inbound.poo.requests.count,*","metrics:name=fps_connector.inbound.standin.requests.count,*","metrics:name=fps_connector.outbound.asyn.responses.count,*","metrics:name=fps_connector.outbound.sync.responses.count,*","metrics:name=fps_connector.outbound.asyn.requests.count,*","metrics:name=fps_connector.outbound.sync.requests.count,*"]
 rules:
    - pattern: metrics<name=(.+)><>(Count)
      name: $1
      type: COUNTER
-   - pattern: metrics<name=(.+)><>(MeanRate)
-        name: $1
-        type: COUNTER

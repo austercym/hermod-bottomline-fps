@@ -60,8 +60,8 @@ public class KafkaResponseInMemoryListener extends KafkaInboundListener implemen
 
             // Parse FPS Outbound Payment Request
             Headers headers = message.headers();
-            Header header = headers.lastHeader(KafkaHeaders.FPS_PAYMENT_TYPE.getKafkaHeader());
-            String paymentType = new String(header.value(), "UTF-8");
+            Header headerPaymentType = headers.lastHeader(KafkaHeaders.FPS_PAYMENT_TYPE.getKafkaHeader());
+            String paymentType = new String(headerPaymentType.value(), "UTF-8");
             Header headerFPID = headers.lastHeader(KafkaHeaders.FPS_PAYMENT_FPID.getKafkaHeader());
             String FPID = new String(headerFPID.value(), "UTF-8");
             Header headerEnvironment = headers.lastHeader(KafkaHeaders.FPS_SITE.getKafkaHeader());
@@ -70,12 +70,16 @@ public class KafkaResponseInMemoryListener extends KafkaInboundListener implemen
             String originalPaymentMessage = null;
             FPSOutboundPaymentResponse fpsPaymentResponse = null;
             boolean isRequest = false;
+            boolean isValid = false;
+            String errorMessage = null;
             try {
                 fpsPaymentResponse = new Gson().fromJson(eventPayment.getEvent().getData(), FPSOutboundPaymentResponse.class);
                 originalPaymentMessage = gson.toJson(fpsPaymentResponse.getOrgnlPaymentDocument());
                 isRequest = true;
+                isValid = true;
             } catch (Exception ex) {
-                LOG.error("[FPS][PmtId: {}] Error parsing response for FPS inbound payment. Error Message: {}", key, ex.getMessage(), ex);
+                LOG.info("[FPS][PmtId: {}] Trying to parse response for FPS inbound payment. Message: {}", key, ex.getMessage(), ex);
+                errorMessage = ex.getMessage();
             }
 
             FPSOutboundReversalResponse fpsPaymentReversalResponse = null;
@@ -83,25 +87,31 @@ public class KafkaResponseInMemoryListener extends KafkaInboundListener implemen
                 try {
                     fpsPaymentReversalResponse = new Gson().fromJson(eventPayment.getEvent().getData(), FPSOutboundReversalResponse.class);
                     originalPaymentMessage = gson.toJson(fpsPaymentReversalResponse.getRvsdDocument());
+                    isValid = true;
                 } catch (Exception ex) {
-                    LOG.error("[FPS][PmtId: {}] Error parsing response for FPS inbound reversal payment. Error Message: {}", key, ex.getMessage(), ex);
+                    LOG.info("[FPS][PmtId: {}] Trying to parse response for FPS inbound reversal payment. Error Message: {}", key, ex.getMessage(), ex);
+                    errorMessage = ex.getMessage();
                 }
             }
 
-            // Generate Reversal Response
-            FPSAvroMessage fpsPacs002Response = null;
-            if(!isRequest) {
-                fpsPacs002Response = generateFPSPacs002ReversalResponse(fpsPaymentReversalResponse);
-            }else{
-                fpsPacs002Response = generateFPSPacs002(fpsPaymentResponse.getOrgnlPaymentDocument(), fpsPaymentResponse.getPaymentId(),
-                        fpsPaymentResponse.getStsRsn(), fpsPaymentResponse.getTxSts());
-            }
+            if(isValid) {
 
-            FPSTransform transform = transforms.get("transform_pacs_002_001");
-            if (transform != null) {
-                FPSMessage fpsMessage = transform.avro2fps(fpsPacs002Response);
-                StringWriter rawMessage = transformResponseToString(fpsMessage);
-                updatePaymentResponseInMemory(originalPaymentMessage, FPID, rawMessage.toString(), key, paymentType, environmentMQ);
+                // Generate Reversal Response
+                FPSAvroMessage fpsPacs002Response = null;
+                if (!isRequest) {
+                    fpsPacs002Response = generateFPSPacs002ReversalResponse(fpsPaymentReversalResponse);
+                } else {
+                    fpsPacs002Response = generateFPSPacs002(fpsPaymentResponse.getOrgnlPaymentDocument(), fpsPaymentResponse.getPaymentId(), fpsPaymentResponse.getStsRsn(), fpsPaymentResponse.getTxSts());
+                }
+
+                FPSTransform transform = transforms.get("transform_pacs_002_001");
+                if (transform != null) {
+                    FPSMessage fpsMessage = transform.avro2fps(fpsPacs002Response);
+                    StringWriter rawMessage = transformResponseToString(fpsMessage);
+                    updatePaymentResponseInMemory(originalPaymentMessage, FPID, rawMessage.toString(), key, paymentType, environmentMQ);
+                }
+            }else{
+                LOG.error("[FPS][PmtId: {}] Error getting response to store in cache. Error Message: {}", key, errorMessage);
             }
 
         } catch (Exception e) {

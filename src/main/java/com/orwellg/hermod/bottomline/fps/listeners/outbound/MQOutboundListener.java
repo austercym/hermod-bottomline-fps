@@ -1,5 +1,6 @@
 package com.orwellg.hermod.bottomline.fps.listeners.outbound;
 
+import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.codahale.metrics.jmx.JmxReporter;
@@ -11,9 +12,9 @@ import com.orwellg.hermod.bottomline.fps.services.transform.helper.ConversionExc
 import com.orwellg.hermod.bottomline.fps.storage.InMemoryOutboundPaymentStorage;
 import com.orwellg.hermod.bottomline.fps.storage.PaymentOutboundBean;
 import com.orwellg.hermod.bottomline.fps.types.FPSMessage;
-import com.orwellg.hermod.bottomline.fps.utils.generators.EventGenerator;
-import com.orwellg.hermod.bottomline.fps.utils.generators.IDGeneratorBean;
-import com.orwellg.hermod.bottomline.fps.utils.generators.SchemeValidatorBean;
+import com.orwellg.hermod.bottomline.fps.utils.singletons.EventGenerator;
+import com.orwellg.hermod.bottomline.fps.utils.singletons.IDGeneratorBean;
+import com.orwellg.hermod.bottomline.fps.utils.singletons.SchemeValidatorBean;
 import com.orwellg.umbrella.avro.types.event.Event;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSInboundPaymentResponse;
@@ -82,11 +83,7 @@ public abstract class MQOutboundListener extends BaseListener implements Message
     @Autowired
     private TaskExecutor taskOutboundResponseExecutor;
 
-    protected Timer responses;
-    protected Timer responses_failures;
-
     protected void onMessage(Message message, String paymentType) {
-        final Timer.Context context = responses.time();
         LOG.debug("[FPS][PaymentType: {}] Receiving outbound payment response message from Bottomline", paymentType);
         InputStream stream = null;
         Reader reader = null;
@@ -116,7 +113,6 @@ public abstract class MQOutboundListener extends BaseListener implements Message
         } catch (Exception e) {
             throw new MessageConversionException("Exception in message reception. Message: " + e.getMessage(), e);
         } finally {
-            context.close();
             try {
                 if (reader != null) {
                     reader.close();
@@ -247,22 +243,13 @@ public abstract class MQOutboundListener extends BaseListener implements Message
                 LOG.debug("[FPS][PmtId: {}] Time to process outbound payment response: {} ms",
                         uuid, new Date().getTime()-startTime);
             } catch (ConversionException convEx) {
-                final Timer.Context context_failures = responses_failures.time();
                 LOG.error("[FPS][PaymentType: {}]Error generating Avro file. Error: {} Message: {}", paymentType, convEx.getMessage(), message);
-                context_failures.stop();
-
             } catch (IOException e) {
-                final Timer.Context context_failures = responses_failures.time();
                 LOG.error("[FPS][PaymentType: {}] IO Error {}", paymentType, e.getMessage());
-                context_failures.stop();
             } catch (MessageConversionException conversionEx) {
-                final Timer.Context context_failures = responses_failures.time();
                 LOG.error("[FPS][PaymentType: {}] Error transforming message {}", paymentType, conversionEx.getMessage());
-                context_failures.stop();
             }catch (Exception ex) {
-                final Timer.Context context_failures = responses_failures.time();
                 LOG.error("[FPS][PaymentType: {}] Error getting response from payment. Message error {}", paymentType, ex.getMessage(), ex);
-                context_failures.stop();
             }
         }
     }

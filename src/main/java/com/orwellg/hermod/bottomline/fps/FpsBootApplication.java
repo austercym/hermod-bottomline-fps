@@ -26,9 +26,8 @@ public class FpsBootApplication {
 	@Bean
 	public TaskExecutor taskOutboundRequestExecutor() {
 		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-		executor.setCorePoolSize(5);
-		executor.setMaxPoolSize(10);
-		executor.setQueueCapacity(25);
+		executor.setCorePoolSize(20);
+		executor.setMaxPoolSize(20);
 		executor.setThreadNamePrefix("task_outbound_request_executor_thread");
 		executor.initialize();
 		return executor;
@@ -36,9 +35,8 @@ public class FpsBootApplication {
 	@Bean
 	public TaskExecutor taskOutboundResponseExecutor() {
 		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-		executor.setCorePoolSize(5);
-		executor.setMaxPoolSize(10);
-		executor.setQueueCapacity(25);
+		executor.setCorePoolSize(20);
+		executor.setMaxPoolSize(20);
 		executor.setThreadNamePrefix("task_outbound_response_executor_thread");
 		executor.initialize();
 		return executor;
@@ -47,10 +45,19 @@ public class FpsBootApplication {
 	@Bean
 	public TaskExecutor taskInboundResponseExecutor() {
 		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-		executor.setCorePoolSize(5);
-		executor.setMaxPoolSize(10);
-		executor.setQueueCapacity(25);
+		executor.setCorePoolSize(20);
+		executor.setMaxPoolSize(20);
 		executor.setThreadNamePrefix("task_inbound_response_executor_thread");
+		executor.initialize();
+		return executor;
+	}
+
+	@Bean
+	public TaskExecutor taskInboundReversalExecutor() {
+		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+		executor.setCorePoolSize(20);
+		executor.setMaxPoolSize(20);
+		executor.setThreadNamePrefix("task_inbound_reversal_executor_thread");
 		executor.initialize();
 		return executor;
 	}
@@ -58,9 +65,8 @@ public class FpsBootApplication {
 	@Bean
 	public TaskExecutor taskInboundRequestExecutor() {
 		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-		executor.setCorePoolSize(5);
-		executor.setMaxPoolSize(10);
-		executor.setQueueCapacity(25);
+		executor.setCorePoolSize(20);
+		executor.setMaxPoolSize(20);
 		executor.setThreadNamePrefix("task_inbound_request_executor_thread");
 		executor.initialize();
 		return executor;

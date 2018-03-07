@@ -1,4 +1,4 @@
-package com.orwellg.hermod.bottomline.fps.utils.generators;
+package com.orwellg.hermod.bottomline.fps.utils.singletons;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
