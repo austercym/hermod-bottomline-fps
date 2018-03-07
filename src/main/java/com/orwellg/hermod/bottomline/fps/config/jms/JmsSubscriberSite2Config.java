@@ -1,6 +1,13 @@
 package com.orwellg.hermod.bottomline.fps.config.jms;
 
 import com.orwellg.hermod.bottomline.fps.config.ComponentConfig;
+import com.orwellg.hermod.bottomline.fps.listeners.inbound.MQASYNListener;
+import com.orwellg.hermod.bottomline.fps.listeners.inbound.MQPOOListener;
+import com.orwellg.hermod.bottomline.fps.listeners.inbound.MQSIPListener;
+import com.orwellg.hermod.bottomline.fps.listeners.inbound.MQSTANDINListener;
+import com.orwellg.hermod.bottomline.fps.listeners.outbound.MQAsynOutboundRecvListener;
+import com.orwellg.hermod.bottomline.fps.listeners.outbound.MQSIPOutboundRecvListener;
+import com.orwellg.hermod.bottomline.fps.listeners.usm.MQUSMListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +20,7 @@ import org.springframework.jms.listener.DefaultMessageListenerContainer;
 
 import javax.jms.ConnectionFactory;
 import javax.jms.MessageListener;
+import java.util.HashMap;
 
 @Configuration
 @EnableJms

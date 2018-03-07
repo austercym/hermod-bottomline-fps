@@ -48,6 +48,11 @@ public class KafkaResponseInboundListener extends KafkaInboundListener implement
 	@Value("${connector.%id.mq_primary}")
 	private String environmentPrimaryMQ;
 
+	@Value("${jms.mq.bottomline.environment.1}")
+	private String environmentMQSite1;
+
+	@Value("${jms.mq.bottomline.environment.2}")
+	private String environmentMQSite2;
 
 	@Autowired
 	private KafkaSender kafkaSender;
@@ -145,8 +150,16 @@ public class KafkaResponseInboundListener extends KafkaInboundListener implement
                     }
                     updatePaymentResponseInMemory(originalStr, FPID, rawMessage.toString(), key, paymentType, environmentMQ);
                     boolean responseSent = sendToMQ(key, rawMessage.toString(), queueToSend, paymentType, environmentMQ);
+					if(!responseSent){
+						String alternativeEnvironmentMQ = environmentMQSite1;
+						if(environmentMQ.equalsIgnoreCase(environmentMQSite1)){
+							alternativeEnvironmentMQ = environmentMQSite2;
+						}
+						responseSent = sendToMQ(key, rawMessage.toString(), queueToSend, paymentType, alternativeEnvironmentMQ);
+					}
 
-                    Event event = EventGenerator.generateEvent(
+
+					Event event = EventGenerator.generateEvent(
                             this.getClass().getName(),
                             FPSEvents.FPS_PAYMENT_SENT.getEventName(),
                             uuid,

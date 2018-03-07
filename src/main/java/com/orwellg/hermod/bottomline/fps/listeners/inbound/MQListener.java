@@ -41,6 +41,9 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Validator;
 import java.io.*;
 import java.util.Date;
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 public abstract class MQListener extends BaseListener implements MessageListener {
 
@@ -92,8 +95,30 @@ public abstract class MQListener extends BaseListener implements MessageListener
     @Value("${connector.%id.mq_primary}")
     private String environmentMQ;
 
+    @Value("${jms.mq.bottomline.environment.1}")
+    private String environmentMQSite1;
+
+    @Value("${jms.mq.bottomline.environment.2}")
+    private String environmentMQSite2;
+
     @Autowired
     private TaskExecutor taskInboundRequestExecutor;
+
+    private static AtomicLong index;
+    static {
+        if (index == null){
+            index = new AtomicLong(0);
+        }
+    }
+    private String getNextEnvironment(){
+        long i = index.incrementAndGet();
+        if(i % 2 == 0){
+            return environmentMQSite2;
+        }else{
+            return environmentMQSite1;
+
+        }
+    }
 
     protected void onMessage(Message message, String paymentType) {
 
@@ -152,7 +177,7 @@ public abstract class MQListener extends BaseListener implements MessageListener
                 message = writer.toString();
 
                 if(emergencyLog){
-                    LOG.warn("[FPS][PaymentType: {}] Payload received {}",paymentType, message);
+                    LOG.trace("[FPS][PaymentType: {}] Payload received {}",paymentType, message);
                 }
 
                 String uuid = StringUtils.isNotEmpty(id)?id:IDGeneratorBean.getInstance().generatorID().getFasterPaymentUniqueId();
@@ -249,6 +274,13 @@ public abstract class MQListener extends BaseListener implements MessageListener
                         }
 
                         boolean responseSent = sendToMQ(uuid, previousPaymentProcessed.getResponseMessage(), queueToSend, paymentType, previousPaymentProcessed.getEnvironmentMQ());
+                        if(!responseSent){
+                            String alternativeEnvironmentMQ = environmentMQSite1;
+                            if(previousPaymentProcessed.getEnvironmentMQ().equalsIgnoreCase(environmentMQSite1)){
+                                alternativeEnvironmentMQ = environmentMQSite2;
+                            }
+                            responseSent = sendToMQ(uuid, previousPaymentProcessed.getResponseMessage(), queueToSend, paymentType, alternativeEnvironmentMQ);
+                        }
 
 
                     }else {
@@ -268,7 +300,7 @@ public abstract class MQListener extends BaseListener implements MessageListener
                                         eventName, uuid, gson.toJson(fpsRequest), entity, brand
                                 );
                                 LOG.info("[FPS][PmtId: {}] Sending FPS Inbound payment request", uuid);
-                                sendToKafka(inboundTopic, uuid, event, paymentTypeCode, environmentMQ);
+                                sendToKafka(inboundTopic, uuid, event, paymentTypeCode, getNextEnvironment());
                             }else{
                                 FPSInboundReversal fpsInboundReversal = new FPSInboundReversal();
                                 fpsInboundReversal.setPaymentId(uuid);
@@ -290,7 +322,7 @@ public abstract class MQListener extends BaseListener implements MessageListener
                                 );
 
                                 LOG.info("[FPS][PmtId: {}] Sending FPS Inbound reversal request", uuid);
-                                sendToKafka(inboundReversalTopic, uuid, event, paymentTypeCode, environmentMQ);
+                                sendToKafka(inboundReversalTopic, uuid, event, paymentTypeCode, getNextEnvironment());
 
 
                                 event = EventGenerator.generateEvent(
@@ -323,7 +355,7 @@ public abstract class MQListener extends BaseListener implements MessageListener
                                 // Send avro message to Kafka
                                 event = EventGenerator.generateEvent(this.getClass().getName(), FPSEvents.FPS_VALIDATION_ERROR.getEventName(), uuid, gson.toJson(fpsResponse), entity, brand);
 
-                                sendToKafka(outboundResponseTopic, uuid, event, paymentTypeCode, environmentMQ);
+                                sendToKafka(outboundResponseTopic, uuid, event, paymentTypeCode, getNextEnvironment());
 
                                 LOG.info("[FPS][PmtId: {}] Sent FPS Inbound payment Reject response", uuid);
                             }else{
@@ -341,7 +373,7 @@ public abstract class MQListener extends BaseListener implements MessageListener
                                 // Send avro message to Kafka
                                 event = EventGenerator.generateEvent(this.getClass().getName(), FPSEvents.FPS_VALIDATION_ERROR.getEventName(), uuid, gson.toJson(fpsResponse), entity, brand);
 
-                                sendToKafka(inboundReversalResponseTopic, uuid, event, paymentTypeCode, environmentMQ);
+                                sendToKafka(inboundReversalResponseTopic, uuid, event, paymentTypeCode, getNextEnvironment());
 
                                 LOG.info("[FPS][PmtId: {}] Sent FPS Inbound payment Reversal response", uuid);
                             }

@@ -134,7 +134,7 @@ public abstract class MQOutboundListener extends BaseListener implements Message
                 message = writer.toString();
 
                 if(emergencyLog){
-                    LOG.debug("[FPS][PaymentType: {}] Payload received {}",paymentType, message);
+                    LOG.trace("[FPS][PaymentType: {}] Payload received {}",paymentType, message);
                 }
 
                 String uuid = StringUtils.isNotEmpty(id) ? id : IDGeneratorBean.getInstance().generatorID().getFasterPaymentUniqueId();

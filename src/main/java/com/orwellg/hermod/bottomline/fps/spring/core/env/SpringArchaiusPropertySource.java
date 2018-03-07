@@ -42,7 +42,7 @@ public class SpringArchaiusPropertySource extends PropertySource<Void> {
 
             this.defaultPropertyValues = defaultPropertyValues;
         } catch (Exception e) {
-            LOG.warn("Cannot initialize the system properties using the properties : {}. Message: {}.", name, e.getMessage(), e);
+            LOG.error("Cannot initialize the system properties using the properties : {}. Message: {}.", name, e.getMessage(), e);
         }
     }
 

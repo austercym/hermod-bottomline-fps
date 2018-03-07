@@ -58,7 +58,7 @@ public class BaseListener {
 					}
 					messageSent = true;
 				} catch (Exception ex) {
-					LOG.error("[FPS] Error sending message for testing. Error Message: {}", ex.getMessage());
+					LOG.error("[FPS] Error sending message to Bottomline. Error Message: {}", ex.getMessage());
 					numAttempts--;
 					LOG.info("[FPS][PaymentType: {}][PmtId: {}] Sending message to queue {} to Bottomline {}. Attempts to try {}", paymentType, key, queueToSend, environmentMQ, numAttempts);
 				}

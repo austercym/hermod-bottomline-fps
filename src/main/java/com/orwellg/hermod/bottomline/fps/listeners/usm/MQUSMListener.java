@@ -71,7 +71,7 @@ public class MQUSMListener extends BaseListener implements MessageListener {
     private String environmentMQ;
 
 
-        public void onMessage(Message message) {
+    public void onMessage(Message message) {
 
         LOG.info("[FPS] Getting usm message...............");
         InputStream stream = null;
@@ -118,7 +118,7 @@ public class MQUSMListener extends BaseListener implements MessageListener {
                 message = writer.toString();
 
                 if(emergencyLog){
-                    LOG.warn("[FPS][PaymentType: {}] Payload received {}", PAYMENT_TYPE, message);
+                    LOG.trace("[FPS][PaymentType: {}] Payload received {}", PAYMENT_TYPE, message);
                 }
 
                 String uuid = StringUtils.isNotEmpty(id)?id:IDGeneratorBean.getInstance().generatorID().getFasterPaymentUniqueId();

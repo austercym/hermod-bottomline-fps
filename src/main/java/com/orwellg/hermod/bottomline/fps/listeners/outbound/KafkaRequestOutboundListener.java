@@ -37,6 +37,8 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Date;
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicLong;
 
 
 @Component(value = "kafkaRequestOutboundListener")
@@ -82,6 +84,22 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
 
     @Autowired
     private TaskExecutor taskOutboundRequestExecutor;
+
+    private static AtomicLong index;
+    static {
+        if (index == null){
+            index = new AtomicLong(0);
+        }
+    }
+    private String getNextEnvironment(){
+        long i = index.incrementAndGet();
+        if(i % 2 == 0){
+            return environmentMQSite2;
+        }else{
+            return environmentMQSite1;
+
+        }
+    }
 
     @Override
     public void onMessage(ConsumerRecord<String, String> message) {
@@ -177,10 +195,12 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
                         queueToSend = outboundQueue;
                     }
 
-                    boolean paymentSent = sendToMQ(key, rawMessage.toString(), queueToSend, paymentType, environmentMQ);
+
+                    String datacenter = getNextEnvironment();
+                    boolean paymentSent = sendToMQ(key, rawMessage.toString(), queueToSend, paymentType, datacenter);
                     if(!paymentSent){
                         String alternativeEnvironmentMQ = environmentMQSite1;
-                        if(environmentMQ.equalsIgnoreCase(environmentMQSite1)){
+                        if(datacenter.equalsIgnoreCase(environmentMQSite1)){
                             alternativeEnvironmentMQ = environmentMQSite2;
                         }
                         paymentSent = sendToMQ(key, rawMessage.toString(), queueToSend, paymentType, alternativeEnvironmentMQ);

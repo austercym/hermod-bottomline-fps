@@ -49,6 +49,12 @@ public class KafkaResponseReversalInboundListener extends KafkaInboundListener i
 	@Value("${connector.%id.mq_primary}")
 	private String environmentPrimaryMQ;
 
+	@Value("${jms.mq.bottomline.environment.1}")
+	private String environmentMQSite1;
+
+	@Value("${jms.mq.bottomline.environment.2}")
+	private String environmentMQSite2;
+
 	@Autowired
 	private KafkaSender kafkaSender;
 
@@ -145,6 +151,13 @@ public class KafkaResponseReversalInboundListener extends KafkaInboundListener i
 					}
 					updatePaymentResponseInMemory(originalStr, FPID, rawMessage.toString(), key, paymentType, environmentMQ);
 					boolean reversalSent = sendToMQ(key, rawMessage.toString(), queueToSend, paymentType, environmentMQ);
+					if(!reversalSent){
+						String alternativeEnvironmentMQ = environmentMQSite1;
+						if(environmentMQ.equalsIgnoreCase(environmentMQSite1)){
+							alternativeEnvironmentMQ = environmentMQSite2;
+						}
+						reversalSent = sendToMQ(key, rawMessage.toString(), queueToSend, paymentType, alternativeEnvironmentMQ);
+					}
 
 
 					Event event = EventGenerator.generateEvent(
