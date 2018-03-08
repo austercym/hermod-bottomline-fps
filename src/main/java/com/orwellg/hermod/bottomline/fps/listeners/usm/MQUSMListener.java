@@ -18,6 +18,7 @@ import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSInboundUSM;
 import com.orwellg.umbrella.commons.types.utils.avro.RawMessageUtils;
 import com.orwellg.umbrella.commons.utils.enums.FPSEvents;
+import com.orwellg.umbrella.commons.utils.enums.fps.FPSDirection;
 import com.orwellg.umbrella.commons.utils.enums.fps.USMMessageTypes;
 import org.apache.activemq.util.ByteArrayInputStream;
 import org.apache.commons.io.IOUtils;
@@ -77,7 +78,7 @@ public class MQUSMListener extends BaseListener implements MessageListener {
 
     public MQUSMListener(MetricRegistry metricRegistry){
         if(metricRegistry!= null) {
-            inbound_usm_requests = metricRegistry.counter(name("connector_fps", "inbound", "usm", "requests", "count"));
+            inbound_usm_requests = metricRegistry.counter(name("connector_fps", "inbound", "USM", FPSDirection.INPUT.getDirection()));
           //  final JmxReporter reporterJMX = JmxReporter.forRegistry(metricRegistry).build();
           //  reporterJMX.start();
         }else{

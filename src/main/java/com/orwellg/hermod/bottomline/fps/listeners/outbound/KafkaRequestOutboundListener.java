@@ -19,6 +19,7 @@ import com.orwellg.umbrella.avro.types.payment.fps.FPSOutboundPayment;
 import com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Document;
 import com.orwellg.umbrella.commons.types.utils.avro.RawMessageUtils;
 import com.orwellg.umbrella.commons.utils.enums.FPSEvents;
+import com.orwellg.umbrella.commons.utils.enums.fps.FPSDirection;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -96,12 +97,13 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
 
     public KafkaRequestOutboundListener(MetricRegistry metricRegistry){
         if(metricRegistry!= null) {
-            outbound_sop_requests = metricRegistry.counter(name("connector_fps", "outbound", "sop", "requests", "count"));
-            outbound_fdp_requests = metricRegistry.counter(name("connector_fps", "outbound", "fdp", "requests", "count"));
-            outbound_cbp_requests = metricRegistry.counter(name("connector_fps", "outbound", "cbp", "requests", "count"));
-            outbound_srn_requests = metricRegistry.counter(name("connector_fps", "outbound", "srn", "requests", "count"));
-            outbound_rtn_requests = metricRegistry.counter(name("connector_fps", "outbound", "stn", "requests", "count"));
-            outbound_sip_requests = metricRegistry.counter(name("connector_fps", "outbound", "sip", "requests", "count"));
+            String direction = FPSDirection.OUTPUT.getDirection();
+            outbound_sop_requests = metricRegistry.counter(name("connector_fps", "outbound", "SOP", direction));
+            outbound_fdp_requests = metricRegistry.counter(name("connector_fps", "outbound", "FDP", direction));
+            outbound_cbp_requests = metricRegistry.counter(name("connector_fps", "outbound", "CBP", direction));
+            outbound_srn_requests = metricRegistry.counter(name("connector_fps", "outbound", "SRN", direction));
+            outbound_rtn_requests = metricRegistry.counter(name("connector_fps", "outbound", "RTN", direction));
+            outbound_sip_requests = metricRegistry.counter(name("connector_fps", "outbound", "SIP", direction));
 
          //   final JmxReporter reporterJMX = JmxReporter.forRegistry(metricRegistry).build();
          //   reporterJMX.start();

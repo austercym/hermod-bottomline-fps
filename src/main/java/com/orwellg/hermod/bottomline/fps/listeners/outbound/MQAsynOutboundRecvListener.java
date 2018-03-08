@@ -5,6 +5,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.jmx.JmxReporter;
 import com.orwellg.umbrella.avro.types.event.Event;
 import com.orwellg.umbrella.commons.types.utils.avro.RawMessageUtils;
+import com.orwellg.umbrella.commons.utils.enums.fps.FPSDirection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -25,11 +26,12 @@ public class MQAsynOutboundRecvListener extends MQOutboundListener {
 
     public MQAsynOutboundRecvListener(MetricRegistry metricRegistry){
         if(metricRegistry!= null) {
-            outbound_sop_responses = metricRegistry.counter(name("connector_fps", "outbound", "sop", "responses", "count"));
-            outbound_cbp_responses = metricRegistry.counter(name("connector_fps", "outbound", "cbp", "responses", "count"));
-            outbound_fdp_responses = metricRegistry.counter(name("connector_fps", "outbound", "fdp", "responses", "count"));
-            outbound_rtn_responses = metricRegistry.counter(name("connector_fps", "outbound", "rtn", "responses", "count"));
-            outbound_srn_responses = metricRegistry.counter(name("connector_fps", "outbound", "srn", "responses", "count"));
+            String direction = FPSDirection.INPUT.getDirection();
+            outbound_sop_responses = metricRegistry.counter(name("connector_fps", "outbound", "SOP", direction));
+            outbound_cbp_responses = metricRegistry.counter(name("connector_fps", "outbound", "CBP", direction));
+            outbound_fdp_responses = metricRegistry.counter(name("connector_fps", "outbound", "FDP", direction));
+            outbound_rtn_responses = metricRegistry.counter(name("connector_fps", "outbound", "RTN", direction));
+            outbound_srn_responses = metricRegistry.counter(name("connector_fps", "outbound", "SRN", direction));
           //  final JmxReporter reporterJMX = JmxReporter.forRegistry(metricRegistry).build();
           //  reporterJMX.start();
         }else{

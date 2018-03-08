@@ -5,6 +5,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.jmx.JmxReporter;
 import com.orwellg.umbrella.avro.types.event.Event;
 import com.orwellg.umbrella.commons.types.utils.avro.RawMessageUtils;
+import com.orwellg.umbrella.commons.utils.enums.fps.FPSDirection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -33,11 +34,12 @@ public class MQASYNListener extends MQListener {
 
     public MQASYNListener(MetricRegistry metricRegistry){
         if(metricRegistry!= null) {
-            inbound_sop_requests = metricRegistry.counter(name("connector_fps", "inbound", "sop", "requests", "count"));
-            inbound_cbp_requests= metricRegistry.counter(name("connector_fps", "inbound", "cbp", "requests", "count"));
-            inbound_fdp_requests = metricRegistry.counter(name("connector_fps", "inbound", "fdp", "requests", "count"));
-            inbound_srn_requests = metricRegistry.counter(name("connector_fps", "inbound", "srn", "requests", "count"));
-            inbound_rtn_requests = metricRegistry.counter(name("connector_fps", "inbound", "rtn", "requests", "count"));
+            String direction = FPSDirection.INPUT.getDirection();
+            inbound_sop_requests = metricRegistry.counter(name("connector_fps", "inbound", "SOP", direction));
+            inbound_cbp_requests= metricRegistry.counter(name("connector_fps", "inbound", "CBP", direction));
+            inbound_fdp_requests = metricRegistry.counter(name("connector_fps", "inbound", "FDP", direction));
+            inbound_srn_requests = metricRegistry.counter(name("connector_fps", "inbound", "SRN", direction));
+            inbound_rtn_requests = metricRegistry.counter(name("connector_fps", "inbound", "RTN", direction));
            // final JmxReporter reporterJMX = JmxReporter.forRegistry(metricRegistry).build();
            // reporterJMX.start();
         }else{

@@ -15,6 +15,7 @@ import com.orwellg.umbrella.commons.types.utils.avro.RawMessageUtils;
 import com.orwellg.umbrella.commons.utils.enums.CurrencyCodes;
 import com.orwellg.umbrella.commons.utils.enums.FPSEvents;
 import com.orwellg.umbrella.commons.utils.enums.KafkaHeaders;
+import com.orwellg.umbrella.commons.utils.enums.fps.FPSDirection;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.Headers;
@@ -68,12 +69,13 @@ public class KafkaResponseInboundListener extends KafkaInboundListener implement
 
 	public KafkaResponseInboundListener(MetricRegistry metricRegistry){
 		if(metricRegistry!= null) {
-			inbound_sop_responses = metricRegistry.counter(name("connector_fps", "inbound", "sop", "responses", "count"));
-			inbound_cbp_responses = metricRegistry.counter(name("connector_fps", "inbound", "cbp", "responses", "count"));
-			inbound_fdp_responses = metricRegistry.counter(name("connector_fps", "inbound", "fdp", "responses", "count"));
-			inbound_srn_responses = metricRegistry.counter(name("connector_fps", "inbound", "srn", "responses", "count"));
-			inbound_rtn_responses = metricRegistry.counter(name("connector_fps", "inbound", "rtn", "responses", "count"));
-			inbound_sip_responses = metricRegistry.counter(name("connector_fps", "inbound", "sip", "responses", "count"));
+			String direction = FPSDirection.OUTPUT.getDirection();
+			inbound_sop_responses = metricRegistry.counter(name("connector_fps", "inbound", "SOP", direction));
+			inbound_cbp_responses = metricRegistry.counter(name("connector_fps", "inbound", "CBP", direction));
+			inbound_fdp_responses = metricRegistry.counter(name("connector_fps", "inbound", "FDP", direction));
+			inbound_srn_responses = metricRegistry.counter(name("connector_fps", "inbound", "SRN", direction));
+			inbound_rtn_responses = metricRegistry.counter(name("connector_fps", "inbound", "RTN", direction));
+			inbound_sip_responses = metricRegistry.counter(name("connector_fps", "inbound", "SIP", direction));
 
 			//final JmxReporter reporterJMX = JmxReporter.forRegistry(metricRegistry).build();
 			//reporterJMX.start();

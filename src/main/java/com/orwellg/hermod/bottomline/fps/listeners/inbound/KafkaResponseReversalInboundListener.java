@@ -14,6 +14,7 @@ import com.orwellg.umbrella.commons.types.utils.avro.RawMessageUtils;
 import com.orwellg.umbrella.commons.utils.enums.CurrencyCodes;
 import com.orwellg.umbrella.commons.utils.enums.FPSEvents;
 import com.orwellg.umbrella.commons.utils.enums.KafkaHeaders;
+import com.orwellg.umbrella.commons.utils.enums.fps.FPSDirection;
 import org.apache.commons.lang.StringUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.header.Header;
@@ -66,12 +67,13 @@ public class KafkaResponseReversalInboundListener extends KafkaInboundListener i
 
 	public KafkaResponseReversalInboundListener(MetricRegistry metricRegistry){
 		if(metricRegistry!= null) {
-			inbound_sop_reversal_responses = metricRegistry.counter(name("connector_fps", "inbound", "sop", "reversal", "responses", "count"));
-			inbound_sip_reversal_responses = metricRegistry.counter(name("connector_fps", "inbound", "sip", "reversal", "responses", "count"));
-			inbound_cbp_reversal_responses = metricRegistry.counter(name("connector_fps", "inbound", "cbp", "reversal", "responses", "count"));
-			inbound_fdp_reversal_responses = metricRegistry.counter(name("connector_fps", "inbound", "fdp", "reversal", "responses", "count"));
-			inbound_srn_reversal_responses = metricRegistry.counter(name("connector_fps", "inbound", "srn", "reversal", "responses", "count"));
-			inbound_rtn_reversal_responses = metricRegistry.counter(name("connector_fps", "inbound", "rtn", "reversal", "responses", "count"));
+			String direction = FPSDirection.OUTPUT.getDirection();
+			inbound_sop_reversal_responses = metricRegistry.counter(name("connector_fps_inbound_reversal", "inbound", "SOP", direction));
+			inbound_sip_reversal_responses = metricRegistry.counter(name("connector_fps_inbound_reversal", "inbound", "SIP", direction));
+			inbound_cbp_reversal_responses = metricRegistry.counter(name("connector_fps_inbound_reversal", "inbound", "CBP", direction));
+			inbound_fdp_reversal_responses = metricRegistry.counter(name("connector_fps_inbound_reversal", "inbound", "FDP", direction));
+			inbound_srn_reversal_responses = metricRegistry.counter(name("connector_fps_inbound_reversal", "inbound", "SRN", direction));
+			inbound_rtn_reversal_responses = metricRegistry.counter(name("connector_fps_inbound_reversal", "inbound", "RTN", direction));
 
 			//final JmxReporter reporterJMX = JmxReporter.forRegistry(metricRegistry).build();
 			//reporterJMX.start();

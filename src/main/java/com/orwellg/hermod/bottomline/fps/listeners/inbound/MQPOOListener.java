@@ -5,6 +5,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.jmx.JmxReporter;
 import com.orwellg.umbrella.avro.types.event.Event;
 import com.orwellg.umbrella.commons.types.utils.avro.RawMessageUtils;
+import com.orwellg.umbrella.commons.utils.enums.fps.FPSDirection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -25,7 +26,7 @@ public class MQPOOListener extends MQListener {
 
     public MQPOOListener(MetricRegistry metricRegistry){
         if(metricRegistry!= null) {
-            inbound_poo_requests = metricRegistry.counter(name("connector_fps", "inbound", "poo", "requests", "count"));
+            inbound_poo_requests = metricRegistry.counter(name("connector_fps", "inbound", "POO", FPSDirection.INPUT.getDirection()));
           //  final JmxReporter reporterJMX = JmxReporter.forRegistry(metricRegistry).build();
           //  reporterJMX.start();
         }else{
