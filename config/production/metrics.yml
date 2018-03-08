@@ -1,7 +1,38 @@
 ---
 lowercaseOutputName: true 
-whitelistObjectNames: ["metrics:name=fps_connector.inbound.asyn.requests.count,*","metrics:name=fps_connector.inbound.sync.requests.count,*","metrics:name=fps_connector.inbound.asyn.reversal.responses.count,*","metrics:name=fps_connector.inbound.sync.reversal.requests.count,*","metrics:name=fps_connector.inbound.asyn.responses.count,*","metrics:name=fps_connector.inbound.sync.responses.count,*",
-"metrics:name=fps_connector.inbound.usm.requests.count,*","metrics:name=fps_connector.inbound.poo.requests.count,*","metrics:name=fps_connector.inbound.standin.requests.count,*","metrics:name=fps_connector.outbound.asyn.responses.count,*","metrics:name=fps_connector.outbound.sync.responses.count,*","metrics:name=fps_connector.outbound.asyn.requests.count,*","metrics:name=fps_connector.outbound.sync.requests.count,*"]
+whitelistObjectNames: ["metrics:name=connector_fps.inbound.sop.requests.count,*",
+"metrics:name=connector_fps.inbound.cbp.requests.count,*",
+"metrics:name=connector_fps.inbound.fdp.requests.count,*",
+"metrics:name=connector_fps.inbound.srn.requests.count,*",
+"metrics:name=connector_fps.inbound.rtn.requests.count,*",
+"metrics:name=connector_fps.inbound.sip.requests.count,*",
+"metrics:name=connector_fps.inbound.sop.reversal.responses.count,*",
+"metrics:name=connector_fps.inbound.cbp.reversal.responses.count,*",
+"metrics:name=connector_fps.inbound.fdp.reversal.responses.count,*",
+"metrics:name=connector_fps.inbound.srn.reversal.responses.count,*",
+"metrics:name=connector_fps.inbound.rtn.reversal.responses.count,*",
+"metrics:name=connector_fps.inbound.sip.reversal.requests.count,*",
+"metrics:name=connector_fps.inbound.sop.responses.count,*",
+"metrics:name=connector_fps.inbound.cbp.responses.count,*",
+"metrics:name=connector_fps.inbound.fdp.responses.count,*",
+"metrics:name=connector_fps.inbound.srn.responses.count,*",
+"metrics:name=connector_fps.inbound.rtn.responses.count,*",
+"metrics:name=connector_fps.inbound.sip.responses.count,*",
+"metrics:name=connector_fps.inbound.usm.requests.count,*",
+"metrics:name=connector_fps.inbound.poo.requests.count,*",
+"metrics:name=connector_fps.inbound.standin.requests.count,*",
+"metrics:name=connector_fps.outbound.sop.responses.count,*",
+"metrics:name=connector_fps.outbound.cbp.responses.count,*",
+"metrics:name=connector_fps.outbound.fdp.responses.count,*",
+"metrics:name=connector_fps.outbound.rtn.responses.count,*",
+"metrics:name=connector_fps.outbound.srn.responses.count,*",
+"metrics:name=connector_fps.outbound.sip.responses.count,*",
+"metrics:name=connector_fps.outbound.sop.requests.count,*",
+"metrics:name=connector_fps.outbound.cdp.requests.count,*",
+"metrics:name=connector_fps.outbound.fdp.requests.count,*",
+"metrics:name=connector_fps.outbound.rtn.requests.count,*",
+"metrics:name=connector_fps.outbound.srn.requests.count,*",
+"metrics:name=connector_fps.outbound.sip.requests.count,*"]
 rules:
    - pattern: metrics<name=(.+)><>(Count)
      name: $1

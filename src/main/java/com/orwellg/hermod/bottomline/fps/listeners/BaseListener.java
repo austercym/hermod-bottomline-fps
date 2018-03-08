@@ -13,6 +13,16 @@ public class BaseListener {
 
 	private static Logger LOG = LogManager.getLogger(BaseListener.class);
 
+	public static final String SIP = "SIP";
+	public static final String SOP = "SOP";
+	public static final String FDP = "FDP";
+	public static final String CBP = "CBP";
+	public static final String SRN = "SRN";
+	public static final String RTN = "RTN";
+	public static final String STANDIN = "STANDIN";
+	public static final String POO = "POO";
+	public static final String USM = "USM";
+
 	@Autowired
 	protected Map<String, FPSTransform> transforms;
 	@Value("${wq.mq.num.max.attempts}")

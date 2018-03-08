@@ -2,8 +2,6 @@ package com.orwellg.hermod.bottomline.fps.listeners.inbound;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.Timer;
-import com.codahale.metrics.jmx.JmxReporter;
 import com.google.gson.Gson;
 import com.orwellg.hermod.bottomline.fps.services.kafka.KafkaSender;
 import com.orwellg.hermod.bottomline.fps.services.transform.FPSTransform;
@@ -33,7 +31,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
 import java.util.Date;
 
 import static com.codahale.metrics.MetricRegistry.name;
@@ -43,8 +40,12 @@ import static com.orwellg.hermod.bottomline.fps.utils.Constants.RESP_SUFFIX;
 public class KafkaResponseReversalInboundListener extends KafkaInboundListener implements MessageListener<String, String>, KafkaDataListener<ConsumerRecord<String, String>> {
 
 	private static Logger LOG = LogManager.getLogger(KafkaResponseReversalInboundListener.class);
-	private Counter inbound_asyn_reversal_responses;
-	private Counter inbound_sync_reversal_responses;
+	private Counter inbound_sop_reversal_responses;
+	private Counter inbound_sip_reversal_responses;
+	private Counter inbound_fdp_reversal_responses;
+	private Counter inbound_cbp_reversal_responses;
+	private Counter inbound_srn_reversal_responses;
+	private Counter inbound_rtn_reversal_responses;
 
 	@Value("${wq.mq.queue.sip.inbound.resp}")
 	private String outboundQueue;
@@ -65,9 +66,12 @@ public class KafkaResponseReversalInboundListener extends KafkaInboundListener i
 
 	public KafkaResponseReversalInboundListener(MetricRegistry metricRegistry){
 		if(metricRegistry!= null) {
-			inbound_asyn_reversal_responses = metricRegistry.counter(name("fps_connector", "inbound", "asyn", "reversal", "responses", "count"));
-
-			inbound_sync_reversal_responses = metricRegistry.counter(name("fps_connector", "inbound", "sync", "reversal", "responses", "count"));
+			inbound_sop_reversal_responses = metricRegistry.counter(name("connector_fps", "inbound", "sop", "reversal", "responses", "count"));
+			inbound_sip_reversal_responses = metricRegistry.counter(name("connector_fps", "inbound", "sip", "reversal", "responses", "count"));
+			inbound_cbp_reversal_responses = metricRegistry.counter(name("connector_fps", "inbound", "cbp", "reversal", "responses", "count"));
+			inbound_fdp_reversal_responses = metricRegistry.counter(name("connector_fps", "inbound", "fdp", "reversal", "responses", "count"));
+			inbound_srn_reversal_responses = metricRegistry.counter(name("connector_fps", "inbound", "srn", "reversal", "responses", "count"));
+			inbound_rtn_reversal_responses = metricRegistry.counter(name("connector_fps", "inbound", "rtn", "reversal", "responses", "count"));
 
 			//final JmxReporter reporterJMX = JmxReporter.forRegistry(metricRegistry).build();
 			//reporterJMX.start();
@@ -123,7 +127,7 @@ public class KafkaResponseReversalInboundListener extends KafkaInboundListener i
 
 			// Generate Reversal Response
 			FPSAvroMessage fpsPacs002Response = null;
-			String paymentType = "SIP";
+			String paymentType = SIP;
 			String queueToSend = outboundAsynQueue;
 			String environmentMQ = environmentPrimaryMQ;
 
@@ -152,12 +156,11 @@ public class KafkaResponseReversalInboundListener extends KafkaInboundListener i
 					if (header != null) {
 						paymentType = new String(header.value(), "UTF-8");
 					}
-					if (paymentType.equalsIgnoreCase("SIP")) {
+					if (paymentType.equalsIgnoreCase(SIP)) {
 						queueToSend = outboundQueue;
-						inbound_sync_reversal_responses.inc();
-					} else {
-						inbound_asyn_reversal_responses.inc();
 					}
+
+					calculateMetrics(paymentType);
 
 					Header headerSite = headers.lastHeader(KafkaHeaders.FPS_SITE.getKafkaHeader());
 					if(headerSite != null){
@@ -228,5 +231,21 @@ public class KafkaResponseReversalInboundListener extends KafkaInboundListener i
 
 	private String getResponsePaymentId(FPSOutboundReversalResponse fpsPaymentResponse) {
 		return fpsPaymentResponse.getPaymentId()+ RESP_SUFFIX;
+	}
+
+	private void calculateMetrics(String paymentType) {
+		if (paymentType.equalsIgnoreCase(SIP)) {
+			inbound_sip_reversal_responses.inc();
+		}else if (paymentType.equalsIgnoreCase(SOP)) {
+			inbound_sop_reversal_responses.inc();
+		}else if (paymentType.equalsIgnoreCase(FDP)) {
+			inbound_fdp_reversal_responses.inc();
+		}else if (paymentType.equalsIgnoreCase(CBP)) {
+			inbound_cbp_reversal_responses.inc();
+		}else if (paymentType.equalsIgnoreCase(SRN)) {
+			inbound_srn_reversal_responses.inc();
+		}else if (paymentType.equalsIgnoreCase(RTN)) {
+			inbound_rtn_reversal_responses.inc();
+		}
 	}
 }

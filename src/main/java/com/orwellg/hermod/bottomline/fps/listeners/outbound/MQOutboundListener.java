@@ -56,6 +56,14 @@ public abstract class MQOutboundListener extends BaseListener implements Message
     @Autowired
     private Gson gson;
 
+    protected Counter outbound_sop_responses;
+    protected Counter outbound_fdp_responses;
+    protected Counter outbound_cbp_responses;
+    protected Counter outbound_srn_responses;
+    protected Counter outbound_rtn_responses;
+    protected Counter outbound_sip_responses;
+
+
     @Autowired
     private Jaxb2Marshaller marshaller;
 
@@ -263,6 +271,8 @@ public abstract class MQOutboundListener extends BaseListener implements Message
             LOG.info("[FPS] Payment Type {}", prtry);
             if(prtry.indexOf('/')> 0) {
                 paymentType = prtry.substring(0, prtry.indexOf('/'));
+            }else{
+                paymentType = prtry;
             }
         }
         return paymentType;
@@ -311,5 +321,21 @@ public abstract class MQOutboundListener extends BaseListener implements Message
     }
 
     protected abstract void sendToKafka(String topic, String uuid, Event event, String paymentType, String environmentMQ);
+
+    protected void calculateMetrics(String paymentType) {
+        if (paymentType.equalsIgnoreCase(SIP)) {
+            outbound_sip_responses.inc();
+        }else if (paymentType.equalsIgnoreCase(SOP)) {
+            outbound_sop_responses.inc();
+        }else if (paymentType.equalsIgnoreCase(FDP)) {
+            outbound_fdp_responses.inc();
+        }else if (paymentType.equalsIgnoreCase(CBP)) {
+            outbound_cbp_responses.inc();
+        }else if (paymentType.equalsIgnoreCase(SRN)) {
+            outbound_srn_responses.inc();
+        }else if (paymentType.equalsIgnoreCase(RTN)) {
+            outbound_rtn_responses.inc();
+        }
+    }
 
 }

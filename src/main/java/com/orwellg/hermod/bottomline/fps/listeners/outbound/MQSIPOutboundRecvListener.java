@@ -20,29 +20,26 @@ import static com.codahale.metrics.MetricRegistry.name;
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class MQSIPOutboundRecvListener extends MQOutboundListener {
 
-    public static final String PAYMENT_TYPE = "SIP";
     private static Logger LOG = LogManager.getLogger(MQSIPOutboundRecvListener.class);
-
-    private Counter outbound_sync_responses;
 
     public MQSIPOutboundRecvListener(MetricRegistry metricRegistry){
         if(metricRegistry!= null) {
-            outbound_sync_responses = metricRegistry.counter(name("fps_connector", "outbound", "sync", "responses", "count"));
+            outbound_sip_responses = metricRegistry.counter(name("connector_fps", "outbound", "sip", "responses", "count"));
          //   final JmxReporter reporterJMX = JmxReporter.forRegistry(metricRegistry).build();
           //  reporterJMX.start();
         }else{
-            LOG.error("No existe metrics registry");
+            LOG.error("No exists metrics registry");
         }
     }
 
     @Override
     public void onMessage(Message message) {
-        outbound_sync_responses.inc();
-        super.onMessage(message, PAYMENT_TYPE);
+        super.onMessage(message, SIP);
     }
 
     @Override
     protected void sendToKafka(String topic, String uuid, Event event, String paymentType, String environmentMQ){
+        outbound_sip_responses.inc();
         kafkaSender.send(
                 topic,
                 RawMessageUtils.encodeToString(Event.SCHEMA$, event),

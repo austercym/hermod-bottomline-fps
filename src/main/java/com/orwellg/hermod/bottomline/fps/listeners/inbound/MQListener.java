@@ -48,6 +48,15 @@ public abstract class MQListener extends BaseListener implements MessageListener
 
     private static Logger LOG = LogManager.getLogger(MQListener.class);
 
+    protected Counter inbound_sop_requests;
+    protected Counter inbound_fdp_requests;
+    protected Counter inbound_cbp_requests;
+    protected Counter inbound_srn_requests;
+    protected Counter inbound_rtn_requests;
+    protected Counter inbound_sip_requests;
+    protected Counter inbound_poo_requests;
+    protected Counter inbound_standin_requests;
+
     @Autowired
     private Gson gson;
 
@@ -246,7 +255,7 @@ public abstract class MQListener extends BaseListener implements MessageListener
                         String paymentTypeToSend = previousPaymentProcessed.getPaymentType();
                         String queueToSend = outboundAsynQueue;
 
-                        if (paymentTypeToSend.equalsIgnoreCase("SIP")) {
+                        if (paymentTypeToSend.equalsIgnoreCase(SIP)) {
                             queueToSend = outboundQueue;
                         }
 
@@ -263,7 +272,7 @@ public abstract class MQListener extends BaseListener implements MessageListener
                                 fpsRequest.setPaymentId(uuid);
                                 fpsRequest.setPaymentType(paymentTypeCode);
                                 String eventName = FPSEvents.FPS_PAYMENT_RECEIVED.getEventName();
-                                if(paymentTypeCode.equalsIgnoreCase("RTN")){
+                                if(paymentTypeCode.equalsIgnoreCase(RTN)){
                                     eventName = FPSEvents.FPS_RETURN_RECEIVED.getEventName();
                                 }
                                 event = EventGenerator.generateEvent(this.getClass().getName(),
@@ -459,5 +468,21 @@ public abstract class MQListener extends BaseListener implements MessageListener
     }
 
     protected abstract void sendToKafka(String topic, String uuid, Event event, String paymentType, String environmentMQ);
+
+    protected void calculateMetrics(String paymentType) {
+        if (paymentType.equalsIgnoreCase(SIP)) {
+            inbound_sip_requests.inc();
+        }else if (paymentType.equalsIgnoreCase(SOP)) {
+            inbound_sop_requests.inc();
+        }else if (paymentType.equalsIgnoreCase(FDP)) {
+            inbound_fdp_requests.inc();
+        }else if (paymentType.equalsIgnoreCase(CBP)) {
+            inbound_cbp_requests.inc();
+        }else if (paymentType.equalsIgnoreCase(SRN)) {
+            inbound_srn_requests.inc();
+        }else if (paymentType.equalsIgnoreCase(RTN)) {
+            inbound_rtn_requests.inc();
+        }
+    }
 
 }

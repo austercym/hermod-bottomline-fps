@@ -53,7 +53,6 @@ public class MQUSMListener extends BaseListener implements MessageListener {
 
     private static Logger LOG = LogManager.getLogger(MQUSMListener.class);
 
-    public static String PAYMENT_TYPE = "USM";
     private  Counter inbound_usm_requests;
 
     @Autowired
@@ -78,7 +77,7 @@ public class MQUSMListener extends BaseListener implements MessageListener {
 
     public MQUSMListener(MetricRegistry metricRegistry){
         if(metricRegistry!= null) {
-            inbound_usm_requests = metricRegistry.counter(name("fps_connector", "inbound", "usm", "requests", "count"));
+            inbound_usm_requests = metricRegistry.counter(name("connector_fps", "inbound", "usm", "requests", "count"));
           //  final JmxReporter reporterJMX = JmxReporter.forRegistry(metricRegistry).build();
           //  reporterJMX.start();
         }else{
@@ -136,7 +135,7 @@ public class MQUSMListener extends BaseListener implements MessageListener {
                 message = writer.toString();
 
                 if(emergencyLog){
-                    LOG.warn("[FPS][PaymentType: {}] Payload received {}", PAYMENT_TYPE, message);
+                    LOG.warn("[FPS][PaymentType: {}] Payload received {}", USM, message);
                 }
 
                 String uuid = StringUtils.isNotEmpty(id)?id:IDGeneratorBean.getInstance().generatorID().getFasterPaymentUniqueId();
@@ -225,7 +224,7 @@ public class MQUSMListener extends BaseListener implements MessageListener {
                 topic,
                 RawMessageUtils.encodeToString(Event.SCHEMA$, event),
                 uuid,
-                null, environmentMQ, PAYMENT_TYPE, false
+                null, environmentMQ, USM, false
         );
     }
 

@@ -20,13 +20,11 @@ import static com.codahale.metrics.MetricRegistry.name;
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class MQSIPListener extends MQListener {
 
-    public static final String PAYMENT_TYPE = "SIP";
     private static Logger LOG = LogManager.getLogger(MQSIPListener.class);
-    private Counter inbound_sync_requests;
 
     public MQSIPListener(MetricRegistry metricRegistry){
         if(metricRegistry!= null) {
-            inbound_sync_requests = metricRegistry.counter(name("fps_connector", "inbound", "sync", "requests", "count"));
+            inbound_sip_requests = metricRegistry.counter(name("connector_fps", "inbound", "sip", "requests", "count"));
            // final JmxReporter reporterJMX = JmxReporter.forRegistry(metricRegistry).build();
             //reporterJMX.start();
         }else{
@@ -36,12 +34,12 @@ public class MQSIPListener extends MQListener {
 
     @Override
     public void onMessage(Message message) {
-        inbound_sync_requests.inc();
-        super.onMessage(message, PAYMENT_TYPE);
+        super.onMessage(message, SIP);
     }
 
     @Override
     protected void sendToKafka(String topic, String uuid, Event event, String paymentType, String environmentMQ){
+        inbound_sip_requests.inc();
         kafkaSender.send(
                 topic,
                 RawMessageUtils.encodeToString(Event.SCHEMA$, event),

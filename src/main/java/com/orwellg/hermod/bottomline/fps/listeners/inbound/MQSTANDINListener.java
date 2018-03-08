@@ -20,13 +20,11 @@ import static com.codahale.metrics.MetricRegistry.name;
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class MQSTANDINListener extends MQListener {
 
-    public static String PAYMENT_TYPE = "STANDIN";
     public static Logger LOG = LogManager.getLogger(MQSTANDINListener.class);
-    private Counter inbound_standin_requests;
 
     public MQSTANDINListener(MetricRegistry metricRegistry){
         if(metricRegistry!= null) {
-            inbound_standin_requests = metricRegistry.counter(name("fps_connector", "inbound", "standin", "requests", "count"));
+            inbound_standin_requests = metricRegistry.counter(name("connector_fps", "inbound", "standin", "requests", "count"));
           //  final JmxReporter reporterJMX = JmxReporter.forRegistry(metricRegistry).build();
            // reporterJMX.start();
         }else{
@@ -36,12 +34,12 @@ public class MQSTANDINListener extends MQListener {
 
     @Override
     public void onMessage(Message message) {
-        inbound_standin_requests.inc();
-        super.onMessage(message, PAYMENT_TYPE);
+        super.onMessage(message, STANDIN);
     }
 
     @Override
     protected void sendToKafka(String topic, String uuid, Event event, String paymentType, String environmentMQ){
+        inbound_standin_requests.inc();
         kafkaSender.send(
                 topic,
                 RawMessageUtils.encodeToString(Event.SCHEMA$, event),

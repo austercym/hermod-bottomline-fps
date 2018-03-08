@@ -3,8 +3,6 @@ package com.orwellg.hermod.bottomline.fps.listeners.outbound;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.Timer;
-import com.codahale.metrics.jmx.JmxReporter;
 import com.google.gson.Gson;
 import com.orwellg.hermod.bottomline.fps.services.kafka.KafkaSender;
 import com.orwellg.hermod.bottomline.fps.services.transform.FPSTransform;
@@ -89,13 +87,21 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
     @Autowired
     private TaskExecutor taskOutboundRequestExecutor;
 
-    private Counter outbound_sync_requests;
-    private Counter outbound_asyn_requests;
+    private Counter outbound_sip_requests;
+    private Counter outbound_sop_requests;
+    private Counter outbound_fdp_requests;
+    private Counter outbound_cbp_requests;
+    private Counter outbound_srn_requests;
+    private Counter outbound_rtn_requests;
 
     public KafkaRequestOutboundListener(MetricRegistry metricRegistry){
         if(metricRegistry!= null) {
-            outbound_asyn_requests = metricRegistry.counter(name("fps_connector", "outbound", "asyn", "requests", "count"));
-            outbound_sync_requests = metricRegistry.counter(name("fps_connector", "outbound", "sync", "requests", "count"));
+            outbound_sop_requests = metricRegistry.counter(name("connector_fps", "outbound", "sop", "requests", "count"));
+            outbound_fdp_requests = metricRegistry.counter(name("connector_fps", "outbound", "fdp", "requests", "count"));
+            outbound_cbp_requests = metricRegistry.counter(name("connector_fps", "outbound", "cbp", "requests", "count"));
+            outbound_srn_requests = metricRegistry.counter(name("connector_fps", "outbound", "srn", "requests", "count"));
+            outbound_rtn_requests = metricRegistry.counter(name("connector_fps", "outbound", "stn", "requests", "count"));
+            outbound_sip_requests = metricRegistry.counter(name("connector_fps", "outbound", "sip", "requests", "count"));
 
          //   final JmxReporter reporterJMX = JmxReporter.forRegistry(metricRegistry).build();
          //   reporterJMX.start();
@@ -148,11 +154,7 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
         Document fpsDocument = fpsOutboundPayment.getPaymentDocument();
         String paymentType = fpsOutboundPayment.getPaymentType();
         String paymentId = fpsOutboundPayment.getPaymentId();
-        if(paymentType.equalsIgnoreCase("SIP")) {
-            outbound_sync_requests.inc();
-        }else{
-            outbound_asyn_requests.inc();
-        }
+        calculateMetrics(paymentType);
 
         try {
             // Call the correspondent transform
@@ -201,7 +203,6 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
 
                     if(paymentType.equalsIgnoreCase("SIP")){
                         queueToSend = outboundQueue;
-
                     }
 
                     boolean paymentSent = sendToMQ(key, rawMessage.toString(), queueToSend, paymentType, environmentMQ);
@@ -318,4 +319,21 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
                 uuid
         );
     }
+
+    private void calculateMetrics(String paymentType) {
+        if (paymentType.equalsIgnoreCase(SIP)) {
+            outbound_sip_requests.inc();
+        }else if (paymentType.equalsIgnoreCase(SOP)) {
+            outbound_sop_requests.inc();
+        }else if (paymentType.equalsIgnoreCase(FDP)) {
+            outbound_fdp_requests.inc();
+        }else if (paymentType.equalsIgnoreCase(CBP)) {
+            outbound_cbp_requests.inc();
+        }else if (paymentType.equalsIgnoreCase(SRN)) {
+            outbound_srn_requests.inc();
+        }else if (paymentType.equalsIgnoreCase(RTN)) {
+            outbound_rtn_requests.inc();
+        }
+    }
+
 }

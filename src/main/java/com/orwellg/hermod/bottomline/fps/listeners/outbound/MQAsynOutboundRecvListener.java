@@ -22,26 +22,30 @@ public class MQAsynOutboundRecvListener extends MQOutboundListener {
 
     public static final String PAYMENT_TYPE = "ASYN";
     private static Logger LOG = LogManager.getLogger(MQAsynOutboundRecvListener.class);
-    private Counter outbound_asyn_responses;
 
     public MQAsynOutboundRecvListener(MetricRegistry metricRegistry){
         if(metricRegistry!= null) {
-            outbound_asyn_responses = metricRegistry.counter(name("fps_connector", "outbound", "asyn", "responses", "count"));
+            outbound_sop_responses = metricRegistry.counter(name("connector_fps", "outbound", "sop", "responses", "count"));
+            outbound_cbp_responses = metricRegistry.counter(name("connector_fps", "outbound", "cbp", "responses", "count"));
+            outbound_fdp_responses = metricRegistry.counter(name("connector_fps", "outbound", "fdp", "responses", "count"));
+            outbound_rtn_responses = metricRegistry.counter(name("connector_fps", "outbound", "rtn", "responses", "count"));
+            outbound_srn_responses = metricRegistry.counter(name("connector_fps", "outbound", "srn", "responses", "count"));
           //  final JmxReporter reporterJMX = JmxReporter.forRegistry(metricRegistry).build();
           //  reporterJMX.start();
         }else{
-            LOG.error("No existe metrics registry");
+            LOG.error("No exists metrics registry");
         }
     }
 
     @Override
     public void onMessage(Message message) {
-        outbound_asyn_responses.inc();
         super.onMessage(message, PAYMENT_TYPE);
     }
 
     @Override
     protected void sendToKafka(String topic, String uuid, Event event, String paymentType, String environmentMQ){
+        LOG.debug("[FPS][Payment type {}] Asyn", paymentType);
+        calculateMetrics(paymentType);
         kafkaSender.send(
                 topic,
                 RawMessageUtils.encodeToString(Event.SCHEMA$, event),

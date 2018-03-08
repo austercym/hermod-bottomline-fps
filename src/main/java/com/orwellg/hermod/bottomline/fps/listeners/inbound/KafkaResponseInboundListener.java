@@ -3,8 +3,6 @@ package com.orwellg.hermod.bottomline.fps.listeners.inbound;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.Timer;
-import com.codahale.metrics.jmx.JmxReporter;
 import com.google.gson.Gson;
 import com.orwellg.hermod.bottomline.fps.services.kafka.KafkaSender;
 import com.orwellg.hermod.bottomline.fps.services.transform.FPSTransform;
@@ -33,7 +31,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
 import java.util.Date;
 
 import static com.codahale.metrics.MetricRegistry.name;
@@ -43,8 +40,12 @@ import static com.orwellg.hermod.bottomline.fps.utils.Constants.RESP_SUFFIX;
 public class KafkaResponseInboundListener extends KafkaInboundListener implements MessageListener<String, String>, KafkaDataListener<ConsumerRecord<String, String>> {
 
 	private static Logger LOG = LogManager.getLogger(KafkaResponseInboundListener.class);
-	private Counter inbound_asyn_responses;
-	private Counter inbound_sync_responses;
+	private Counter inbound_sop_responses;
+	private Counter inbound_fdp_responses;
+	private Counter inbound_cbp_responses;
+	private Counter inbound_srn_responses;
+	private Counter inbound_rtn_responses;
+	private Counter inbound_sip_responses;
 
 	@Value("${wq.mq.queue.sip.inbound.resp}")
 	private String outboundQueue;
@@ -67,8 +68,12 @@ public class KafkaResponseInboundListener extends KafkaInboundListener implement
 
 	public KafkaResponseInboundListener(MetricRegistry metricRegistry){
 		if(metricRegistry!= null) {
-			inbound_asyn_responses = metricRegistry.counter(name("fps_connector", "inbound", "asyn", "responses", "count"));
-			inbound_sync_responses = metricRegistry.counter(name("fps_connector", "inbound", "sync", "responses", "count"));
+			inbound_sop_responses = metricRegistry.counter(name("connector_fps", "inbound", "sop", "responses", "count"));
+			inbound_cbp_responses = metricRegistry.counter(name("connector_fps", "inbound", "cbp", "responses", "count"));
+			inbound_fdp_responses = metricRegistry.counter(name("connector_fps", "inbound", "fdp", "responses", "count"));
+			inbound_srn_responses = metricRegistry.counter(name("connector_fps", "inbound", "srn", "responses", "count"));
+			inbound_rtn_responses = metricRegistry.counter(name("connector_fps", "inbound", "rtn", "responses", "count"));
+			inbound_sip_responses = metricRegistry.counter(name("connector_fps", "inbound", "sip", "responses", "count"));
 
 			//final JmxReporter reporterJMX = JmxReporter.forRegistry(metricRegistry).build();
 			//reporterJMX.start();
@@ -123,7 +128,7 @@ public class KafkaResponseInboundListener extends KafkaInboundListener implement
 
             // Generate Response Reject
             FPSAvroMessage fpsPacs002Response = null;
-			String paymentType = "SIP";
+			String paymentType = SIP;
 			String queueToSend = outboundAsynQueue;
 			String environmentMQ = environmentPrimaryMQ;
 
@@ -152,14 +157,13 @@ public class KafkaResponseInboundListener extends KafkaInboundListener implement
                     if (header != null) {
                         paymentType = new String(header.value(), "UTF-8");
                     }
-                    if (paymentType.equalsIgnoreCase("SIP")) {
-                        queueToSend = outboundQueue;
-						inbound_sync_responses.inc();
-					}else{
-						inbound_asyn_responses.inc();
+					if (paymentType.equalsIgnoreCase(SIP)) {
+						queueToSend = outboundQueue;
 					}
 
-                    Header headerSite = headers.lastHeader(KafkaHeaders.FPS_SITE.getKafkaHeader());
+					calculateMetrics(paymentType);
+
+					Header headerSite = headers.lastHeader(KafkaHeaders.FPS_SITE.getKafkaHeader());
                     if(headerSite != null){
                         environmentMQ = new String(headerSite.value(), "UTF-8");
                         LOG.debug("[FPS][PaymentType: {}][PmtId: {}] Get header FPS_SITE: {}",
@@ -195,6 +199,22 @@ public class KafkaResponseInboundListener extends KafkaInboundListener implement
         }
 		LOG.debug("[FPS][PmtId: {}] Time to process inbound payment response: {} ms",
                 key, new Date().getTime()-startTime);
+	}
+
+	private void calculateMetrics(String paymentType) {
+		if (paymentType.equalsIgnoreCase(SIP)) {
+            inbound_sip_responses.inc();
+        }else if (paymentType.equalsIgnoreCase(SOP)) {
+            inbound_sop_responses.inc();
+        }else if (paymentType.equalsIgnoreCase(FDP)) {
+            inbound_fdp_responses.inc();
+        }else if (paymentType.equalsIgnoreCase(CBP)) {
+            inbound_cbp_responses.inc();
+        }else if (paymentType.equalsIgnoreCase(SRN)) {
+            inbound_srn_responses.inc();
+        }else if (paymentType.equalsIgnoreCase(RTN)) {
+            inbound_rtn_responses.inc();
+        }
 	}
 
 	private FPSAvroMessage generateFPSPacs002Response(FPSOutboundPaymentResponse fpsPaymentResponse) {
