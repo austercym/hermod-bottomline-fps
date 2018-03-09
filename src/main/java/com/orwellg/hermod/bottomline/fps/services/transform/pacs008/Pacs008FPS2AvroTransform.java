@@ -66,14 +66,14 @@ public class Pacs008FPS2AvroTransform {
                         BigDecimal value = instdAmt.getValue();
 
                         if(value != null) {
-                            instdAmt1.setValue(DecimalTypeUtils.toDecimal(value));
+                            instdAmt1.setValue(DecimalTypeUtils.toDecimal(value, 2));
                         }
                         creditTransferTransaction19.setInstdAmt(instdAmt1);
                     }
 
                     BigDecimal xchgRate = cdtTrfTxInf.getXchgRate();
                     if(xchgRate != null) {
-                        creditTransferTransaction19.setXchgRate(DecimalTypeUtils.toDecimal(xchgRate));
+                        creditTransferTransaction19.setXchgRate(DecimalTypeUtils.toDecimal(xchgRate, 2));
                     }
 
                     ChargeBearerType1Code chrgBr = cdtTrfTxInf.getChrgBr();
@@ -436,7 +436,7 @@ public class Pacs008FPS2AvroTransform {
                 }
                 BigDecimal value = amt.getValue();
                 if(value != null) {
-                    amt2.setValue(DecimalTypeUtils.toDecimal(value));
+                    amt2.setValue(DecimalTypeUtils.toDecimal(value, 2));
                 }
                 charge.setAmt(amt2);
             }
@@ -675,8 +675,9 @@ public class Pacs008FPS2AvroTransform {
                     intrBkSttlmAmt.setCcy(ccy);
                 }
 
-                if(intrBkSttlmAmt1.getValue() != null){
-                    Decimal value = DecimalTypeUtils.toDecimal(intrBkSttlmAmt1.getValue());
+                BigDecimal intrBkSttlmAmt1Value = intrBkSttlmAmt1.getValue();
+                if(intrBkSttlmAmt1Value != null){
+                    Decimal value = DecimalTypeUtils.toDecimal(intrBkSttlmAmt1Value, 2);
                     intrBkSttlmAmt.setValue(value);
                 }
             }

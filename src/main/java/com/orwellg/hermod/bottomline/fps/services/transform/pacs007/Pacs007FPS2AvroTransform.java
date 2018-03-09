@@ -134,7 +134,7 @@ public class Pacs007FPS2AvroTransform {
                             BigDecimal value = rvsdIntrBkSttlmAmt.getValue();
 
                             if(value != null){
-                                Decimal decimal = DecimalTypeUtils.toDecimal(value);
+                                Decimal decimal = DecimalTypeUtils.toDecimal(value, 2);
                                 activeCurrencyAndAmount.setValue(decimal);
                             }
                             txInfAndSts1.setRvsdIntrBkSttlmAmt(activeCurrencyAndAmount);
@@ -229,8 +229,9 @@ public class Pacs007FPS2AvroTransform {
                                 if(StringUtils.isNotEmpty(ccy)){
                                     intrBkSttlmAmt1.setCcy(ccy);
                                 }
-                                if(intrBkSttlmAmt.getValue() != null){
-                                    Decimal decimal = DecimalTypeUtils.toDecimal(intrBkSttlmAmt.getValue());
+                                BigDecimal intrBkSttlmAmtValue = intrBkSttlmAmt.getValue();
+                                if(intrBkSttlmAmtValue != null){
+                                    Decimal decimal = DecimalTypeUtils.toDecimal(intrBkSttlmAmtValue, 2);
                                     intrBkSttlmAmt1.setValue(decimal);
                                 }
                                 orgnlTxRef1.setIntrBkSttlmAmt(intrBkSttlmAmt1);

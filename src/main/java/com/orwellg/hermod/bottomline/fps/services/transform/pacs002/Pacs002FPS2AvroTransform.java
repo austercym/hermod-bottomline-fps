@@ -6,6 +6,7 @@ import iso.std.iso._20022.tech.xsd.pacs_002_001.*;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.xml.datatype.XMLGregorianCalendar;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -204,8 +205,9 @@ public class Pacs002FPS2AvroTransform {
                                 if(StringUtils.isNotEmpty(ccy)){
                                     intrBkSttlmAmt1.setCcy(ccy);
                                 }
-                                if(intrBkSttlmAmt.getValue() != null){
-                                    Decimal decimal = DecimalTypeUtils.toDecimal(intrBkSttlmAmt.getValue());
+                                BigDecimal intrBkSttlmAmtValue = intrBkSttlmAmt.getValue();
+                                if(intrBkSttlmAmtValue != null){
+                                    Decimal decimal = DecimalTypeUtils.toDecimal(intrBkSttlmAmtValue, 2);
                                     intrBkSttlmAmt1.setValue(decimal);
                                 }
                                 orgnlTxRef1.setIntrBkSttlmAmt(intrBkSttlmAmt1);
