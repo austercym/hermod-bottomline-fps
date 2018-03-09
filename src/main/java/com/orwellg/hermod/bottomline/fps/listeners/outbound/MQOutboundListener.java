@@ -1,5 +1,9 @@
 package com.orwellg.hermod.bottomline.fps.listeners.outbound;
 
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
+import com.codahale.metrics.jmx.JmxReporter;
 import com.google.gson.Gson;
 import com.orwellg.hermod.bottomline.fps.listeners.BaseListener;
 import com.orwellg.hermod.bottomline.fps.services.kafka.KafkaSender;
@@ -42,6 +46,7 @@ import javax.xml.validation.Validator;
 import java.io.*;
 import java.util.Date;
 
+import static com.codahale.metrics.MetricRegistry.name;
 import static com.orwellg.hermod.bottomline.fps.utils.Constants.RESP_SUFFIX;
 
 public abstract class MQOutboundListener extends BaseListener implements MessageListener {
@@ -50,6 +55,14 @@ public abstract class MQOutboundListener extends BaseListener implements Message
 
     @Autowired
     private Gson gson;
+
+    protected Counter outbound_sop_responses;
+    protected Counter outbound_fdp_responses;
+    protected Counter outbound_cbp_responses;
+    protected Counter outbound_srn_responses;
+    protected Counter outbound_rtn_responses;
+    protected Counter outbound_sip_responses;
+
 
     @Autowired
     private Jaxb2Marshaller marshaller;
@@ -79,7 +92,6 @@ public abstract class MQOutboundListener extends BaseListener implements Message
     private TaskExecutor taskOutboundResponseExecutor;
 
     protected void onMessage(Message message, String paymentType) {
-
         LOG.debug("[FPS][PaymentType: {}] Receiving outbound payment response message from Bottomline", paymentType);
         InputStream stream = null;
         Reader reader = null;
@@ -259,6 +271,8 @@ public abstract class MQOutboundListener extends BaseListener implements Message
             LOG.info("[FPS] Payment Type {}", prtry);
             if(prtry.indexOf('/')> 0) {
                 paymentType = prtry.substring(0, prtry.indexOf('/'));
+            }else{
+                paymentType = prtry;
             }
         }
         return paymentType;
@@ -307,5 +321,21 @@ public abstract class MQOutboundListener extends BaseListener implements Message
     }
 
     protected abstract void sendToKafka(String topic, String uuid, Event event, String paymentType, String environmentMQ);
+
+    protected void calculateMetrics(String paymentType) {
+        if (paymentType.equalsIgnoreCase(SIP)) {
+            outbound_sip_responses.inc();
+        }else if (paymentType.equalsIgnoreCase(SOP)) {
+            outbound_sop_responses.inc();
+        }else if (paymentType.equalsIgnoreCase(FDP)) {
+            outbound_fdp_responses.inc();
+        }else if (paymentType.equalsIgnoreCase(CBP)) {
+            outbound_cbp_responses.inc();
+        }else if (paymentType.equalsIgnoreCase(SRN)) {
+            outbound_srn_responses.inc();
+        }else if (paymentType.equalsIgnoreCase(RTN)) {
+            outbound_rtn_responses.inc();
+        }
+    }
 
 }

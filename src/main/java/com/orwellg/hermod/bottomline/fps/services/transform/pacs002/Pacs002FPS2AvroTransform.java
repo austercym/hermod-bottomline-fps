@@ -205,7 +205,7 @@ public class Pacs002FPS2AvroTransform {
                                     intrBkSttlmAmt1.setCcy(ccy);
                                 }
                                 if(intrBkSttlmAmt.getValue() != null){
-                                    Decimal decimal = DecimalTypeUtils.toDecimal(intrBkSttlmAmt.getValue(), 2);
+                                    Decimal decimal = DecimalTypeUtils.toDecimal(intrBkSttlmAmt.getValue());
                                     intrBkSttlmAmt1.setValue(decimal);
                                 }
                                 orgnlTxRef1.setIntrBkSttlmAmt(intrBkSttlmAmt1);

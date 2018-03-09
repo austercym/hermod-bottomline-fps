@@ -1,6 +1,8 @@
 package com.orwellg.hermod.bottomline.fps.listeners.outbound;
 
 
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.MetricRegistry;
 import com.google.gson.Gson;
 import com.orwellg.hermod.bottomline.fps.services.kafka.KafkaSender;
 import com.orwellg.hermod.bottomline.fps.services.transform.FPSTransform;
@@ -17,6 +19,7 @@ import com.orwellg.umbrella.avro.types.payment.fps.FPSOutboundPayment;
 import com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Document;
 import com.orwellg.umbrella.commons.types.utils.avro.RawMessageUtils;
 import com.orwellg.umbrella.commons.utils.enums.FPSEvents;
+import com.orwellg.umbrella.commons.utils.enums.fps.FPSDirection;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -39,6 +42,8 @@ import java.io.StringWriter;
 import java.util.Date;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
+
+import static com.codahale.metrics.MetricRegistry.name;
 
 
 @Component(value = "kafkaRequestOutboundListener")
@@ -84,6 +89,12 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
 
     @Autowired
     private TaskExecutor taskOutboundRequestExecutor;
+    private Counter outbound_sip_requests;
+    private Counter outbound_sop_requests;
+    private Counter outbound_fdp_requests;
+    private Counter outbound_cbp_requests;
+    private Counter outbound_srn_requests;
+    private Counter outbound_rtn_requests;
 
     private static AtomicLong index;
     static {
@@ -91,13 +102,29 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
             index = new AtomicLong(0);
         }
     }
-    private String getNextEnvironment(){
+    private String getNextEnvironment() {
         long i = index.incrementAndGet();
-        if(i % 2 == 0){
+        if (i % 2 == 0) {
             return environmentMQSite2;
-        }else{
+        } else {
             return environmentMQSite1;
+        }
+    }
 
+    public KafkaRequestOutboundListener(MetricRegistry metricRegistry){
+        if(metricRegistry!= null) {
+            String direction = FPSDirection.OUTPUT.getDirection();
+            outbound_sop_requests = metricRegistry.counter(name("connector_fps", "outbound", "SOP", direction));
+            outbound_fdp_requests = metricRegistry.counter(name("connector_fps", "outbound", "FDP", direction));
+            outbound_cbp_requests = metricRegistry.counter(name("connector_fps", "outbound", "CBP", direction));
+            outbound_srn_requests = metricRegistry.counter(name("connector_fps", "outbound", "SRN", direction));
+            outbound_rtn_requests = metricRegistry.counter(name("connector_fps", "outbound", "RTN", direction));
+            outbound_sip_requests = metricRegistry.counter(name("connector_fps", "outbound", "SIP", direction));
+
+         //   final JmxReporter reporterJMX = JmxReporter.forRegistry(metricRegistry).build();
+         //   reporterJMX.start();
+        }else{
+            LOG.error("No exists metrics registry");
         }
     }
 
@@ -145,6 +172,7 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
         Document fpsDocument = fpsOutboundPayment.getPaymentDocument();
         String paymentType = fpsOutboundPayment.getPaymentType();
         String paymentId = fpsOutboundPayment.getPaymentId();
+        calculateMetrics(paymentType);
 
         try {
             // Call the correspondent transform
@@ -311,4 +339,21 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
                 uuid
         );
     }
+
+    private void calculateMetrics(String paymentType) {
+        if (paymentType.equalsIgnoreCase(SIP)) {
+            outbound_sip_requests.inc();
+        }else if (paymentType.equalsIgnoreCase(SOP)) {
+            outbound_sop_requests.inc();
+        }else if (paymentType.equalsIgnoreCase(FDP)) {
+            outbound_fdp_requests.inc();
+        }else if (paymentType.equalsIgnoreCase(CBP)) {
+            outbound_cbp_requests.inc();
+        }else if (paymentType.equalsIgnoreCase(SRN)) {
+            outbound_srn_requests.inc();
+        }else if (paymentType.equalsIgnoreCase(RTN)) {
+            outbound_rtn_requests.inc();
+        }
+    }
+
 }

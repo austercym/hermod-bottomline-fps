@@ -4,7 +4,7 @@ import com.orwellg.hermod.bottomline.fps.spring.core.env.SpringArchaiusPropertyS
 import com.orwellg.yggdrasil.net.client.producer.CommandProducerConfig;
 import com.orwellg.yggdrasil.net.client.producer.GeneratorIdCommandProducer;
 import org.apache.kafka.clients.CommonClientConfigs;
-import org.apache.kafka.common.protocol.SecurityProtocol;
+import org.apache.kafka.common.security.auth.SecurityProtocol;
 import org.apache.kafka.common.utils.Time;
 
 import java.util.Properties;

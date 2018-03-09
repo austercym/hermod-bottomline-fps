@@ -1,5 +1,6 @@
 package com.orwellg.hermod.bottomline.fps;
 
+import com.codahale.metrics.MetricRegistry;
 import com.orwellg.hermod.bottomline.fps.spring.context.SpringProfileSettingApplicationContextInitializer;
 import com.orwellg.hermod.bottomline.fps.spring.core.env.SpringArchaiusPropertySource;
 import com.orwellg.hermod.bottomline.fps.utils.properties.DefaultPropertyValues;
@@ -16,6 +17,11 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @EnableAsync
 public class FpsBootApplication {
 	private static final Logger LOG = LogManager.getLogger(FpsBootApplication.class);
+
+	@Bean
+	public MetricRegistry metricRegistry(){
+		return new MetricRegistry();
+	}
 
 	@Bean
 	public TaskExecutor taskOutboundRequestExecutor() {

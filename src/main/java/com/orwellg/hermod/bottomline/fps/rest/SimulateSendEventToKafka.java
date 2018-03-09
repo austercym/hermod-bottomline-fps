@@ -1,5 +1,7 @@
 package com.orwellg.hermod.bottomline.fps.rest;
 
+import com.codahale.metrics.MetricRegistry;
+import com.orwellg.hermod.bottomline.fps.listeners.BaseListener;
 import com.orwellg.hermod.bottomline.fps.listeners.inbound.MQASYNListener;
 import com.orwellg.hermod.bottomline.fps.listeners.inbound.MQPOOListener;
 import com.orwellg.hermod.bottomline.fps.listeners.inbound.MQSIPListener;
@@ -26,6 +28,10 @@ public class SimulateSendEventToKafka {
     private static Logger LOG = LogManager.getLogger(SimulateSendEventToKafka.class);
 
     @Autowired
+
+    MetricRegistry metricRegistry;
+
+    @Autowired
     MessageTestQueueSender messageTestQueueSender;
 
     @Autowired
@@ -48,7 +54,6 @@ public class SimulateSendEventToKafka {
     MQSIPOutboundRecvListener mqOutboundListener;
 
 
-
     @Value("${inmemory.cache.expiringMinutes}")
     private int expiringMinutes;
 
@@ -58,8 +63,7 @@ public class SimulateSendEventToKafka {
         Writer writer = null;
         try {
             writer = getStringWriter(queueMessage);
-           // MQSIPListener mqSIPListener = new MQSIPListener();
-            mqSIPListener.sendMessageToTopic(writer, MQSIPListener.PAYMENT_TYPE, key);
+            mqSIPListener.sendMessageToTopic(writer, BaseListener.SIP, key);
             return new ResponseEntity<>("Message sent ", HttpStatus.OK);
         }catch(IOException e){
             LOG.error("Error processing message: {}", e.getMessage());
@@ -89,8 +93,7 @@ public class SimulateSendEventToKafka {
         Writer writer = null;
         try {
             writer = getStringWriter(queueMessage);
-            //MQPOOListener mqPOOListener = new MQPOOListener();
-            mqPOOListener.sendMessageToTopic(writer, MQSIPListener.PAYMENT_TYPE, key);
+            mqPOOListener.sendMessageToTopic(writer, BaseListener.POO, key);
             return new ResponseEntity<>("Message sent ", HttpStatus.OK);
         }catch(IOException e){
             LOG.error("Error processing message: {}", e.getMessage());
@@ -113,7 +116,6 @@ public class SimulateSendEventToKafka {
         Writer writer = null;
         try {
             writer = getStringWriter(queueMessage);
-            //MQASYNListener mqASYNCListener = new MQASYNListener();
             mqASYNCListener.sendMessageToTopic(writer, MQASYNListener.PAYMENT_TYPE, key);
             return new ResponseEntity<>("Message sent ", HttpStatus.OK);
         }catch(IOException e){
@@ -143,8 +145,7 @@ public class SimulateSendEventToKafka {
         Writer writer = null;
         try {
             writer = getStringWriter(queueMessage);
-            //MQSIPOutboundRecvListener mqOutboundListener = new MQSIPOutboundRecvListener();
-            mqOutboundListener.sendMessageToTopic(writer, MQSIPOutboundRecvListener.PAYMENT_TYPE, null);
+            mqOutboundListener.sendMessageToTopic(writer, BaseListener.SIP, null);
             return new ResponseEntity<>("Message sent ", HttpStatus.OK);
         }catch(IOException e){
             LOG.error("Error processing message: {}", e.getMessage());
@@ -167,7 +168,6 @@ public class SimulateSendEventToKafka {
         Writer writer = null;
         try{
             writer= getStringWriter(queueMessage);
-            //MQUSMListener mqUSMListener = new MQUSMListener();
             mqUSMListener.sendMessageToTopic(writer, key);
             return new ResponseEntity<>("Message sent ", HttpStatus.OK);
         }catch(IOException e){
@@ -187,7 +187,6 @@ public class SimulateSendEventToKafka {
     @RequestMapping(method= RequestMethod.POST, value="/testMessage")
     public ResponseEntity<String> sendTestMessage(@RequestBody String queueMessage,
                                           @RequestHeader("x-process-id") String key) {
-        //MessageTestQueueSender messageTestQueueSender = new MessageTestQueueSender();
         messageTestQueueSender.sendMessage(queueMessage, key);
         return new ResponseEntity<>("Message sent ", HttpStatus.OK);
     }

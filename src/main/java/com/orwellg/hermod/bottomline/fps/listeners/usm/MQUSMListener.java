@@ -1,6 +1,9 @@
 package com.orwellg.hermod.bottomline.fps.listeners.usm;
 
 import com.bottomline.directfps.fpsusmelements.*;
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.jmx.JmxReporter;
 import com.google.gson.Gson;
 import com.orwellg.hermod.bottomline.fps.listeners.BaseListener;
 import com.orwellg.hermod.bottomline.fps.services.kafka.KafkaSender;
@@ -15,6 +18,7 @@ import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSInboundUSM;
 import com.orwellg.umbrella.commons.types.utils.avro.RawMessageUtils;
 import com.orwellg.umbrella.commons.utils.enums.FPSEvents;
+import com.orwellg.umbrella.commons.utils.enums.fps.FPSDirection;
 import com.orwellg.umbrella.commons.utils.enums.fps.USMMessageTypes;
 import org.apache.activemq.util.ByteArrayInputStream;
 import org.apache.commons.io.IOUtils;
@@ -42,13 +46,15 @@ import javax.xml.validation.Validator;
 import java.io.*;
 import java.util.Date;
 
+import static com.codahale.metrics.MetricRegistry.name;
+
 @Component(value = "mqUSMListener")
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class MQUSMListener extends BaseListener implements MessageListener {
 
     private static Logger LOG = LogManager.getLogger(MQUSMListener.class);
 
-    public static String PAYMENT_TYPE = "USM";
+    private  Counter inbound_usm_requests;
 
     @Autowired
     private Gson gson;
@@ -70,8 +76,20 @@ public class MQUSMListener extends BaseListener implements MessageListener {
     @Value("${connector.%id.mq_primary}")
     private String environmentMQ;
 
+    public MQUSMListener(MetricRegistry metricRegistry){
+        if(metricRegistry!= null) {
+            inbound_usm_requests = metricRegistry.counter(name("connector_fps", "inbound", "USM", FPSDirection.INPUT.getDirection()));
+          //  final JmxReporter reporterJMX = JmxReporter.forRegistry(metricRegistry).build();
+          //  reporterJMX.start();
+        }else{
+            LOG.error("No exists metrics registry");
+        }
+    }
 
+    @Override
     public void onMessage(Message message) {
+
+        inbound_usm_requests.inc();
 
         LOG.info("[FPS] Getting usm message...............");
         InputStream stream = null;
@@ -118,7 +136,7 @@ public class MQUSMListener extends BaseListener implements MessageListener {
                 message = writer.toString();
 
                 if(emergencyLog){
-                    LOG.trace("[FPS][PaymentType: {}] Payload received {}", PAYMENT_TYPE, message);
+                    LOG.trace("[FPS][PaymentType: {}] Payload received {}", USM, message);
                 }
 
                 String uuid = StringUtils.isNotEmpty(id)?id:IDGeneratorBean.getInstance().generatorID().getFasterPaymentUniqueId();
@@ -207,7 +225,7 @@ public class MQUSMListener extends BaseListener implements MessageListener {
                 topic,
                 RawMessageUtils.encodeToString(Event.SCHEMA$, event),
                 uuid,
-                null, environmentMQ, PAYMENT_TYPE, false
+                null, environmentMQ, USM, false
         );
     }
 

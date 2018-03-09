@@ -1,0 +1,43 @@
+---
+lowercaseOutputName: true
+whitelistObjectNames: ["metrics:name=connector_fps.inbound.SOP.I,*",
+"metrics:name=connector_fps.inbound.CBP.I,*",
+"metrics:name=connector_fps.inbound.FDP.I,*",
+"metrics:name=connector_fps.inbound.SRN.I,*",
+"metrics:name=connector_fps.inbound.RTN.I,*",
+"metrics:name=connector_fps.inbound.SIP.I,*",
+"metrics:name=connector_fps_inbound_reversal.inbound.SOP.O,*",
+"metrics:name=connector_fps_inbound_reversal.inbound.CBP.O,*",
+"metrics:name=connector_fps_inbound_reversal.inbound.FDP.O,*",
+"metrics:name=connector_fps_inbound_reversal.inbound.SRN.O,*",
+"metrics:name=connector_fps_inbound_reversal.inbound.RTN.O,*",
+"metrics:name=connector_fps_inbound_reversal.inbound.SIP.O,*",
+"metrics:name=connector_fps.inbound.SOP.O,*",
+"metrics:name=connector_fps.inbound.CBP.O,*",
+"metrics:name=connector_fps.inbound.FDP.O,*",
+"metrics:name=connector_fps.inbound.SRN.O,*",
+"metrics:name=connector_fps.inbound.RTN.O,*",
+"metrics:name=connector_fps.inbound.SIP.O,*",
+"metrics:name=connector_fps.inbound.USM.O,*",
+"metrics:name=connector_fps.inbound.POO.O,*",
+"metrics:name=connector_fps.inbound.STANDIN.I,*",
+"metrics:name=connector_fps.outbound.SOP.I,*",
+"metrics:name=connector_fps.outbound.CBP.I,*",
+"metrics:name=connector_fps.outbound.FDP.I,*",
+"metrics:name=connector_fps.outbound.RTN.I,*",
+"metrics:name=connector_fps.outbound.SRN.I,*",
+"metrics:name=connector_fps.outbound.SIP.I,*",
+"metrics:name=connector_fps.outbound.SOP.O,*",
+"metrics:name=connector_fps.outbound.CBP.O,*",
+"metrics:name=connector_fps.outbound.FDP.O,*",
+"metrics:name=connector_fps.outbound.RTN.O,*",
+"metrics:name=connector_fps.outbound.SRN.O,*",
+"metrics:name=connector_fps.outbound.SIP.O,*"]
+rules:
+   - pattern: metrics<name=(.*?)\.(.*?)\.(.*?)\.(.*?)\.*>
+     name: $1
+     labels:
+       direction: $4
+       fpsType: $3
+       messageType: $2
+     type: COUNTER

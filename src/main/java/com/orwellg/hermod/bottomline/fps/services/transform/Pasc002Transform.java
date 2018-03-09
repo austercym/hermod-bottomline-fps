@@ -3,6 +3,7 @@ package com.orwellg.hermod.bottomline.fps.services.transform;
 import com.orwellg.hermod.bottomline.fps.services.transform.helper.ConfigurationException;
 import com.orwellg.hermod.bottomline.fps.services.transform.helper.ConversionException;
 import com.orwellg.hermod.bottomline.fps.services.transform.helper.TransformationHelper;
+import com.orwellg.hermod.bottomline.fps.services.transform.pacs002.Pacs002Avro2FPSTransform;
 import com.orwellg.hermod.bottomline.fps.services.transform.pacs002.Pacs002FPS2AvroTransform;
 import com.orwellg.hermod.bottomline.fps.types.FPSMessage;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
@@ -79,7 +80,8 @@ public class Pasc002Transform implements FPSTransform {
 		
 		final iso.std.iso._20022.tech.xsd.pacs_002_001.Document target = new iso.std.iso._20022.tech.xsd.pacs_002_001.Document();
 		long startTransformation = new Date().getTime();
-		TransformationHelper.updateTargetValues(avroMessage, target);
+		Pacs002Avro2FPSTransform.transform((com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs002_001_06.Document)avroMessage, target);
+		//TransformationHelper.updateTargetValues(avroMessage, target);
 		LOG.debug("[FPS] Transform from avro to FPS last {} ms ", new Date().getTime()-startTransformation);
 		return target;	}
 

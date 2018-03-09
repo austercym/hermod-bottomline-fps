@@ -16,13 +16,22 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.w3c.dom.ls.DOMImplementationLS;
+import org.w3c.dom.ls.LSSerializer;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -99,39 +108,4 @@ public class ConvertFullPacs008Test {
 	  return reader.read(null, decoder);
 	}
 
-	/* TODO Convert from json to Avro
-	static byte[] fromJsonToAvro(String json, String schemastr) throws Exception {
-  InputStream input = new ByteArrayInputStream(json.getBytes());
-  DataInputStream din = new DataInputStream(input);
-
-  Schema schema = Schema.parse(schemastr);
-
-  Decoder decoder = DecoderFactory.get().jsonDecoder(schema, din);
-
-  DatumReader<Object> reader = new GenericDatumReader<Object>(schema);
-  Object datum = reader.read(null, decoder);
-
-  GenericDatumWriter<Object>  w = new GenericDatumWriter<Object>(schema);
-  ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-
-  Encoder e = EncoderFactory.get().binaryEncoder(outputStream, null);
-
-  w.write(datum, e);
-  e.flush();
-
-  return outputStream.toByteArray();
-}
-
-String json = "{\"username\":\"miguno\",\"tweet\":\"Rock: Nerf paper, scissors is fine.\",\"timestamp\": 1366150681 }";
-
-String schemastr ="{ \"type\" : \"record\", \"name\" : \"twitter_schema\", \"namespace\" : \"com.miguno.avro\", \"fields\" : [ { \"name\" : \"username\", \"type\" : \"string\", \"doc\"  : \"Name of the user account on Twitter.com\" }, { \"name\" : \"tweet\", \"type\" : \"string\", \"doc\"  : \"The content of the user's Twitter message\" }, { \"name\" : \"timestamp\", \"type\" : \"long\", \"doc\"  : \"Unix epoch time in seconds\" } ], \"doc:\" : \"A basic schema for storing Twitter messages\" }";
-
-byte[] avroByteArray = fromJsonToAvro(json,schemastr);
-
-Schema schema = Schema.parse(schemastr);
-DatumReader<Genericrecord> reader1 = new GenericDatumReader<Genericrecord>(schema);
-
-Decoder decoder1 = DecoderFactory.get().binaryDecoder(avroByteArray, null);
-GenericRecord result = reader1.read(null, decoder1);
-	 */
 }
