@@ -139,7 +139,9 @@ public class KafkaResponseInboundListener extends KafkaInboundListener implement
 			String queueToSend = outboundAsynQueue;
 			String environmentMQ = environmentPrimaryMQ;
 
-            try {
+			Event event = null;
+
+			try {
                 fpsPacs002Response = generateFPSPacs002Response(fpsPaymentResponse);
                 LOG.info("[FPS][PmtId: {}] Response generated for FPS inbound payment. Response: {}", key, fpsPacs002Response.toString());
                 // Call the correspondent transform
@@ -151,7 +153,16 @@ public class KafkaResponseInboundListener extends KafkaInboundListener implement
                     String uuid = getResponsePaymentId(fpsPaymentResponse);
 
                     LOG.info("[FPS][PmtId: {}] XML Response generated for FPS inbound payment. Response: {}", key, rawMessage.toString());
-                    kafkaSender.sendRawMessage(loggingTopic, rawMessage.toString(), uuid);
+                    event = EventGenerator.generateEvent(
+                            this.getClass().getName(),
+                            FPSEvents.FPS_HERMOD_BL_INBOUND_RESPONSE.getEventName(),
+                            uuid,
+                            rawMessage.toString(),
+                            entity,
+                            brand
+                    );
+                    kafkaSender.sendRawMessage(loggingTopic,
+							RawMessageUtils.encodeToString(Event.SCHEMA$, event), uuid);
 
                     Gson gson = new Gson();
 
@@ -190,7 +201,7 @@ public class KafkaResponseInboundListener extends KafkaInboundListener implement
 					}
 
 
-					Event event = EventGenerator.generateEvent(
+					event = EventGenerator.generateEvent(
                             this.getClass().getName(),
                             FPSEvents.FPS_PAYMENT_SENT.getEventName(),
                             uuid,

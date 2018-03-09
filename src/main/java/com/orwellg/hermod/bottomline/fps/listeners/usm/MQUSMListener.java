@@ -130,6 +130,7 @@ public class MQUSMListener extends BaseListener implements MessageListener {
 
 
     public void sendMessageToTopic(Writer writer, String id) {
+        Event event = null;
         if (writer != null) {
             String message = "";
             try {
@@ -141,7 +142,9 @@ public class MQUSMListener extends BaseListener implements MessageListener {
 
                 String uuid = StringUtils.isNotEmpty(id)?id:IDGeneratorBean.getInstance().generatorID().getFasterPaymentUniqueId();
                 //Send mq message to logging topic
-                kafkaSender.sendRawMessage(loggingTopic, message, uuid);
+                event = getRawMessageEvent(message, uuid, FPSEvents.FPS_HERMOD_BL_USM_RECEIVED.getEventName());
+
+                kafkaSender.sendRawMessage(loggingTopic, RawMessageUtils.encodeToString(Event.SCHEMA$, event), uuid);
 
                 // Validate against scheme
                 boolean schemaValidation = isWellFormedMessage(message);
@@ -169,7 +172,7 @@ public class MQUSMListener extends BaseListener implements MessageListener {
 
                         LOG.info("[FPS][PmtId: {}] Sending USM message to topic {}", uuid, usmTopic);
 
-                        Event event = EventGenerator.generateEvent(this.getClass().getName(),
+                        event = EventGenerator.generateEvent(this.getClass().getName(),
                                 FPSEvents.FPS_USM_RECEIVED.getEventName(), uuid, gson.toJson(fpsInboundUSM),
                                 entity, brand
                         );

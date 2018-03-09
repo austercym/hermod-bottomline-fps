@@ -72,10 +72,6 @@ public abstract class MQListener extends BaseListener implements MessageListener
     @Value("${inmemory.cache.expiringMinutes}")
     private int expiringMinutes;
 
-    @Value("{entity.name}")
-    private String entity;
-    @Value("${brand.name}")
-    private String brand;
 
     @Value("${kafka.topic.inbound.request}")
     protected String inboundTopic;
@@ -193,7 +189,9 @@ public abstract class MQListener extends BaseListener implements MessageListener
 
                 String uuid = StringUtils.isNotEmpty(id)?id:IDGeneratorBean.getInstance().generatorID().getFasterPaymentUniqueId();
                 //Send mq message to logging topic
-                kafkaSender.sendRawMessage(loggingTopic, message, uuid);
+                event = getRawMessageEvent(message, uuid, FPSEvents.FPS_HERMOD_BL_INBOUND_RECEIVED.getEventName());
+
+                kafkaSender.sendRawMessage(loggingTopic, RawMessageUtils.encodeToString(Event.SCHEMA$, event), uuid);
 
                 String errorMessage = "";
                 boolean isReversal = false;
@@ -421,6 +419,18 @@ public abstract class MQListener extends BaseListener implements MessageListener
                         paymentType,  ex.getMessage(), ex);
             }
         }
+    }
+
+    protected Event getRawMessageEvent(String message, String uuid) {
+        Event event = EventGenerator.generateEvent(
+                this.getClass().getName(),
+                FPSEvents.FPS_HERMOD_BL_INBOUND_RECEIVED.getEventName(),
+                uuid,
+                message,
+                entity,
+                brand
+        );
+        return event;
     }
 
     private PaymentBean checkPreviousResponse(String message, String uuid, String FPID, String paymentType, String environmentMQ) {

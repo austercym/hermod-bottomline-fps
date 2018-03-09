@@ -4,7 +4,7 @@
 
 	<groupId>com.orwellg.hermod.bottomline.fps</groupId>
   	<artifactId>hermod-bottomline-fps</artifactId>
-	<version>0.0.7-SNAPSHOT</version>
+	<version>0.0.8-SNAPSHOT</version>
 	<name>hermod-bottomline-fps</name>
 	<description>Project to connect to Bottomline and send/retrieve messages to Kafka</description>
 

@@ -1,6 +1,9 @@
 package com.orwellg.hermod.bottomline.fps.listeners;
 
 import com.orwellg.hermod.bottomline.fps.services.transform.FPSTransform;
+import com.orwellg.hermod.bottomline.fps.utils.singletons.EventGenerator;
+import com.orwellg.umbrella.avro.types.event.Event;
+import com.orwellg.umbrella.commons.utils.enums.FPSEvents;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +26,7 @@ public class BaseListener {
 	public static final String POO = "POO";
 	public static final String USM = "USM";
 
+
 	@Autowired
 	protected Map<String, FPSTransform> transforms;
 	@Value("${wq.mq.num.max.attempts}")
@@ -30,6 +34,10 @@ public class BaseListener {
 
 	@Value("${jms.mq.send.messages}")
 	private Boolean sendMessageToBL;
+	@Value("{entity.name}")
+	protected String entity;
+	@Value("${brand.name}")
+	protected String brand;
 
 	@Autowired
 	private JmsOperations jmsOperations;
@@ -80,6 +88,18 @@ public class BaseListener {
 			LOG.debug("[FPS][PaymentType: {}][PmtId: {}] Message NOT SENT to queue {} to Bottomline {}", paymentType, key, queueToSend, environmentMQ);
 		}
 		return messageSent;
+	}
+
+	protected Event getRawMessageEvent(String message, String uuid, String eventName) {
+		Event event = EventGenerator.generateEvent(
+				this.getClass().getName(),
+				eventName,
+				uuid,
+				message,
+				entity,
+				brand
+		);
+		return event;
 	}
 
 }

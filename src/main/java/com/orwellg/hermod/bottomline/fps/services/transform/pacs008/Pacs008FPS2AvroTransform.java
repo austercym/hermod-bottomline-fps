@@ -66,14 +66,14 @@ public class Pacs008FPS2AvroTransform {
                         BigDecimal value = instdAmt.getValue();
 
                         if(value != null) {
-                            instdAmt1.setValue(DecimalTypeUtils.toDecimal(value, 2));
+                            instdAmt1.setValue(DecimalTypeUtils.toDecimal(value,2));
                         }
                         creditTransferTransaction19.setInstdAmt(instdAmt1);
                     }
 
                     BigDecimal xchgRate = cdtTrfTxInf.getXchgRate();
                     if(xchgRate != null) {
-                        creditTransferTransaction19.setXchgRate(DecimalTypeUtils.toDecimal(xchgRate, 2));
+                        creditTransferTransaction19.setXchgRate(DecimalTypeUtils.toDecimal(xchgRate,2));
                     }
 
                     ChargeBearerType1Code chrgBr = cdtTrfTxInf.getChrgBr();

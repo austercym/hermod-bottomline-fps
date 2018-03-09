@@ -21,6 +21,7 @@ import com.orwellg.umbrella.avro.types.payment.fps.FPSInboundPaymentResponse;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSOutboundPayment;
 import com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs002_001_06.Document;
 import com.orwellg.umbrella.commons.types.utils.avro.DecimalTypeUtils;
+import com.orwellg.umbrella.commons.types.utils.avro.RawMessageUtils;
 import com.orwellg.umbrella.commons.utils.enums.FPSEvents;
 import org.apache.activemq.util.ByteArrayInputStream;
 import org.apache.commons.io.IOUtils;
@@ -138,6 +139,7 @@ public abstract class MQOutboundListener extends BaseListener implements Message
 
     @Async("taskOutboundResponseExecutor")
     public void sendMessageToTopic(Writer writer, String paymentType, String id) {
+        Event event = null;
         if (writer != null) {
             String message = "";
             try {
@@ -150,7 +152,10 @@ public abstract class MQOutboundListener extends BaseListener implements Message
                 }
 
                 String uuid = StringUtils.isNotEmpty(id) ? id : IDGeneratorBean.getInstance().generatorID().getFasterPaymentUniqueId();
-                kafkaSender.sendRawMessage(loggingTopic, message, uuid);
+
+                event = getRawMessageEvent(message, uuid, FPSEvents.FPS_HERMOD_BL_OUTBOUND_RESPONSE.getEventName());
+
+                kafkaSender.sendRawMessage(loggingTopic, RawMessageUtils.encodeToString(Event.SCHEMA$, event), uuid);
 
                 boolean schemaValidation = true;
                 try {
@@ -238,7 +243,7 @@ public abstract class MQOutboundListener extends BaseListener implements Message
                         }
 
                         LOG.info("[FPS][PmtId: {}] Sending FPS Outbound payment response", uuid);
-                        Event event = EventGenerator.generateEvent(this.getClass().getName(), FPSEvents.FPS_RESPONSE_RECEIVED.getEventName(), fpsResponse.getOrgnlPaymentId(), gson.toJson(fpsResponse), entity, brand);
+                        event = EventGenerator.generateEvent(this.getClass().getName(), FPSEvents.FPS_RESPONSE_RECEIVED.getEventName(), fpsResponse.getOrgnlPaymentId(), gson.toJson(fpsResponse), entity, brand);
 
                         sendToKafka(inboundTopic, uuid, event, paymentType, environmentMQ);
 

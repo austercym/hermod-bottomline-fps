@@ -3,8 +3,10 @@ package com.orwellg.hermod.bottomline.fps.listeners.inbound;
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.jmx.JmxReporter;
+import com.orwellg.hermod.bottomline.fps.utils.singletons.EventGenerator;
 import com.orwellg.umbrella.avro.types.event.Event;
 import com.orwellg.umbrella.commons.types.utils.avro.RawMessageUtils;
+import com.orwellg.umbrella.commons.utils.enums.FPSEvents;
 import com.orwellg.umbrella.commons.utils.enums.fps.FPSDirection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -47,5 +49,11 @@ public class MQSTANDINListener extends MQListener {
                 uuid,
                 replyTo, environmentMQ, paymentType, false, true
         );
+    }
+
+    @Override
+    protected Event getRawMessageEvent(String message, String uuid, String eventName) {
+        Event event = super.getRawMessageEvent(message, uuid, FPSEvents.FPS_HERMOD_BL_STANDIN_RECEIVED.getEventName());
+        return event;
     }
 }

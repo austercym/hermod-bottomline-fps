@@ -150,6 +150,7 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
     @Async("taskOutboundRequestExecutor")
     public void processOutboundPayment(String key, String value) {
         long startTime = new Date().getTime();
+        Event event = null;
         Gson gson = new Gson();
         // Parse Event Message
         Event eventPayment = null;
@@ -190,7 +191,15 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
                 StringWriter rawMessage = transformRequestToString(fpsMessage);
 
                 LOG.info("[FPS][PmtId: {}] XML Request generated for FPS outbound payment. Request: {}", paymentId, rawMessage.toString());
-                kafkaSender.sendRawMessage(loggingTopic, rawMessage.toString(), key);
+                event = EventGenerator.generateEvent(
+                        this.getClass().getName(),
+                        FPSEvents.FPS_HERMOD_BL_OUTBOUND_SENT.getEventName(),
+                        key,
+                        rawMessage.toString(),
+                        entity,
+                        brand
+                );
+                kafkaSender.sendRawMessage(loggingTopic, RawMessageUtils.encodeToString(Event.SCHEMA$, event), key);
 
                 boolean schemaValidation = true;
                 // Validate against scheme
@@ -211,8 +220,6 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
                     LOG.error("[FPS][PaymentType: {}] I/O Error. Error:{} Message: {}", paymentType, e.getMessage(),
                             rawMessage);
                 }
-
-                Event event = null;
 
                 if (schemaValidation) {
 
