@@ -68,7 +68,7 @@ public class DefaultPropertyValues {
 	private final static String KAFKA_DEFAULT_CONSUMER_CACHE_REQUEST_TOPIC  = "com.orwellg.hermod.bottomline.fps.cache.payment.request.1";
 	private final static String KAFKA_DEFAULT_CONSUMER_CACHE_RESPONSE_TOPIC  = "com.orwellg.hermod.bottomline.fps.cache.payment.response.1";
 
-	private final static String KAFKA_DEFAULT_MESSAGE_LOGGING_TOPIC   = "com.orwellg.logging.message";
+	private final static String KAFKA_DEFAULT_MESSAGE_LOGGING_TOPIC   = "com.orwellg.hermod.bottomline.fps.raw.messages.1";
 
 	private final static Integer KAFKA_DEFAULT_OUTBOUND_TOPIC_PARTITIONS = 3;
 	private final static String KAFKA_DEFAULT_CONSUMER_GROUP_ID = "hermod-bottomline-fps-inbound";
