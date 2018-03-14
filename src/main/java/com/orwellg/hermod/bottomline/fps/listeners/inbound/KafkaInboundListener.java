@@ -11,6 +11,7 @@ import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSOutboundReversalResponse;
 import com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs002_001_06.*;
 import com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.InstructionForNextAgent1;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
@@ -98,20 +99,26 @@ public class KafkaInboundListener extends BaseListener {
     }
 
     protected FPSAvroMessage generateFPSPacs002(com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Document originalDocument,
-                                              String paymentId, String rsn, String txSts){
+                                                String paymentId, String rsn, String txSts){
+        FPSAvroMessage fpsAvroMessage = generateFPSPacs002(originalDocument, paymentId, rsn, txSts, null);
+        return fpsAvroMessage;
+    }
+    protected FPSAvroMessage generateFPSPacs002(com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Document originalDocument,
+                                              String paymentId, String rsn, String txSts, String msgId002){
         Document fpsPacs002Response = new Document();
         Gson gson = new Gson();
         DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
         FPSAvroMessage avroMessage = new FPSAvroMessage();
 
         // Generate message identifier for response message
-        String msgId002;
-        try {
-            msgId002 = IDGeneratorBean.getInstance().generatorID().getFasterPaymentUniqueId();
-        } catch (Exception e) {
-            LOG.error("[FPS][PmtId: {}] Error generating message identifier for response. Error Message: {}", paymentId, e.getMessage(), e);
-            msgId002 = "002" + originalDocument.getFIToFICstmrCdtTrf().getCdtTrfTxInf().get(0).getPmtId().getTxId() + df.format(new Date());
-            LOG.info("[FPS][PmtId: {}] generated message identifier by default. Pacs.002 MsgId: {}", paymentId, msgId002);
+        if(StringUtils.isEmpty(msgId002)) {
+            try {
+                msgId002 = IDGeneratorBean.getInstance().generatorID().getFasterPaymentUniqueId();
+            } catch (Exception e) {
+                LOG.error("[FPS][PmtId: {}] Error generating message identifier for response. Error Message: {}", paymentId, e.getMessage(), e);
+                msgId002 = "002" + originalDocument.getFIToFICstmrCdtTrf().getCdtTrfTxInf().get(0).getPmtId().getTxId() + df.format(new Date());
+                LOG.info("[FPS][PmtId: {}] generated message identifier by default. Pacs.002 MsgId: {}", paymentId, msgId002);
+            }
         }
 
         // Payment Status Report
@@ -200,19 +207,24 @@ public class KafkaInboundListener extends BaseListener {
     }
 
     protected FPSAvroMessage generateFPSPacs002ReversalResponse(FPSOutboundReversalResponse fpsPaymentResponse) {
+        FPSAvroMessage fpsAvroMessage = generateFPSPacs002ReversalResponse(fpsPaymentResponse, null);
+        return fpsAvroMessage;
+    }
+    protected FPSAvroMessage generateFPSPacs002ReversalResponse(FPSOutboundReversalResponse fpsPaymentResponse, String msgId002) {
         Document fpsPacs002Response = new Document();
         Gson gson = new Gson();
         DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
         FPSAvroMessage avroMessage = new FPSAvroMessage();
 
         // Generate message identifier for response message
-        String msgId002;
-        try {
-            msgId002 = IDGeneratorBean.getInstance().generatorID().getFasterPaymentUniqueId();
-        } catch (Exception e) {
-            LOG.error("[FPS][PmtId: {}] Error generating message identifier for response. Error Message: {}", fpsPaymentResponse.getPaymentId(), e.getMessage(), e);
-            msgId002 = "002" + fpsPaymentResponse.getRvsdDocument().getFIToFIPmtRvsl().getTxInf().get(0).getOrgnlTxId() + df.format(new Date());
-            LOG.error("[FPS][PmtId: {}] generated message identifier by default. Pacs.002 MsgId: {}", fpsPaymentResponse.getPaymentId(), msgId002);
+        if(StringUtils.isEmpty(msgId002)) {
+            try {
+                msgId002 = IDGeneratorBean.getInstance().generatorID().getFasterPaymentUniqueId();
+            } catch (Exception e) {
+                LOG.error("[FPS][PmtId: {}] Error generating message identifier for response. Error Message: {}", fpsPaymentResponse.getPaymentId(), e.getMessage(), e);
+                msgId002 = "002" + fpsPaymentResponse.getRvsdDocument().getFIToFIPmtRvsl().getTxInf().get(0).getOrgnlTxId() + df.format(new Date());
+                LOG.error("[FPS][PmtId: {}] generated message identifier by default. Pacs.002 MsgId: {}", fpsPaymentResponse.getPaymentId(), msgId002);
+            }
         }
 
         // Payment Status Report

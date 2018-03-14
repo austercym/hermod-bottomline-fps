@@ -12,6 +12,7 @@ import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSOutboundPaymentResponse;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSOutboundReversalResponse;
 import com.orwellg.umbrella.commons.types.utils.avro.RawMessageUtils;
+import com.orwellg.umbrella.commons.utils.enums.FPSEvents;
 import com.orwellg.umbrella.commons.utils.enums.KafkaHeaders;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.header.Header;
@@ -69,39 +70,42 @@ public class KafkaResponseInMemoryListener extends KafkaInboundListener implemen
 
             String originalPaymentMessage = null;
             FPSOutboundPaymentResponse fpsPaymentResponse = null;
+            FPSOutboundReversalResponse fpsPaymentReversalResponse = null;
             boolean isRequest = false;
             boolean isValid = false;
             String errorMessage = null;
-            try {
-                fpsPaymentResponse = new Gson().fromJson(eventPayment.getEvent().getData(), FPSOutboundPaymentResponse.class);
-                originalPaymentMessage = gson.toJson(fpsPaymentResponse.getOrgnlPaymentDocument());
-                isRequest = true;
-                isValid = true;
-            } catch (Exception ex) {
-                LOG.info("[FPS][PmtId: {}] Trying to parse response for FPS inbound payment. Message: {}", key, ex.getMessage(), ex);
-                errorMessage = ex.getMessage();
-            }
-
-            FPSOutboundReversalResponse fpsPaymentReversalResponse = null;
-            if(!isRequest) {
+            if (eventPayment.getEvent().getName().equalsIgnoreCase(FPSEvents.FPS_PAYMENT_SENT.getEventName())) {
                 try {
-                    fpsPaymentReversalResponse = new Gson().fromJson(eventPayment.getEvent().getData(), FPSOutboundReversalResponse.class);
-                    originalPaymentMessage = gson.toJson(fpsPaymentReversalResponse.getRvsdDocument());
+                    fpsPaymentResponse = new Gson().fromJson(eventPayment.getEvent().getData(), FPSOutboundPaymentResponse.class);
+                    originalPaymentMessage = gson.toJson(fpsPaymentResponse.getOrgnlPaymentDocument());
+                    isRequest = true;
                     isValid = true;
                 } catch (Exception ex) {
-                    LOG.info("[FPS][PmtId: {}] Trying to parse response for FPS inbound reversal payment. Error Message: {}", key, ex.getMessage(), ex);
+                    LOG.info("[FPS][PmtId: {}] Trying to parse response for FPS inbound payment. Message: {}", key, ex.getMessage(), ex);
                     errorMessage = ex.getMessage();
                 }
             }
+            if (eventPayment.getEvent().getName().equalsIgnoreCase(FPSEvents.FPS_PAYMENT_REVERSED.getEventName())) {
+                if (!isRequest) {
+                    try {
+                        fpsPaymentReversalResponse = new Gson().fromJson(eventPayment.getEvent().getData(), FPSOutboundReversalResponse.class);
+                        originalPaymentMessage = gson.toJson(fpsPaymentReversalResponse.getRvsdDocument());
+                        isValid = true;
+                    } catch (Exception ex) {
+                        LOG.info("[FPS][PmtId: {}] Trying to parse response for FPS inbound reversal payment. Error Message: {}", key, ex.getMessage(), ex);
+                        errorMessage = ex.getMessage();
+                    }
+                }
+            }
 
-            if(isValid) {
+            if (isValid) {
 
                 // Generate Reversal Response
                 FPSAvroMessage fpsPacs002Response = null;
                 if (!isRequest) {
-                    fpsPacs002Response = generateFPSPacs002ReversalResponse(fpsPaymentReversalResponse);
+                    fpsPacs002Response = generateFPSPacs002ReversalResponse(fpsPaymentReversalResponse, key);
                 } else {
-                    fpsPacs002Response = generateFPSPacs002(fpsPaymentResponse.getOrgnlPaymentDocument(), fpsPaymentResponse.getPaymentId(), fpsPaymentResponse.getStsRsn(), fpsPaymentResponse.getTxSts());
+                    fpsPacs002Response = generateFPSPacs002(fpsPaymentResponse.getOrgnlPaymentDocument(), fpsPaymentResponse.getPaymentId(), fpsPaymentResponse.getStsRsn(), fpsPaymentResponse.getTxSts(), key);
                 }
 
                 FPSTransform transform = transforms.get("transform_pacs_002_001");
@@ -110,10 +114,11 @@ public class KafkaResponseInMemoryListener extends KafkaInboundListener implemen
                     StringWriter rawMessage = transformResponseToString(fpsMessage);
                     updatePaymentResponseInMemory(originalPaymentMessage, FPID, rawMessage.toString(), key, paymentType, environmentMQ);
                 }
-            }else{
+            } else {
                 LOG.error("[FPS][PmtId: {}] Error getting response to store in cache. Error Message: {}", key, errorMessage);
             }
-
+        }catch(NullPointerException npe){
+            LOG.error("[FPS][PmtId: {}] Error getting response to store in cache. Error Message: {}", key);
         } catch (Exception e) {
             throw new MessageConversionException("Exception in message emission. Message: " + e.getMessage(), e);
         }

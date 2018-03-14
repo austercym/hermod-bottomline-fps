@@ -192,7 +192,7 @@ public class KafkaResponseReversalInboundListener extends KafkaInboundListener i
 
 					event = EventGenerator.generateEvent(
 							this.getClass().getName(),
-							FPSEvents.FPS_PAYMENT_SENT.getEventName(),
+							FPSEvents.FPS_PAYMENT_REVERSED.getEventName(),
 							uuid,
 							eventPayment.getEvent().getData(),
 							entity,
