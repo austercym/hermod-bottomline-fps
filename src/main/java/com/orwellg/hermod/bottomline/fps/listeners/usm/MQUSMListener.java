@@ -3,7 +3,6 @@ package com.orwellg.hermod.bottomline.fps.listeners.usm;
 import com.bottomline.directfps.fpsusmelements.*;
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.jmx.JmxReporter;
 import com.google.gson.Gson;
 import com.orwellg.hermod.bottomline.fps.listeners.BaseListener;
 import com.orwellg.hermod.bottomline.fps.services.kafka.KafkaSender;
@@ -70,7 +69,7 @@ public class MQUSMListener extends BaseListener implements MessageListener {
     @Value("${kafka.topic.usm.message}")
     private String usmTopic;
 
-    @Value("${kafka.topic.fps.logging}")
+    @Value("${kafka.topic.fps.inbound.logging}")
     private String loggingTopic;
 
     @Value("${connector.%id.mq_primary}")
@@ -79,8 +78,6 @@ public class MQUSMListener extends BaseListener implements MessageListener {
     public MQUSMListener(MetricRegistry metricRegistry){
         if(metricRegistry!= null) {
             inbound_usm_requests = metricRegistry.counter(name("connector_fps", "inbound", "USM", FPSDirection.INPUT.getDirection()));
-          //  final JmxReporter reporterJMX = JmxReporter.forRegistry(metricRegistry).build();
-          //  reporterJMX.start();
         }else{
             LOG.error("No exists metrics registry");
         }
@@ -137,7 +134,7 @@ public class MQUSMListener extends BaseListener implements MessageListener {
                 message = writer.toString();
 
                 if(emergencyLog){
-                    LOG.trace("[FPS][PaymentType: {}] Payload received {}", USM, message);
+                    LOG.debug("[FPS][PaymentType: {}] Payload received {}", USM, message);
                 }
 
                 String uuid = StringUtils.isNotEmpty(id)?id:IDGeneratorBean.getInstance().generatorID().getFasterPaymentUniqueId();

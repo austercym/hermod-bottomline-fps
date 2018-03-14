@@ -1,6 +1,6 @@
 package com.orwellg.hermod.bottomline.fps.spring.core.env;
 
-import com.netflix.config.*;
+import com.netflix.config.DynamicPropertyFactory;
 import com.orwellg.umbrella.commons.beans.config.zookeeper.ZkConfigurationParams;
 import com.orwellg.umbrella.commons.utils.config.PropertiesUtils;
 import com.orwellg.umbrella.commons.utils.config.ZookeeperUtils;

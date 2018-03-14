@@ -68,7 +68,8 @@ public class DefaultPropertyValues {
 	private final static String KAFKA_DEFAULT_CONSUMER_CACHE_REQUEST_TOPIC  = "com.orwellg.hermod.bottomline.fps.cache.payment.request.1";
 	private final static String KAFKA_DEFAULT_CONSUMER_CACHE_RESPONSE_TOPIC  = "com.orwellg.hermod.bottomline.fps.cache.payment.response.1";
 
-	private final static String KAFKA_DEFAULT_MESSAGE_LOGGING_TOPIC   = "com.orwellg.hermod.bottomline.fps.raw.messages.1";
+	private final static String KAFKA_DEFAULT_MESSAGE_LOGGING_INBOUND_TOPIC    = "com.orwellg.hermod.bottomline.fps.inbound.raw.messages.1";
+	private final static String KAFKA_DEFAULT_MESSAGE_LOGGING_OUTBOUND_TOPIC   = "com.orwellg.hermod.bottomline.fps.outbound.raw.messages.1";
 
 	private final static Integer KAFKA_DEFAULT_OUTBOUND_TOPIC_PARTITIONS = 3;
 	private final static String KAFKA_DEFAULT_CONSUMER_GROUP_ID = "hermod-bottomline-fps-inbound";
@@ -80,6 +81,9 @@ public class DefaultPropertyValues {
 
 	private final static Boolean CONNECTOR_EMERGENCY_PAYLOAD_LOG = false;
 	private final static Boolean SEND_MESSAGES_TO_BOTTOMLINE = true;
+
+	private final static Boolean SEND_PAYMENTS_ROUNDROBIN = false;
+	private final static Boolean SEND_RESPONSES_ROUNDROBIN = false;
 
 	
 	private final static Map<String, Object> defaultValues;
@@ -149,7 +153,8 @@ public class DefaultPropertyValues {
 		defaultValues.put("kafka.topic.reversal.request", KAFKA_DEFAULT_INBOUND_REVERSAL_REQUEST_TOPIC);
 		defaultValues.put("kafka.topic.reversal.response", KAFKA_DEFAULT_INBOUND_REVERSAL_RESPONSE_TOPIC);
 
-		defaultValues.put("kafka.topic.fps.logging", KAFKA_DEFAULT_MESSAGE_LOGGING_TOPIC);
+		defaultValues.put("kafka.topic.fps.input.logging", KAFKA_DEFAULT_MESSAGE_LOGGING_INBOUND_TOPIC);
+		defaultValues.put("kafka.topic.fps.output.logging", KAFKA_DEFAULT_MESSAGE_LOGGING_OUTBOUND_TOPIC);
 
 		defaultValues.put("kafka.consumer.group.id", KAFKA_DEFAULT_CONSUMER_GROUP_ID);
 		defaultValues.put("kafka.consumer.threads.num", KAFKA_DEFAULT_CONSUMER_THREADS);
@@ -167,6 +172,11 @@ public class DefaultPropertyValues {
 		defaultValues.put("kafka.topic.cache.response", KAFKA_DEFAULT_CONSUMER_CACHE_RESPONSE_TOPIC);
 
 		defaultValues.put("jms.mq.send.messages", SEND_MESSAGES_TO_BOTTOMLINE);
+
+		defaultValues.put("connector.payments.sent.roundrobin", SEND_PAYMENTS_ROUNDROBIN);
+		defaultValues.put("connector.responses.sent.roundrobin", SEND_RESPONSES_ROUNDROBIN);
+
+
 	}
 
 	public static Map<String, Object> getDefaultValues() {

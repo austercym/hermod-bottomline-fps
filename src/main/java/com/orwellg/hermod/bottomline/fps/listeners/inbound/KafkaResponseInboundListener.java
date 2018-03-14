@@ -53,17 +53,8 @@ public class KafkaResponseInboundListener extends KafkaInboundListener implement
 	@Value("${wq.mq.queue.asyn.inbound.resp}")
 	private String outboundAsynQueue;
 
-	@Value("${kafka.topic.fps.logging}")
+	@Value("${kafka.topic.fps.inbound.logging}")
 	private String loggingTopic;
-
-	@Value("${connector.%id.mq_primary}")
-	private String environmentPrimaryMQ;
-
-	@Value("${jms.mq.bottomline.environment.1}")
-	private String environmentMQSite1;
-
-	@Value("${jms.mq.bottomline.environment.2}")
-	private String environmentMQSite2;
 
 	@Autowired
 	private KafkaSender kafkaSender;
@@ -81,9 +72,6 @@ public class KafkaResponseInboundListener extends KafkaInboundListener implement
 			inbound_srn_responses = metricRegistry.counter(name("connector_fps", "inbound", "SRN", direction));
 			inbound_rtn_responses = metricRegistry.counter(name("connector_fps", "inbound", "RTN", direction));
 			inbound_sip_responses = metricRegistry.counter(name("connector_fps", "inbound", "SIP", direction));
-
-			//final JmxReporter reporterJMX = JmxReporter.forRegistry(metricRegistry).build();
-			//reporterJMX.start();
 		}else{
 			LOG.error("No exists metrics registry");
 		}
@@ -182,22 +170,15 @@ public class KafkaResponseInboundListener extends KafkaInboundListener implement
 					calculateMetrics(paymentType);
 
 					Header headerSite = headers.lastHeader(KafkaHeaders.FPS_SITE.getKafkaHeader());
-                    if(headerSite != null){
-                        environmentMQ = new String(headerSite.value(), "UTF-8");
-                        LOG.debug("[FPS][PaymentType: {}][PmtId: {}] Get header FPS_SITE: {}",
-                                paymentType, key, environmentMQ);
-                    }else{
-                        LOG.debug("[FPS][PaymentType: {}][PmtId: {}] No header FPS_SITE. Sending to primary MQ: {}",
-                                paymentType, key, environmentMQ);
-                    }
+
+					environmentMQ = getEnvironment(headerSite, key);
                     updatePaymentResponseInMemory(originalStr, FPID, rawMessage.toString(), key, paymentType, environmentMQ);
                     boolean responseSent = sendToMQ(key, rawMessage.toString(), queueToSend, paymentType, environmentMQ);
 					if(!responseSent){
-						String alternativeEnvironmentMQ = environmentMQSite1;
 						if(environmentMQ.equalsIgnoreCase(environmentMQSite1)){
-							alternativeEnvironmentMQ = environmentMQSite2;
+							environmentMQ = environmentMQSite2;
 						}
-						responseSent = sendToMQ(key, rawMessage.toString(), queueToSend, paymentType, alternativeEnvironmentMQ);
+						responseSent = sendToMQ(key, rawMessage.toString(), queueToSend, paymentType, environmentMQ);
 					}
 
 

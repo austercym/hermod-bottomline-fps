@@ -53,7 +53,7 @@ public class KafkaResponseReversalInboundListener extends KafkaInboundListener i
 	@Value("${wq.mq.queue.asyn.inbound.resp}")
 	private String outboundAsynQueue;
 
-	@Value("${kafka.topic.fps.logging}")
+	@Value("${kafka.topic.fps.inbound.logging}")
 	private String loggingTopic;
 
 	@Value("${connector.%id.mq_primary}")
@@ -80,9 +80,6 @@ public class KafkaResponseReversalInboundListener extends KafkaInboundListener i
 			inbound_fdp_reversal_responses = metricRegistry.counter(name("connector_fps_inbound_reversal", "inbound", "FDP", direction));
 			inbound_srn_reversal_responses = metricRegistry.counter(name("connector_fps_inbound_reversal", "inbound", "SRN", direction));
 			inbound_rtn_reversal_responses = metricRegistry.counter(name("connector_fps_inbound_reversal", "inbound", "RTN", direction));
-
-			//final JmxReporter reporterJMX = JmxReporter.forRegistry(metricRegistry).build();
-			//reporterJMX.start();
 		}else{
 			LOG.error("No exists metrics registry");
 		}
@@ -181,22 +178,15 @@ public class KafkaResponseReversalInboundListener extends KafkaInboundListener i
 					calculateMetrics(paymentType);
 
 					Header headerSite = headers.lastHeader(KafkaHeaders.FPS_SITE.getKafkaHeader());
-					if(headerSite != null){
-						environmentMQ = new String(headerSite.value(), "UTF-8");
-						LOG.debug("[FPS][PaymentType: {}][PmtId: {}] Get header FPS_SITE: {}",
-								paymentType, key, environmentMQ);
-					}else{
-						LOG.debug("[FPS][PaymentType: {}][PmtId: {}] No header FPS_SITE. Sending to primary MQ: {}",
-								paymentType, key, environmentMQ);
-					}
+					environmentMQ = getEnvironment(headerSite, key);
+
 					updatePaymentResponseInMemory(originalStr, FPID, rawMessage.toString(), key, paymentType, environmentMQ);
 					boolean reversalSent = sendToMQ(key, rawMessage.toString(), queueToSend, paymentType, environmentMQ);
 					if(!reversalSent){
-						String alternativeEnvironmentMQ = environmentMQSite1;
 						if(environmentMQ.equalsIgnoreCase(environmentMQSite1)){
-							alternativeEnvironmentMQ = environmentMQSite2;
+							environmentMQ = environmentMQSite2;
 						}
-						reversalSent = sendToMQ(key, rawMessage.toString(), queueToSend, paymentType, alternativeEnvironmentMQ);
+						reversalSent = sendToMQ(key, rawMessage.toString(), queueToSend, paymentType, environmentMQ);
 					}
 
 

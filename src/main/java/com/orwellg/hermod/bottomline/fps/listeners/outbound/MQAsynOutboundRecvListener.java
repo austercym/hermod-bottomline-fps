@@ -1,8 +1,6 @@
 package com.orwellg.hermod.bottomline.fps.listeners.outbound;
 
-import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.jmx.JmxReporter;
 import com.orwellg.umbrella.avro.types.event.Event;
 import com.orwellg.umbrella.commons.types.utils.avro.RawMessageUtils;
 import com.orwellg.umbrella.commons.utils.enums.fps.FPSDirection;
@@ -32,8 +30,6 @@ public class MQAsynOutboundRecvListener extends MQOutboundListener {
             outbound_fdp_responses = metricRegistry.counter(name("connector_fps", "outbound", "FDP", direction));
             outbound_rtn_responses = metricRegistry.counter(name("connector_fps", "outbound", "RTN", direction));
             outbound_srn_responses = metricRegistry.counter(name("connector_fps", "outbound", "SRN", direction));
-          //  final JmxReporter reporterJMX = JmxReporter.forRegistry(metricRegistry).build();
-          //  reporterJMX.start();
         }else{
             LOG.error("No exists metrics registry");
         }

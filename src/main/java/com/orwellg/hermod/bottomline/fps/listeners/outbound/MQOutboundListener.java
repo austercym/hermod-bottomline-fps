@@ -1,9 +1,6 @@
 package com.orwellg.hermod.bottomline.fps.listeners.outbound;
 
 import com.codahale.metrics.Counter;
-import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.Timer;
-import com.codahale.metrics.jmx.JmxReporter;
 import com.google.gson.Gson;
 import com.orwellg.hermod.bottomline.fps.listeners.BaseListener;
 import com.orwellg.hermod.bottomline.fps.services.kafka.KafkaSender;
@@ -47,7 +44,6 @@ import javax.xml.validation.Validator;
 import java.io.*;
 import java.util.Date;
 
-import static com.codahale.metrics.MetricRegistry.name;
 import static com.orwellg.hermod.bottomline.fps.utils.Constants.RESP_SUFFIX;
 
 public abstract class MQOutboundListener extends BaseListener implements MessageListener {
@@ -80,7 +76,7 @@ public abstract class MQOutboundListener extends BaseListener implements Message
     private String inboundTopic;
 
 
-    @Value("${kafka.topic.fps.logging}")
+    @Value("${kafka.topic.fps.outbound.logging}")
     private String loggingTopic;
 
     @Value("${connector.%id.mq_primary}")
@@ -148,7 +144,7 @@ public abstract class MQOutboundListener extends BaseListener implements Message
                 message = writer.toString();
 
                 if(emergencyLog){
-                    LOG.trace("[FPS][PaymentType: {}] Payload received {}",paymentType, message);
+                    LOG.debug("[FPS][PaymentType: {}] Payload received {}",paymentType, message);
                 }
 
                 String uuid = StringUtils.isNotEmpty(id) ? id : IDGeneratorBean.getInstance().generatorID().getFasterPaymentUniqueId();

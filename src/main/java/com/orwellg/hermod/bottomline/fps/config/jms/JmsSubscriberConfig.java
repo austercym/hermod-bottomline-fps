@@ -1,13 +1,6 @@
 package com.orwellg.hermod.bottomline.fps.config.jms;
 
 import com.orwellg.hermod.bottomline.fps.config.ComponentConfig;
-import com.orwellg.hermod.bottomline.fps.listeners.inbound.*;
-import com.orwellg.hermod.bottomline.fps.listeners.outbound.MQAsynOutboundRecvListener;
-import com.orwellg.hermod.bottomline.fps.listeners.outbound.MQSIPOutboundRecvListener;
-import com.orwellg.hermod.bottomline.fps.listeners.usm.MQUSMListener;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.HierarchicalBeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
@@ -18,23 +11,20 @@ import org.springframework.jms.listener.DefaultMessageListenerContainer;
 
 import javax.jms.ConnectionFactory;
 import javax.jms.MessageListener;
-import java.util.HashMap;
 
 @Configuration
 @EnableJms
 public class JmsSubscriberConfig extends ComponentConfig {
-
-    private static final Logger LOG = LogManager.getLogger(JmsSubscriberConfig.class);
     @Autowired private ApplicationContext applicationContext;
 	
 	@Autowired
-	private MessageListener mqSIPListener;
+	private MessageListener mqSIPSite1Listener;
     @Autowired
-    private MessageListener mqASYNListener;
+    private MessageListener mqASYNSite1Listener;
     @Autowired
-    private MessageListener mqPOOListener;
+    private MessageListener mqPOOSite1Listener;
     @Autowired
-    private MessageListener mqSTANDINListener;
+    private MessageListener mqSTANDINSite1Listener;
     @Autowired
     private MessageListener mqSIPOutboundRecvListener;
     @Autowired
@@ -79,7 +69,7 @@ public class JmsSubscriberConfig extends ComponentConfig {
         DefaultMessageListenerContainer listenerContainer = new DefaultMessageListenerContainer();
         listenerContainer.setConnectionFactory((ConnectionFactory) (applicationContext.getBean("mqQueueConnectionFactory")));
         listenerContainer.setDestinationName(sipQueue);
-        listenerContainer.setMessageListener(mqSIPListener);
+        listenerContainer.setMessageListener(mqSIPSite1Listener);
         listenerContainer.setMaxConcurrentConsumers(maxConcurrentConsumers);
         listenerContainer.setSessionTransacted(true);
         listenerContainer.setReceiveTimeout(200);
@@ -96,7 +86,7 @@ public class JmsSubscriberConfig extends ComponentConfig {
         DefaultMessageListenerContainer listenerContainer = new DefaultMessageListenerContainer();
         listenerContainer.setConnectionFactory((ConnectionFactory) (applicationContext.getBean("mqQueueConnectionFactory")));
         listenerContainer.setDestinationName(asynQueue);
-        listenerContainer.setMessageListener(mqASYNListener);
+        listenerContainer.setMessageListener(mqASYNSite1Listener);
         listenerContainer.setMaxConcurrentConsumers(maxConcurrentConsumers);
         listenerContainer.setSessionTransacted(true);
 
@@ -109,7 +99,7 @@ public class JmsSubscriberConfig extends ComponentConfig {
         DefaultMessageListenerContainer listenerContainer = new DefaultMessageListenerContainer();
         listenerContainer.setConnectionFactory((ConnectionFactory) (applicationContext.getBean("mqQueueConnectionFactory")));
         listenerContainer.setDestinationName(standinQueue);
-        listenerContainer.setMessageListener(mqSTANDINListener);
+        listenerContainer.setMessageListener(mqSTANDINSite1Listener);
         listenerContainer.setMaxConcurrentConsumers(maxConcurrentConsumers);
         listenerContainer.setSessionTransacted(true);
 
@@ -122,7 +112,7 @@ public class JmsSubscriberConfig extends ComponentConfig {
         DefaultMessageListenerContainer listenerContainer = new DefaultMessageListenerContainer();
         listenerContainer.setConnectionFactory((ConnectionFactory) (applicationContext.getBean("mqQueueConnectionFactory")));
         listenerContainer.setDestinationName(pooQueue);
-        listenerContainer.setMessageListener(mqPOOListener);
+        listenerContainer.setMessageListener(mqPOOSite1Listener);
         listenerContainer.setMaxConcurrentConsumers(maxConcurrentConsumers);
         listenerContainer.setSessionTransacted(true);
 

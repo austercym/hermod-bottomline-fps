@@ -40,7 +40,6 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Date;
-import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static com.codahale.metrics.MetricRegistry.name;
@@ -63,8 +62,7 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
     @Value("${kafka.topic.outbound.request}")
     private String outboundRequestTopic;
 
-
-    @Value("${kafka.topic.fps.logging}")
+    @Value("${kafka.topic.fps.outbound.logging}")
     private String loggingTopic;
 
     @Value("${inmemory.cache.expiringMinutes}")
@@ -84,6 +82,9 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
     @Value("${jms.mq.bottomline.environment.2}")
     private String environmentMQSite2;
 
+    @Value("${connector.payments.sent.roundrobin}")
+    private Boolean roundRobinSent;
+
     @Autowired
     private KafkaSender kafkaSender;
 
@@ -102,13 +103,19 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
             index = new AtomicLong(0);
         }
     }
-    private String getNextEnvironment() {
-        long i = index.incrementAndGet();
-        if (i % 2 == 0) {
-            return environmentMQSite2;
-        } else {
-            return environmentMQSite1;
+    private String getEnvironment() {
+        String environment = environmentMQ;
+
+        if(roundRobinSent) {
+
+            long i = index.incrementAndGet();
+            if (i % 2 == 0) {
+                environment = environmentMQSite2;
+            } else {
+                environment = environmentMQSite1;
+            }
         }
+        return environment;
     }
 
     public KafkaRequestOutboundListener(MetricRegistry metricRegistry){
@@ -120,9 +127,6 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
             outbound_srn_requests = metricRegistry.counter(name("connector_fps", "outbound", "SRN", direction));
             outbound_rtn_requests = metricRegistry.counter(name("connector_fps", "outbound", "RTN", direction));
             outbound_sip_requests = metricRegistry.counter(name("connector_fps", "outbound", "SIP", direction));
-
-         //   final JmxReporter reporterJMX = JmxReporter.forRegistry(metricRegistry).build();
-         //   reporterJMX.start();
         }else{
             LOG.error("No exists metrics registry");
         }
@@ -231,7 +235,7 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
                     }
 
 
-                    String datacenter = getNextEnvironment();
+                    String datacenter = getEnvironment();
                     boolean paymentSent = sendToMQ(key, rawMessage.toString(), queueToSend, paymentType, datacenter);
                     if(!paymentSent){
                         String alternativeEnvironmentMQ = environmentMQSite1;

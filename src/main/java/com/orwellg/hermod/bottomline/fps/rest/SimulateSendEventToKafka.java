@@ -2,9 +2,12 @@ package com.orwellg.hermod.bottomline.fps.rest;
 
 import com.codahale.metrics.MetricRegistry;
 import com.orwellg.hermod.bottomline.fps.listeners.BaseListener;
-import com.orwellg.hermod.bottomline.fps.listeners.inbound.MQASYNListener;
-import com.orwellg.hermod.bottomline.fps.listeners.inbound.MQPOOListener;
-import com.orwellg.hermod.bottomline.fps.listeners.inbound.MQSIPListener;
+import com.orwellg.hermod.bottomline.fps.listeners.inbound.asyn.MQASYNSite1Listener;
+import com.orwellg.hermod.bottomline.fps.listeners.inbound.asyn.MQASYNSite2Listener;
+import com.orwellg.hermod.bottomline.fps.listeners.inbound.poo.MQPOOSite1Listener;
+import com.orwellg.hermod.bottomline.fps.listeners.inbound.poo.MQPOOSite2Listener;
+import com.orwellg.hermod.bottomline.fps.listeners.inbound.sync.MQSIPSite1Listener;
+import com.orwellg.hermod.bottomline.fps.listeners.inbound.sync.MQSIPSite2Listener;
 import com.orwellg.hermod.bottomline.fps.listeners.outbound.MQSIPOutboundRecvListener;
 import com.orwellg.hermod.bottomline.fps.listeners.usm.MQUSMListener;
 import com.orwellg.hermod.bottomline.fps.storage.InMemoryPaymentStorage;
@@ -35,17 +38,28 @@ public class SimulateSendEventToKafka {
     MessageTestQueueSender messageTestQueueSender;
 
     @Autowired
-    @Qualifier("mqSIPListener")
-    MQSIPListener mqSIPListener;
+    @Qualifier("mqSIPSite1Listener")
+    MQSIPSite1Listener mqSIPSite1Listener;
 
     @Autowired
-    MQSIPListener mqSIPSite2Listener;
+    @Qualifier("mqSIPSite2Listener")
+    MQSIPSite2Listener mqSIPSite2Listener;
 
     @Autowired
-    MQASYNListener mqASYNCListener;
+    @Qualifier("mqASYNSite1Listener")
+    MQASYNSite1Listener mqASYNCSite1Listener;
 
     @Autowired
-    MQPOOListener mqPOOListener;
+    @Qualifier("mqASYNSite2Listener")
+    MQASYNSite2Listener mqASYNCSite2Listener;
+
+    @Autowired
+    @Qualifier("mqPOOSite1Listener")
+    MQPOOSite1Listener mqPOOSite1Listener;
+
+    @Autowired
+    @Qualifier("mqPOOSite2Listener")
+    MQPOOSite2Listener mqPOOSite2Listener;
 
     @Autowired
     MQUSMListener mqUSMListener;
@@ -58,12 +72,12 @@ public class SimulateSendEventToKafka {
     private int expiringMinutes;
 
     @RequestMapping(method= RequestMethod.POST, value="/sip")
-    public ResponseEntity<String> sendSIP(@RequestBody String queueMessage,
+    public ResponseEntity<String> sendSIPSite1(@RequestBody String queueMessage,
                                           @RequestHeader("x-process-id") String key) {
         Writer writer = null;
         try {
             writer = getStringWriter(queueMessage);
-            mqSIPListener.sendMessageToTopic(writer, BaseListener.SIP, key);
+            mqSIPSite1Listener.sendMessageToTopic(writer, BaseListener.SIP, key);
             return new ResponseEntity<>("Message sent ", HttpStatus.OK);
         }catch(IOException e){
             LOG.error("Error processing message: {}", e.getMessage());
@@ -80,20 +94,13 @@ public class SimulateSendEventToKafka {
         }
     }
 
-    private Writer getStringWriter(@RequestBody String queueMessage) throws IOException {
-        Reader reader = new StringReader(queueMessage);
-        Writer writer = new StringWriter();
-        IOUtils.copy(reader, writer);
-        return writer;
-    }
-
-    @RequestMapping(method= RequestMethod.POST, value="/poo")
-    public ResponseEntity<String> sendPOO(@RequestBody String queueMessage,
-                                          @RequestHeader("x-process-id") String key) {
+    @RequestMapping(method= RequestMethod.POST, value="/sip2")
+    public ResponseEntity<String> sendSIPSite2(@RequestBody String queueMessage,
+                                               @RequestHeader("x-process-id") String key) {
         Writer writer = null;
         try {
             writer = getStringWriter(queueMessage);
-            mqPOOListener.sendMessageToTopic(writer, BaseListener.POO, key);
+            mqSIPSite2Listener.sendMessageToTopic(writer, BaseListener.SIP, key);
             return new ResponseEntity<>("Message sent ", HttpStatus.OK);
         }catch(IOException e){
             LOG.error("Error processing message: {}", e.getMessage());
@@ -111,12 +118,12 @@ public class SimulateSendEventToKafka {
     }
 
     @RequestMapping(method= RequestMethod.POST, value="/asyn")
-    public ResponseEntity<String> sendMQSOP(@RequestBody String queueMessage,
+    public ResponseEntity<String> sendMQAsyn(@RequestBody String queueMessage,
                                             @RequestHeader("x-process-id") String key) {
         Writer writer = null;
         try {
             writer = getStringWriter(queueMessage);
-            mqASYNCListener.sendMessageToTopic(writer, MQASYNListener.PAYMENT_TYPE, key);
+            mqASYNCSite1Listener.sendMessageToTopic(writer, MQASYNSite1Listener.PAYMENT_TYPE, key);
             return new ResponseEntity<>("Message sent ", HttpStatus.OK);
         }catch(IOException e){
             LOG.error("Error processing message: {}", e.getMessage());
@@ -133,12 +140,75 @@ public class SimulateSendEventToKafka {
         }
     }
 
-    @RequestMapping(method= RequestMethod.GET, value="/resetstorage")
-    public ResponseEntity<String> cleanMemory() {
-        InMemoryPaymentStorage inmemoryStorage = InMemoryPaymentStorage.getInstance(expiringMinutes);
-        inmemoryStorage.clearStorage();
-        return new ResponseEntity<>("Memory reset", HttpStatus.OK);
+    @RequestMapping(method= RequestMethod.POST, value="/asyn2")
+    public ResponseEntity<String> sendMQAsynSite2(@RequestBody String queueMessage,
+                                            @RequestHeader("x-process-id") String key) {
+        Writer writer = null;
+        try {
+            writer = getStringWriter(queueMessage);
+            mqASYNCSite2Listener.sendMessageToTopic(writer, MQASYNSite2Listener.PAYMENT_TYPE, key);
+            return new ResponseEntity<>("Message sent ", HttpStatus.OK);
+        }catch(IOException e){
+            LOG.error("Error processing message: {}", e.getMessage());
+            return new ResponseEntity<>("Message not sent ", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        finally {
+            try {
+                if (writer != null) {
+                    writer.close();
+                }
+            }catch (Exception e) {
+                LOG.error("[FPS] Error closing streams resources. Message: {}", e.getMessage());
+            }
+        }
     }
+
+    @RequestMapping(method= RequestMethod.POST, value="/poo")
+    public ResponseEntity<String> sendPOO(@RequestBody String queueMessage,
+                                          @RequestHeader("x-process-id") String key) {
+        Writer writer = null;
+        try {
+            writer = getStringWriter(queueMessage);
+            mqPOOSite1Listener.sendMessageToTopic(writer, BaseListener.POO, key);
+            return new ResponseEntity<>("Message sent ", HttpStatus.OK);
+        }catch(IOException e){
+            LOG.error("Error processing message: {}", e.getMessage());
+            return new ResponseEntity<>("Message not sent ", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        finally {
+            try {
+                if (writer != null) {
+                    writer.close();
+                }
+            }catch (Exception e) {
+                LOG.error("[FPS] Error closing streams resources. Message: {}", e.getMessage());
+            }
+        }
+    }
+
+    @RequestMapping(method= RequestMethod.POST, value="/poo2")
+    public ResponseEntity<String> sendPOOSite2(@RequestBody String queueMessage,
+                                          @RequestHeader("x-process-id") String key) {
+        Writer writer = null;
+        try {
+            writer = getStringWriter(queueMessage);
+            mqPOOSite2Listener.sendMessageToTopic(writer, BaseListener.POO, key);
+            return new ResponseEntity<>("Message sent ", HttpStatus.OK);
+        }catch(IOException e){
+            LOG.error("Error processing message: {}", e.getMessage());
+            return new ResponseEntity<>("Message not sent ", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        finally {
+            try {
+                if (writer != null) {
+                    writer.close();
+                }
+            }catch (Exception e) {
+                LOG.error("[FPS] Error closing streams resources. Message: {}", e.getMessage());
+            }
+        }
+    }
+
 
     @RequestMapping(method= RequestMethod.POST, value="/messageResponse")
     public ResponseEntity<String> sendMQSIPOutboundResponse(@RequestBody String queueMessage) {
@@ -189,5 +259,19 @@ public class SimulateSendEventToKafka {
                                           @RequestHeader("x-process-id") String key) {
         messageTestQueueSender.sendMessage(queueMessage, key);
         return new ResponseEntity<>("Message sent ", HttpStatus.OK);
+    }
+
+    @RequestMapping(method= RequestMethod.GET, value="/resetstorage")
+    public ResponseEntity<String> cleanMemory() {
+        InMemoryPaymentStorage inmemoryStorage = InMemoryPaymentStorage.getInstance(expiringMinutes);
+        inmemoryStorage.clearStorage();
+        return new ResponseEntity<>("Memory reset", HttpStatus.OK);
+    }
+
+    private Writer getStringWriter(@RequestBody String queueMessage) throws IOException {
+        Reader reader = new StringReader(queueMessage);
+        Writer writer = new StringWriter();
+        IOUtils.copy(reader, writer);
+        return writer;
     }
 }

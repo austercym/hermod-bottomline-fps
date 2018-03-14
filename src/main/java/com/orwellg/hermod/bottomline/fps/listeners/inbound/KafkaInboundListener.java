@@ -14,17 +14,19 @@ import com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Inst
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
+import org.apache.kafka.common.header.Header;
 
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.transform.stream.StreamResult;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class KafkaInboundListener extends BaseListener {
 
@@ -38,8 +40,54 @@ public class KafkaInboundListener extends BaseListener {
     @Value("${brand.name}")
     protected String brand;
 
+    @Value("${connector.responses.sent.roundrobin}")
+    private Boolean roundRobinSent;
+
     @Value("${inmemory.cache.expiringMinutes}")
     private int expiringMinutes;
+
+    @Value("${connector.%id.mq_primary}")
+    protected String environmentPrimaryMQ;
+
+    @Value("${jms.mq.bottomline.environment.1}")
+    protected String environmentMQSite1;
+
+    @Value("${jms.mq.bottomline.environment.2}")
+    protected String environmentMQSite2;
+
+
+    private static AtomicLong index;
+    static {
+        if (index == null){
+            index = new AtomicLong(0);
+        }
+    }
+
+    protected String getEnvironment(Header headerSite, String paymentId) {
+        String environment  = environmentPrimaryMQ;
+
+        if(roundRobinSent) {
+            long i = index.incrementAndGet();
+            if (i % 2 == 0) {
+                environment = environmentMQSite2;
+            } else {
+                environment = environmentMQSite1;
+            }
+            LOG.debug("[FPS][PmtId: {}] Using Round Robin to set datacenter {}", paymentId, environment);
+        }else{
+            if(headerSite != null){
+                try {
+                   environment = new String(headerSite.value(), "UTF-8");
+                    LOG.debug("[FPS][PmtId: {}] Get header FPS_SITE: {}", paymentId,environment);
+                } catch (UnsupportedEncodingException e) {
+                    LOG.error("[FPS][PmtId: {}] Error encoding header value {}. Setting primary datacenter to send responses {}", paymentId, headerSite.value(), environmentPrimaryMQ);
+                }
+            }else{
+                LOG.debug("[FPS][PmtId: {}] No header FPS_SITE. Sending to primary MQ: {}", paymentId, environment);
+            }
+        }
+        return environment;
+    }
 
     protected StringWriter transformResponseToString(FPSMessage fpsMessage) throws JAXBException {
         StringWriter rawMessage = new StringWriter();
@@ -85,7 +133,6 @@ public class KafkaInboundListener extends BaseListener {
         // <OrgnlGrpInf>
         pmtInfAndSts.setOrgnlGrpInf(new OriginalGroupInformation3());
         pmtInfAndSts.getOrgnlGrpInf().setOrgnlMsgId(originalDocument.getFIToFICstmrCdtTrf().getGrpHdr().getMsgId());
-        // TODO Change pacs.008 version to v.06
         pmtInfAndSts.getOrgnlGrpInf().setOrgnlMsgNmId("pacs.008.001.05");
         // <OrgnlTxId>
         pmtInfAndSts.setOrgnlTxId(originalDocument.getFIToFICstmrCdtTrf().getCdtTrfTxInf().get(0).getPmtId().getTxId());

@@ -1,7 +1,6 @@
 package com.orwellg.hermod.bottomline.fps.listeners.inbound;
 
 import com.codahale.metrics.Counter;
-import com.codahale.metrics.Timer;
 import com.google.gson.Gson;
 import com.orwellg.hermod.bottomline.fps.listeners.BaseListener;
 import com.orwellg.hermod.bottomline.fps.services.kafka.KafkaSender;
@@ -43,13 +42,12 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Validator;
 import java.io.*;
 import java.util.Date;
-import java.util.Random;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 
 public abstract class MQListener extends BaseListener implements MessageListener {
 
     private static Logger LOG = LogManager.getLogger(MQListener.class);
+
+    //protected String environmentMQ;
 
     protected Counter inbound_sop_requests;
     protected Counter inbound_fdp_requests;
@@ -85,7 +83,7 @@ public abstract class MQListener extends BaseListener implements MessageListener
     @Value("${kafka.topic.inbound.response}")
     private String outboundResponseTopic;
 
-    @Value("${kafka.topic.fps.logging}")
+    @Value("${kafka.topic.fps.inbound.logging}")
     private String loggingTopic;
 
     @Value("${kafka.topic.inbound.response.replyTo}")
@@ -99,8 +97,9 @@ public abstract class MQListener extends BaseListener implements MessageListener
     @Value("${wq.mq.queue.asyn.inbound.resp}")
     private String outboundAsynQueue;
 
-    @Value("${connector.%id.mq_primary}")
+    /*@Value("${connector.%id.mq_primary}")
     private String environmentMQ;
+    */
 
     @Value("${jms.mq.bottomline.environment.1}")
     private String environmentMQSite1;
@@ -111,21 +110,7 @@ public abstract class MQListener extends BaseListener implements MessageListener
     @Autowired
     private TaskExecutor taskInboundRequestExecutor;
 
-    private static AtomicLong index;
-    static {
-        if (index == null){
-            index = new AtomicLong(0);
-        }
-    }
-    private String getNextEnvironment(){
-        long i = index.incrementAndGet();
-        if(i % 2 == 0){
-            return environmentMQSite2;
-        }else{
-            return environmentMQSite1;
 
-        }
-    }
 
     protected void onMessage(Message message, String paymentType) {
 
@@ -184,7 +169,7 @@ public abstract class MQListener extends BaseListener implements MessageListener
                 message = writer.toString();
 
                 if(emergencyLog){
-                    LOG.trace("[FPS][PaymentType: {}] Payload received {}",paymentType, message);
+                    LOG.debug("[FPS][PaymentType: {}] Payload received {}",paymentType, message);
                 }
 
                 String uuid = StringUtils.isNotEmpty(id)?id:IDGeneratorBean.getInstance().generatorID().getFasterPaymentUniqueId();
@@ -246,6 +231,7 @@ public abstract class MQListener extends BaseListener implements MessageListener
 
                 // Call the correspondent transform
                 FPSTransform transform = getTransform(fpsMessage.getClass().getPackage().getName());
+                String nextEnvironment = getEnvironment();
                 if (transform != null) {
                     Object avroFpsMessage = transform.fps2avro(fpsMessage);
 
@@ -264,7 +250,7 @@ public abstract class MQListener extends BaseListener implements MessageListener
                         paymentreversalDocument = ((com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs007_001_05.Document) ((FPSAvroMessage) avroFpsMessage).getMessage());
                         originalPaymentMessage = gson.toJson(paymentreversalDocument);
                     }
-                    PaymentBean previousPaymentProcessed = checkPreviousResponse(originalPaymentMessage,uuid, FPID, paymentType, environmentMQ);
+                    PaymentBean previousPaymentProcessed = checkPreviousResponse(originalPaymentMessage,uuid, FPID, paymentType, nextEnvironment);
 
                     if (previousPaymentProcessed != null){
 
@@ -273,7 +259,7 @@ public abstract class MQListener extends BaseListener implements MessageListener
                         while(!previousPaymentProcessed.getStatus().getName().equals(PaymentStatus.PROCESSED.getName())){
                             LOG.info("[FPS][PmtId: {}] Waiting for finishing to be processed, FPID: {}", uuid, FPID);
                             Thread.sleep(10);
-                            previousPaymentProcessed = checkPreviousResponse(originalPaymentMessage,uuid, FPID, paymentType, environmentMQ);
+                            previousPaymentProcessed = checkPreviousResponse(originalPaymentMessage,uuid, FPID, paymentType, nextEnvironment);
                         }
                         String paymentTypeToSend = previousPaymentProcessed.getPaymentType();
                         String queueToSend = outboundAsynQueue;
@@ -282,7 +268,8 @@ public abstract class MQListener extends BaseListener implements MessageListener
                             queueToSend = outboundQueue;
                         }
 
-                        boolean responseSent = sendToMQ(uuid, previousPaymentProcessed.getResponseMessage(), queueToSend, paymentType, previousPaymentProcessed.getEnvironmentMQ());
+                        boolean responseSent = sendToMQ(uuid, previousPaymentProcessed.getResponseMessage(),
+                                queueToSend, paymentType, previousPaymentProcessed.getEnvironmentMQ());
                         if(!responseSent){
                             String alternativeEnvironmentMQ = environmentMQSite1;
                             if(previousPaymentProcessed.getEnvironmentMQ().equalsIgnoreCase(environmentMQSite1)){
@@ -308,8 +295,8 @@ public abstract class MQListener extends BaseListener implements MessageListener
                                 event = EventGenerator.generateEvent(this.getClass().getName(),
                                         eventName, uuid, gson.toJson(fpsRequest), entity, brand
                                 );
-                                LOG.info("[FPS][PmtId: {}] Sending FPS Inbound payment request", uuid);
-                                sendToKafka(inboundTopic, uuid, event, paymentTypeCode, getNextEnvironment());
+                                LOG.info("[FPS][PmtId: {}] Sending FPS Inbound payment request to {}", uuid, nextEnvironment);
+                                sendToKafka(inboundTopic, uuid, event, paymentTypeCode, nextEnvironment);
                             }else{
                                 FPSInboundReversal fpsInboundReversal = new FPSInboundReversal();
                                 fpsInboundReversal.setPaymentId(uuid);
@@ -330,8 +317,8 @@ public abstract class MQListener extends BaseListener implements MessageListener
                                         brand
                                 );
 
-                                LOG.info("[FPS][PmtId: {}] Sending FPS Inbound reversal request", uuid);
-                                sendToKafka(inboundReversalTopic, uuid, event, paymentTypeCode, getNextEnvironment());
+                                LOG.info("[FPS][PmtId: {}] Sending FPS Inbound reversal request to {}", uuid, nextEnvironment);
+                                sendToKafka(inboundReversalTopic, uuid, event, paymentTypeCode, nextEnvironment);
 
 
                                 event = EventGenerator.generateEvent(
@@ -343,7 +330,7 @@ public abstract class MQListener extends BaseListener implements MessageListener
                                         brand
                                 );
                                 kafkaSender.sendInMemoryMessage(inMemoryRequestTopic, RawMessageUtils.encodeToString(Event.SCHEMA$, event),
-                                        FPID, uuid, environmentMQ, paymentType);
+                                        FPID, uuid, nextEnvironment, paymentType);
                             }
 
                             LOG.info("[FPS][PmtId: {}] Sent FPS Inbound payment request", uuid);
@@ -360,11 +347,12 @@ public abstract class MQListener extends BaseListener implements MessageListener
                                 fpsResponse.setPaymentTimestamp(new Date().getTime());
 
 
-                                LOG.info("[FPS][PmtId: {}] Sending FPS Inbound payment Reject response", uuid);
+                                LOG.info("[FPS][PmtId: {}] Sending FPS Inbound payment Reject response to {}", uuid, nextEnvironment);
                                 // Send avro message to Kafka
-                                event = EventGenerator.generateEvent(this.getClass().getName(), FPSEvents.FPS_VALIDATION_ERROR.getEventName(), uuid, gson.toJson(fpsResponse), entity, brand);
+                                event = EventGenerator.generateEvent(this.getClass().getName(), FPSEvents.FPS_VALIDATION_ERROR.getEventName(),
+                                        uuid, gson.toJson(fpsResponse), entity, brand);
 
-                                sendToKafka(outboundResponseTopic, uuid, event, paymentTypeCode, getNextEnvironment());
+                                sendToKafka(outboundResponseTopic, uuid, event, paymentTypeCode, nextEnvironment);
 
                                 LOG.info("[FPS][PmtId: {}] Sent FPS Inbound payment Reject response", uuid);
                             }else{
@@ -378,11 +366,11 @@ public abstract class MQListener extends BaseListener implements MessageListener
                                 fpsResponse.setPaymentTimestamp(new Date().getTime());
 
 
-                                LOG.info("[FPS][PmtId: {}] Sending FPS Inbound payment Reversal response", uuid);
+                                LOG.info("[FPS][PmtId: {}] Sending FPS Inbound payment Reversal response to {}", uuid, nextEnvironment);
                                 // Send avro message to Kafka
                                 event = EventGenerator.generateEvent(this.getClass().getName(), FPSEvents.FPS_VALIDATION_ERROR.getEventName(), uuid, gson.toJson(fpsResponse), entity, brand);
 
-                                sendToKafka(inboundReversalResponseTopic, uuid, event, paymentTypeCode, getNextEnvironment());
+                                sendToKafka(inboundReversalResponseTopic, uuid, event, paymentTypeCode, nextEnvironment);
 
                                 LOG.info("[FPS][PmtId: {}] Sent FPS Inbound payment Reversal response", uuid);
                             }
@@ -398,7 +386,7 @@ public abstract class MQListener extends BaseListener implements MessageListener
                             brand
                     );
                     kafkaSender.sendInMemoryMessage(inMemoryRequestTopic, RawMessageUtils.encodeToString(Event.SCHEMA$, event),
-                            FPID, uuid, environmentMQ, paymentType);
+                            FPID, uuid, nextEnvironment, paymentType);
 
                 } else {
                     throw new MessageConversionException("Exception in message reception. The transform for the class " + fpsMessage.getClass().getName() + " is null");
@@ -421,17 +409,6 @@ public abstract class MQListener extends BaseListener implements MessageListener
         }
     }
 
-    protected Event getRawMessageEvent(String message, String uuid) {
-        Event event = EventGenerator.generateEvent(
-                this.getClass().getName(),
-                FPSEvents.FPS_HERMOD_BL_INBOUND_RECEIVED.getEventName(),
-                uuid,
-                message,
-                entity,
-                brand
-        );
-        return event;
-    }
 
     private PaymentBean checkPreviousResponse(String message, String uuid, String FPID, String paymentType, String environmentMQ) {
         PaymentBean resendPreviousResponse = null;
@@ -509,8 +486,6 @@ public abstract class MQListener extends BaseListener implements MessageListener
         return true;
     }
 
-    protected abstract void sendToKafka(String topic, String uuid, Event event, String paymentType, String environmentMQ);
-
     protected void calculateMetrics(String paymentType) {
         if (paymentType.equalsIgnoreCase(SIP)) {
             inbound_sip_requests.inc();
@@ -526,5 +501,8 @@ public abstract class MQListener extends BaseListener implements MessageListener
             inbound_rtn_requests.inc();
         }
     }
+    protected abstract void sendToKafka(String topic, String uuid, Event event, String paymentType, String environmentMQ);
+
+    protected abstract String getEnvironment();
 
 }

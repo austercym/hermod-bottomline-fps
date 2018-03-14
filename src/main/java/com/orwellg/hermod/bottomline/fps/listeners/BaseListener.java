@@ -3,7 +3,6 @@ package com.orwellg.hermod.bottomline.fps.listeners;
 import com.orwellg.hermod.bottomline.fps.services.transform.FPSTransform;
 import com.orwellg.hermod.bottomline.fps.utils.singletons.EventGenerator;
 import com.orwellg.umbrella.avro.types.event.Event;
-import com.orwellg.umbrella.commons.utils.enums.FPSEvents;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
