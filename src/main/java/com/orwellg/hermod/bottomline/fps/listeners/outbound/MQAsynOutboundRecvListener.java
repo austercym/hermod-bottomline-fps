@@ -23,6 +23,7 @@ public class MQAsynOutboundRecvListener extends MQOutboundListener {
     private static Logger LOG = LogManager.getLogger(MQAsynOutboundRecvListener.class);
 
     public MQAsynOutboundRecvListener(MetricRegistry metricRegistry){
+        super(metricRegistry);
         if(metricRegistry!= null) {
             String direction = FPSDirection.INPUT.getDirection();
             outbound_sop_responses = metricRegistry.counter(name("connector_fps", "outbound", "SOP", direction));

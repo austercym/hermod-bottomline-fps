@@ -1,6 +1,7 @@
 package com.orwellg.hermod.bottomline.fps.listeners.outbound;
 
 import com.codahale.metrics.Counter;
+import com.codahale.metrics.MetricRegistry;
 import com.google.gson.Gson;
 import com.orwellg.hermod.bottomline.fps.listeners.BaseListener;
 import com.orwellg.hermod.bottomline.fps.services.kafka.KafkaSender;
@@ -9,6 +10,7 @@ import com.orwellg.hermod.bottomline.fps.services.transform.helper.ConversionExc
 import com.orwellg.hermod.bottomline.fps.storage.InMemoryOutboundPaymentStorage;
 import com.orwellg.hermod.bottomline.fps.storage.PaymentOutboundBean;
 import com.orwellg.hermod.bottomline.fps.types.FPSMessage;
+import com.orwellg.hermod.bottomline.fps.utils.Constants;
 import com.orwellg.hermod.bottomline.fps.utils.singletons.EventGenerator;
 import com.orwellg.hermod.bottomline.fps.utils.singletons.IDGeneratorBean;
 import com.orwellg.hermod.bottomline.fps.utils.singletons.SchemeValidatorBean;
@@ -20,6 +22,7 @@ import com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs002_001_06.Docu
 import com.orwellg.umbrella.commons.types.utils.avro.DecimalTypeUtils;
 import com.orwellg.umbrella.commons.types.utils.avro.RawMessageUtils;
 import com.orwellg.umbrella.commons.utils.enums.FPSEvents;
+import com.orwellg.umbrella.commons.utils.enums.fps.FPSDirection;
 import org.apache.activemq.util.ByteArrayInputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -44,6 +47,7 @@ import javax.xml.validation.Validator;
 import java.io.*;
 import java.util.Date;
 
+import static com.codahale.metrics.MetricRegistry.name;
 import static com.orwellg.hermod.bottomline.fps.utils.Constants.RESP_SUFFIX;
 
 public abstract class MQOutboundListener extends BaseListener implements MessageListener {
@@ -59,6 +63,7 @@ public abstract class MQOutboundListener extends BaseListener implements Message
     protected Counter outbound_srn_responses;
     protected Counter outbound_rtn_responses;
     protected Counter outbound_sip_responses;
+    protected Counter outbound_duplicate_responses;
 
 
     @Autowired
@@ -87,6 +92,15 @@ public abstract class MQOutboundListener extends BaseListener implements Message
 
     @Autowired
     private TaskExecutor taskOutboundResponseExecutor;
+
+    public MQOutboundListener(MetricRegistry metricRegistry){
+        if(metricRegistry!= null) {
+            String direction = FPSDirection.INPUT.getDirection();
+            outbound_duplicate_responses = metricRegistry.counter(name("connector_fps", "outbound", "duplicates", direction));
+        }else{
+            LOG.error("No exists metrics registry");
+        }
+    }
 
     protected void onMessage(Message message, String paymentType) {
         LOG.debug("[FPS][PaymentType: {}] Receiving outbound payment response message from Bottomline", paymentType);
@@ -191,6 +205,10 @@ public abstract class MQOutboundListener extends BaseListener implements Message
                         fpsResponse.setStsDocument(paymentDocument);
                         fpsResponse.setStsRsn(paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getStsRsnInf().get(0).getRsn().getPrtry());
                         fpsResponse.setTxSts(paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getTxSts());
+
+                        if (fpsResponse.getTxSts().equalsIgnoreCase(Constants.REJECT_CODE) && fpsResponse.getStsRsn().equalsIgnoreCase(Constants.DUPLICATES_CODE)){
+                            outbound_duplicate_responses.inc();
+                        }
                         if (paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef() != null && paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getIntrBkSttlmAmt() != null) {
                             if (paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getIntrBkSttlmAmt().getValue() != null && paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getIntrBkSttlmAmt().getValue().getValue() != null) {
                                 fpsResponse.setIntrBkSttlmAmt(DecimalTypeUtils.toDecimal(paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getIntrBkSttlmAmt().getValue().getValue()));

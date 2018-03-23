@@ -22,6 +22,7 @@ public class MQSIPOutboundRecvListener extends MQOutboundListener {
     private static Logger LOG = LogManager.getLogger(MQSIPOutboundRecvListener.class);
 
     public MQSIPOutboundRecvListener(MetricRegistry metricRegistry){
+        super(metricRegistry);
         if(metricRegistry!= null) {
             outbound_sip_responses = metricRegistry.counter(name("connector_fps", "outbound", "SIP", FPSDirection.INPUT.getDirection()));
         }else{
