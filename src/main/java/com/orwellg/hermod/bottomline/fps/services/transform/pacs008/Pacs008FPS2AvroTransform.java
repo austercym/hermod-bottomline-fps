@@ -600,7 +600,7 @@ public class Pacs008FPS2AvroTransform {
                     }
                     List<String> adrLine = pstlAdr.getAdrLine();
                     if(adrLine != null) {
-                         if(pstlAdr == null){
+                         if(pstlAdr1 == null){
                              pstlAdr1 = new com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.PostalAddress6();
                          }
                         List<String> postalAddressLines = new ArrayList<>();
