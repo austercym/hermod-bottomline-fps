@@ -323,6 +323,9 @@ public class Pacs008FPS2AvroTransform {
                                     List<String> infLst = dtls.getInf();
                                     if(infLst != null) {
                                         for (String inf : infLst) {
+                                            if(dtls2.getInf() == null){
+                                                dtls2.setInf(new ArrayList <>());
+                                            }
                                             dtls2.getInf().add(inf);
                                         }
                                     }
@@ -331,6 +334,9 @@ public class Pacs008FPS2AvroTransform {
                                     }
                                     rgltryRptgLst1.getDtls().add(dtls2);
                                 }
+                            }
+                            if(creditTransferTransaction19.getRgltryRptg() == null){
+                                creditTransferTransaction19.setRgltryRptg(new ArrayList <>());
                             }
                             creditTransferTransaction19.getRgltryRptg().add(rgltryRptgLst1);
                         }
@@ -604,12 +610,10 @@ public class Pacs008FPS2AvroTransform {
                              pstlAdr1 = new com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.PostalAddress6();
                          }
                         List<String> postalAddressLines = new ArrayList<>();
-                        if(pstlAdr1.getAdrLine() != null){
-                            postalAddressLines = pstlAdr1.getAdrLine();
-                        }
                         for (String addrLn : adrLine) {
                             postalAddressLines.add(addrLn);
                         }
+                        pstlAdr1.setAdrLine(postalAddressLines);
                         if(cdtr == null){
                             cdtr = new com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.PartyIdentification43();
                         }
@@ -646,12 +650,10 @@ public class Pacs008FPS2AvroTransform {
                             pstlAdr1 = new  com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.PostalAddress6();
                         }
                         List<String> postalAddressLines = new ArrayList<>();
-                        if(pstlAdr1.getAdrLine() != null){
-                            postalAddressLines = pstlAdr1.getAdrLine();
-                        }
                         for (String addrLn : adrLine) {
                             postalAddressLines.add(addrLn);
                         }
+                        pstlAdr1.setAdrLine(postalAddressLines);
                         if(dbtr == null){
                             dbtr = new com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.PartyIdentification43();
                         }
