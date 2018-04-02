@@ -150,6 +150,7 @@ public abstract class MQOutboundListener extends BaseListener implements Message
     @Async("taskOutboundResponseExecutor")
     public void sendMessageToTopic(Writer writer, String paymentType, String id) {
         Event event = null;
+        String uuid = id;
         if (writer != null) {
             String message = "";
             try {
@@ -161,11 +162,6 @@ public abstract class MQOutboundListener extends BaseListener implements Message
                     LOG.debug("[FPS][PaymentType: {}] Payload received {}",paymentType, message);
                 }
 
-                String uuid = StringUtils.isNotEmpty(id) ? id : IDGeneratorBean.getInstance().generatorID().getFasterPaymentUniqueId();
-
-                event = getRawMessageEvent(message, uuid, FPSEvents.FPS_HERMOD_BL_OUTBOUND_RESPONSE.getEventName());
-
-                kafkaSender.sendRawMessage(loggingTopic, RawMessageUtils.encodeToString(Event.SCHEMA$, event), uuid);
 
                 boolean schemaValidation = true;
                 try {
@@ -221,8 +217,9 @@ public abstract class MQOutboundListener extends BaseListener implements Message
                         if (paymentBean != null) {
                             FPSOutboundPayment originalMessage = paymentBean.getOutboundPayment();
                             uuid = getResponsePaymentId(originalMessage);
-                            //Send mq message to hbase topic
-                            kafkaSender.sendRawMessage(loggingTopic, message, uuid);
+                            event = getRawMessageEvent(message, uuid, FPSEvents.FPS_HERMOD_BL_OUTBOUND_RESPONSE.getEventName());
+
+                            kafkaSender.sendRawMessage(loggingTopic, RawMessageUtils.encodeToString(Event.SCHEMA$, event), uuid);
 
                             fpsResponse.setPaymentId(uuid);
                             fpsResponse.setOrgnlFPID(originalMessage.getFPID());
@@ -234,6 +231,11 @@ public abstract class MQOutboundListener extends BaseListener implements Message
                             fpsResponse.setDbtrAccountId(originalMessage.getDbtrAccountId());
                         } else {
                             fpsResponse.setOrgnlPaymentId(paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxId());
+                            uuid = fpsResponse.getOrgnlPaymentId();
+                            event = getRawMessageEvent(message, uuid, FPSEvents.FPS_HERMOD_BL_OUTBOUND_RESPONSE.getEventName());
+
+                            kafkaSender.sendRawMessage(loggingTopic, RawMessageUtils.encodeToString(Event.SCHEMA$, event), uuid);
+
                             if (paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getPmtTpInf().getLclInstrm().getPrtry().indexOf('/') > 0) {
                                 fpsResponse.setOrgnlPaymentType(paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getPmtTpInf().getLclInstrm().getPrtry().substring(0, paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getPmtTpInf().getLclInstrm().getPrtry().indexOf('/')));
                             } else {
@@ -271,8 +273,6 @@ public abstract class MQOutboundListener extends BaseListener implements Message
                         uuid, new Date().getTime()-startTime);
             } catch (ConversionException convEx) {
                 LOG.error("[FPS][PaymentType: {}]Error generating Avro file. Error: {} Message: {}", paymentType, convEx.getMessage(), message);
-            } catch (IOException e) {
-                LOG.error("[FPS][PaymentType: {}] IO Error {}", paymentType, e.getMessage());
             } catch (MessageConversionException conversionEx) {
                 LOG.error("[FPS][PaymentType: {}] Error transforming message {}", paymentType, conversionEx.getMessage());
             }catch (Exception ex) {
