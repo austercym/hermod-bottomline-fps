@@ -6,4 +6,6 @@ public class Constants {
     public static final String NO_VALIDATION_CODE = "9999";
 
     public static final String RESP_SUFFIX = "_RESP";
+    public static final String DUPLICATES_CODE = "1913";
+
 }
