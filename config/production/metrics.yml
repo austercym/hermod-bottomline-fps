@@ -35,13 +35,6 @@ whitelistObjectNames: ["metrics:name=connector_fps.inbound.SOP.I,*",
 "metrics:name=connector_fps.outbound.SIP.O,*",
 "metrics:name=connector_fps.outbound.duplicates.O,*"]
 rules:
-  - pattern: metrics<name=(.*?)\.(.*?)\.duplicates\.(.*?)\.*>
-     name: $1_duplicates
-     labels:
-       direction: $4
-       fpsType: $3
-       messageType: $2
-     type: COUNTER
    - pattern: metrics<name=(.*?)\.(.*?)\.(.*?)\.(.*?)\.*>
      name: $1
      labels:
