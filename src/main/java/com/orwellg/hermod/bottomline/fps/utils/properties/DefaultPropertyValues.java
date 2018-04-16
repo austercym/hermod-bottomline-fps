@@ -153,8 +153,8 @@ public class DefaultPropertyValues {
 		defaultValues.put("kafka.topic.reversal.request", KAFKA_DEFAULT_INBOUND_REVERSAL_REQUEST_TOPIC);
 		defaultValues.put("kafka.topic.reversal.response", KAFKA_DEFAULT_INBOUND_REVERSAL_RESPONSE_TOPIC);
 
-		defaultValues.put("kafka.topic.fps.input.logging", KAFKA_DEFAULT_MESSAGE_LOGGING_INBOUND_TOPIC);
-		defaultValues.put("kafka.topic.fps.output.logging", KAFKA_DEFAULT_MESSAGE_LOGGING_OUTBOUND_TOPIC);
+		defaultValues.put("kafka.topic.fps.inbound.logging", KAFKA_DEFAULT_MESSAGE_LOGGING_INBOUND_TOPIC);
+		defaultValues.put("kafka.topic.fps.outbound.logging", KAFKA_DEFAULT_MESSAGE_LOGGING_OUTBOUND_TOPIC);
 
 		defaultValues.put("kafka.consumer.group.id", KAFKA_DEFAULT_CONSUMER_GROUP_ID);
 		defaultValues.put("kafka.consumer.threads.num", KAFKA_DEFAULT_CONSUMER_THREADS);
