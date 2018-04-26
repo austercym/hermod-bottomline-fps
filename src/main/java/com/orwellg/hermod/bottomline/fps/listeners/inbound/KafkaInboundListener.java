@@ -1,5 +1,6 @@
 package com.orwellg.hermod.bottomline.fps.listeners.inbound;
 
+import com.codahale.metrics.Counter;
 import com.google.gson.Gson;
 import com.orwellg.hermod.bottomline.fps.listeners.BaseListener;
 import com.orwellg.hermod.bottomline.fps.storage.InMemoryPaymentStorage;
@@ -8,9 +9,11 @@ import com.orwellg.hermod.bottomline.fps.types.FPSMessage;
 import com.orwellg.hermod.bottomline.fps.utils.singletons.IDGeneratorBean;
 import com.orwellg.hermod.bottomline.fps.utils.singletons.JAXBContextBean;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
+import com.orwellg.umbrella.avro.types.payment.fps.FPSOutboundPaymentResponse;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSOutboundReversalResponse;
 import com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs002_001_06.*;
 import com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.InstructionForNextAgent1;
+import com.orwellg.umbrella.commons.utils.enums.fps.FPSDirection;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -27,7 +30,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.SortedMap;
 import java.util.concurrent.atomic.AtomicLong;
+
+import static com.codahale.metrics.MetricRegistry.name;
 
 public class KafkaInboundListener extends BaseListener {
 
@@ -306,4 +312,5 @@ public class KafkaInboundListener extends BaseListener {
         avroMessage.setMessage(fpsPacs002Response);
         return avroMessage;
     }
+
 }

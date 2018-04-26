@@ -18,9 +18,14 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 public class FpsBootApplication {
 	private static final Logger LOG = LogManager.getLogger(FpsBootApplication.class);
 
+	private MetricRegistry metricRegistry;
+
 	@Bean
 	public MetricRegistry metricRegistry(){
-		return new MetricRegistry();
+		if(metricRegistry == null) {
+			metricRegistry = new MetricRegistry();
+		}
+		return metricRegistry;
 	}
 
 	@Bean

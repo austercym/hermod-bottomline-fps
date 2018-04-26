@@ -4,7 +4,7 @@
 
 	<groupId>com.orwellg.hermod.bottomline.fps</groupId>
   	<artifactId>hermod-bottomline-fps</artifactId>
-	<version>0.1.1</version>
+	<version>0.1.2-SNAPSHOT</version>
 	<name>hermod-bottomline-fps</name>
 	<description>Project to connect to Bottomline and send/retrieve messages to Kafka</description>
 
@@ -21,7 +21,7 @@
 		<yggdrasil.network.version>0.0.5-SNAPSHOT</yggdrasil.network.version>
 		<yggdrasil.network.client.version>0.0.6-SNAPSHOT</yggdrasil.network.client.version>
 		<umbrella.commons.version>0.0.8</umbrella.commons.version>
-		<umbrella.commons.types.version>0.0.7</umbrella.commons.types.version>
+		<umbrella.commons.types.version>0.0.8-SNAPSHOT</umbrella.commons.types.version>
 		<spring.version>4.3.8.RELEASE</spring.version>
 		<com.ibm.mq.version>9.0.3.0</com.ibm.mq.version>
 		<org.apache.commons.version>4.1</org.apache.commons.version>

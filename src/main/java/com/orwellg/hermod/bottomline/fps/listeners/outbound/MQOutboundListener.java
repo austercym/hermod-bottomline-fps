@@ -46,6 +46,7 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Validator;
 import java.io.*;
 import java.util.Date;
+import java.util.SortedMap;
 
 import static com.codahale.metrics.MetricRegistry.name;
 import static com.orwellg.hermod.bottomline.fps.utils.Constants.RESP_SUFFIX;
@@ -57,14 +58,8 @@ public abstract class MQOutboundListener extends BaseListener implements Message
     @Autowired
     private Gson gson;
 
-    protected Counter outbound_sop_responses;
-    protected Counter outbound_fdp_responses;
-    protected Counter outbound_cbp_responses;
-    protected Counter outbound_srn_responses;
-    protected Counter outbound_rtn_responses;
-    protected Counter outbound_sip_responses;
-    protected Counter outbound_duplicate_responses;
-
+    @Autowired
+    protected MetricRegistry metricRegistry;
 
     @Autowired
     private Jaxb2Marshaller marshaller;
@@ -93,14 +88,6 @@ public abstract class MQOutboundListener extends BaseListener implements Message
     @Autowired
     private TaskExecutor taskOutboundResponseExecutor;
 
-    public MQOutboundListener(MetricRegistry metricRegistry){
-        if(metricRegistry!= null) {
-            String direction = FPSDirection.INPUT.getDirection();
-            outbound_duplicate_responses = metricRegistry.counter(name("connector_fps", "outbound", "duplicates", direction));
-        }else{
-            LOG.error("No exists metrics registry");
-        }
-    }
 
     protected void onMessage(Message message, String paymentType) {
         LOG.debug("[FPS][PaymentType: {}] Receiving outbound payment response message from Bottomline", paymentType);
@@ -202,9 +189,10 @@ public abstract class MQOutboundListener extends BaseListener implements Message
                         fpsResponse.setStsRsn(paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getStsRsnInf().get(0).getRsn().getPrtry());
                         fpsResponse.setTxSts(paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getTxSts());
 
-                        if (fpsResponse.getTxSts().equalsIgnoreCase(Constants.REJECT_CODE) && fpsResponse.getStsRsn().equalsIgnoreCase(Constants.DUPLICATES_CODE)){
-                            outbound_duplicate_responses.inc();
-                        }
+
+                        calculateMetricResponses(fpsResponse, paymentType);
+
+
                         if (paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef() != null && paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getIntrBkSttlmAmt() != null) {
                             if (paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getIntrBkSttlmAmt().getValue() != null && paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getIntrBkSttlmAmt().getValue().getValue() != null) {
                                 fpsResponse.setIntrBkSttlmAmt(DecimalTypeUtils.toDecimal(paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxRef().getIntrBkSttlmAmt().getValue().getValue()));
@@ -281,6 +269,8 @@ public abstract class MQOutboundListener extends BaseListener implements Message
         }
     }
 
+
+
     private String getPaymentType(Document paymentDocument) {
         String paymentType = "";
         if(paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts() != null &&
@@ -341,20 +331,48 @@ public abstract class MQOutboundListener extends BaseListener implements Message
 
     protected abstract void sendToKafka(String topic, String uuid, Event event, String paymentType, String environmentMQ);
 
-    protected void calculateMetrics(String paymentType) {
-        if (paymentType.equalsIgnoreCase(SIP)) {
-            outbound_sip_responses.inc();
-        }else if (paymentType.equalsIgnoreCase(SOP)) {
-            outbound_sop_responses.inc();
-        }else if (paymentType.equalsIgnoreCase(FDP)) {
-            outbound_fdp_responses.inc();
-        }else if (paymentType.equalsIgnoreCase(CBP)) {
-            outbound_cbp_responses.inc();
-        }else if (paymentType.equalsIgnoreCase(SRN)) {
-            outbound_srn_responses.inc();
-        }else if (paymentType.equalsIgnoreCase(RTN)) {
-            outbound_rtn_responses.inc();
+    private void calculateMetricResponses(FPSInboundPaymentResponse fpsResponse, String paymentType) {
+        String txSts = fpsResponse.getTxSts();
+        SortedMap<String, Counter> counters = metricRegistry.getCounters();
+        if(StringUtils.isNotEmpty(txSts)){
+            Counter counter = null;
+            String stsRsn = fpsResponse.getStsRsn();
+            if(StringUtils.isNotEmpty(stsRsn)) {
+                String key = "connector_fps.outbound."+paymentType+"." + FPSDirection.INPUT.getDirection() + "." + txSts + "." + stsRsn;
+                if (counters.containsKey(key)) {
+                    counter = counters.get(key);
+
+                } else {
+                    counter = metricRegistry.counter(name("connector_fps", "outbound", paymentType, FPSDirection.INPUT.getDirection(), txSts, stsRsn));
+                }
+            }else{
+                String key = "connector_fps.outbound."+paymentType+"." + FPSDirection.INPUT.getDirection() + "." + txSts;
+                if (counters.containsKey(key)) {
+                    counter = counters.get(key);
+
+                } else {
+                    counter = metricRegistry.counter(name("connector_fps", "outbound", paymentType, FPSDirection.INPUT.getDirection(), txSts));
+                }
+            }
+            counter.inc();
+        }else{
+
+            calculateMetrics(counters, paymentType);
         }
+    }
+
+
+    protected void calculateMetrics(SortedMap<String, Counter> counters, String paymentType) {
+        String key = "connector_fps.outbound."+paymentType+"." + FPSDirection.INPUT.getDirection();
+        Counter counter = null;
+        if (counters.containsKey(key)) {
+            counter = counters.get(key);
+
+        } else {
+            counter = metricRegistry.counter(name("connector_fps", "outbound", paymentType, FPSDirection.INPUT.getDirection()));
+        }
+        counter.inc();
+
     }
 
 }
