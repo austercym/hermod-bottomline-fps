@@ -23,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.*;
+import java.util.Date;
 
 
 @RestController
@@ -77,7 +78,7 @@ public class SimulateSendEventToKafka {
         Writer writer = null;
         try {
             writer = getStringWriter(queueMessage);
-            mqSIPSite1Listener.sendMessageToTopic(writer, BaseListener.SIP, key);
+            mqSIPSite1Listener.sendMessageToTopic(writer, BaseListener.SIP, key, new Date().getTime());
             return new ResponseEntity<>("Message sent ", HttpStatus.OK);
         }catch(IOException e){
             LOG.error("Error processing message: {}", e.getMessage());
@@ -100,7 +101,7 @@ public class SimulateSendEventToKafka {
         Writer writer = null;
         try {
             writer = getStringWriter(queueMessage);
-            mqSIPSite2Listener.sendMessageToTopic(writer, BaseListener.SIP, key);
+            mqSIPSite2Listener.sendMessageToTopic(writer, BaseListener.SIP, key, new Date().getTime());
             return new ResponseEntity<>("Message sent ", HttpStatus.OK);
         }catch(IOException e){
             LOG.error("Error processing message: {}", e.getMessage());
@@ -123,7 +124,7 @@ public class SimulateSendEventToKafka {
         Writer writer = null;
         try {
             writer = getStringWriter(queueMessage);
-            mqASYNCSite1Listener.sendMessageToTopic(writer, MQASYNSite1Listener.PAYMENT_TYPE, key);
+            mqASYNCSite1Listener.sendMessageToTopic(writer, MQASYNSite1Listener.PAYMENT_TYPE, key, new Date().getTime());
             return new ResponseEntity<>("Message sent ", HttpStatus.OK);
         }catch(IOException e){
             LOG.error("Error processing message: {}", e.getMessage());
@@ -146,7 +147,7 @@ public class SimulateSendEventToKafka {
         Writer writer = null;
         try {
             writer = getStringWriter(queueMessage);
-            mqASYNCSite2Listener.sendMessageToTopic(writer, MQASYNSite2Listener.PAYMENT_TYPE, key);
+            mqASYNCSite2Listener.sendMessageToTopic(writer, MQASYNSite2Listener.PAYMENT_TYPE, key, new Date().getTime());
             return new ResponseEntity<>("Message sent ", HttpStatus.OK);
         }catch(IOException e){
             LOG.error("Error processing message: {}", e.getMessage());
@@ -169,7 +170,7 @@ public class SimulateSendEventToKafka {
         Writer writer = null;
         try {
             writer = getStringWriter(queueMessage);
-            mqPOOSite1Listener.sendMessageToTopic(writer, BaseListener.POO, key);
+            mqPOOSite1Listener.sendMessageToTopic(writer, BaseListener.POO, key, new Date().getTime());
             return new ResponseEntity<>("Message sent ", HttpStatus.OK);
         }catch(IOException e){
             LOG.error("Error processing message: {}", e.getMessage());
@@ -192,7 +193,7 @@ public class SimulateSendEventToKafka {
         Writer writer = null;
         try {
             writer = getStringWriter(queueMessage);
-            mqPOOSite2Listener.sendMessageToTopic(writer, BaseListener.POO, key);
+            mqPOOSite2Listener.sendMessageToTopic(writer, BaseListener.POO, key, new Date().getTime());
             return new ResponseEntity<>("Message sent ", HttpStatus.OK);
         }catch(IOException e){
             LOG.error("Error processing message: {}", e.getMessage());

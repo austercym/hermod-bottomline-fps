@@ -97,9 +97,6 @@ public abstract class MQListener extends BaseListener implements MessageListener
     @Value("${wq.mq.queue.asyn.inbound.resp}")
     private String outboundAsynQueue;
 
-    /*@Value("${connector.%id.mq_primary}")
-    private String environmentMQ;
-    */
 
     @Value("${jms.mq.bottomline.environment.1}")
     private String environmentMQSite1;
@@ -119,6 +116,8 @@ public abstract class MQListener extends BaseListener implements MessageListener
         Reader reader = null;
         Writer writer = new StringWriter();
 
+        Long qosTimestamp = new Date().getTime();
+
         try {
             if (message instanceof TextMessage) {
                 reader = new StringReader(((TextMessage) message).getText());
@@ -136,7 +135,7 @@ public abstract class MQListener extends BaseListener implements MessageListener
             taskInboundRequestExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
-                    sendMessageToTopic(writer, paymentType, null);
+                    sendMessageToTopic(writer, paymentType, null, qosTimestamp);
                 }
             });
             LOG.debug("[FPS][PaymentType: {}] End processing inbound payment request", paymentType);
@@ -159,7 +158,7 @@ public abstract class MQListener extends BaseListener implements MessageListener
     }
 
     @Async("taskInboundRequestExecutor")
-    public void sendMessageToTopic(Writer writer, String paymentType, String id) {
+    public void sendMessageToTopic(Writer writer, String paymentType, String id, Long qosMilliseconds) {
         boolean schemaValidation = true;
         Event event =  null;
         if (writer != null) {
@@ -296,7 +295,7 @@ public abstract class MQListener extends BaseListener implements MessageListener
                                         eventName, uuid, gson.toJson(fpsRequest), entity, brand
                                 );
                                 LOG.info("[FPS][PmtId: {}] Sending FPS Inbound payment request to {}", uuid, nextEnvironment);
-                                sendToKafka(inboundTopic, uuid, event, paymentTypeCode, nextEnvironment);
+                                sendToKafka(inboundTopic, uuid, event, paymentTypeCode, nextEnvironment, qosMilliseconds);
                             }else{
                                 FPSInboundReversal fpsInboundReversal = new FPSInboundReversal();
                                 fpsInboundReversal.setPaymentId(uuid);
@@ -318,7 +317,7 @@ public abstract class MQListener extends BaseListener implements MessageListener
                                 );
 
                                 LOG.info("[FPS][PmtId: {}] Sending FPS Inbound reversal request to {}", uuid, nextEnvironment);
-                                sendToKafka(inboundReversalTopic, uuid, event, paymentTypeCode, nextEnvironment);
+                                sendToKafka(inboundReversalTopic, uuid, event, paymentTypeCode, nextEnvironment, qosMilliseconds);
 
 
                                 event = EventGenerator.generateEvent(
@@ -330,7 +329,7 @@ public abstract class MQListener extends BaseListener implements MessageListener
                                         brand
                                 );
                                 kafkaSender.sendInMemoryMessage(inMemoryRequestTopic, RawMessageUtils.encodeToString(Event.SCHEMA$, event),
-                                        FPID, uuid, nextEnvironment, paymentType);
+                                        FPID, uuid, nextEnvironment, paymentType, qosMilliseconds);
                             }
 
                             LOG.info("[FPS][PmtId: {}] Sent FPS Inbound payment request", uuid);
@@ -352,7 +351,7 @@ public abstract class MQListener extends BaseListener implements MessageListener
                                 event = EventGenerator.generateEvent(this.getClass().getName(), FPSEvents.FPS_VALIDATION_ERROR.getEventName(),
                                         uuid, gson.toJson(fpsResponse), entity, brand);
 
-                                sendToKafka(outboundResponseTopic, uuid, event, paymentTypeCode, nextEnvironment);
+                                sendToKafka(outboundResponseTopic, uuid, event, paymentTypeCode, nextEnvironment, qosMilliseconds);
 
                                 LOG.info("[FPS][PmtId: {}] Sent FPS Inbound payment Reject response", uuid);
                             }else{
@@ -370,7 +369,7 @@ public abstract class MQListener extends BaseListener implements MessageListener
                                 // Send avro message to Kafka
                                 event = EventGenerator.generateEvent(this.getClass().getName(), FPSEvents.FPS_VALIDATION_ERROR.getEventName(), uuid, gson.toJson(fpsResponse), entity, brand);
 
-                                sendToKafka(inboundReversalResponseTopic, uuid, event, paymentTypeCode, nextEnvironment);
+                                sendToKafka(inboundReversalResponseTopic, uuid, event, paymentTypeCode, nextEnvironment, qosMilliseconds);
 
                                 LOG.info("[FPS][PmtId: {}] Sent FPS Inbound payment Reversal response", uuid);
                             }
@@ -386,7 +385,7 @@ public abstract class MQListener extends BaseListener implements MessageListener
                             brand
                     );
                     kafkaSender.sendInMemoryMessage(inMemoryRequestTopic, RawMessageUtils.encodeToString(Event.SCHEMA$, event),
-                            FPID, uuid, nextEnvironment, paymentType);
+                            FPID, uuid, nextEnvironment, paymentType, qosMilliseconds);
 
                 } else {
                     throw new MessageConversionException("Exception in message reception. The transform for the class " + fpsMessage.getClass().getName() + " is null");
@@ -501,7 +500,7 @@ public abstract class MQListener extends BaseListener implements MessageListener
             inbound_rtn_requests.inc();
         }
     }
-    protected abstract void sendToKafka(String topic, String uuid, Event event, String paymentType, String environmentMQ);
+    protected abstract void sendToKafka(String topic, String uuid, Event event, String paymentType, String environmentMQ, Long qosMilliseconds);
 
     protected abstract String getEnvironment();
 
