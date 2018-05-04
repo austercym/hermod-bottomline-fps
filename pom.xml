@@ -244,7 +244,18 @@
       
    </plugins>
 
-	<finalName>hermod-bottomline-fps-${project.version}</finalName>
+	 <resources>
+		 <resource>
+			 <directory>src/main/resources</directory>
+			 <filtering>true</filtering>
+			 <excludes>
+				 <exclude>*.xml</exclude>
+			 </excludes>
+		 </resource>
+	 </resources>
+
+
+	 <finalName>hermod-bottomline-fps-${project.version}</finalName>
 
  </build>
 </project>
