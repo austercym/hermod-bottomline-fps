@@ -33,13 +33,13 @@ public abstract class MQPOOListener extends MQListener {
     }
 
     @Override
-    protected void sendToKafka(String topic, String uuid, Event event, String paymentType, String environmentMQ){
+    protected void sendToKafka(String topic, String uuid, Event event, String paymentType, String environmentMQ, Long qosMilliseconds){
         inbound_poo_requests.inc();
         kafkaSender.send(
                 topic,
                 RawMessageUtils.encodeToString(Event.SCHEMA$, event),
                 uuid,
-                replyTo, environmentMQ, POO, true
+                replyTo, environmentMQ, POO, true, qosMilliseconds
         );
     }
 }

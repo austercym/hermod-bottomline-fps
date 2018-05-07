@@ -33,6 +33,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.StringWriter;
 import java.util.Date;
+import java.util.SortedMap;
 
 import static com.codahale.metrics.MetricRegistry.name;
 import static com.orwellg.hermod.bottomline.fps.utils.Constants.RESP_SUFFIX;
@@ -41,12 +42,6 @@ import static com.orwellg.hermod.bottomline.fps.utils.Constants.RESP_SUFFIX;
 public class KafkaResponseReversalInboundListener extends KafkaInboundListener implements MessageListener<String, String>, KafkaDataListener<ConsumerRecord<String, String>> {
 
 	private static Logger LOG = LogManager.getLogger(KafkaResponseReversalInboundListener.class);
-	private Counter inbound_sop_reversal_responses;
-	private Counter inbound_sip_reversal_responses;
-	private Counter inbound_fdp_reversal_responses;
-	private Counter inbound_cbp_reversal_responses;
-	private Counter inbound_srn_reversal_responses;
-	private Counter inbound_rtn_reversal_responses;
 
 	@Value("${wq.mq.queue.sip.inbound.resp}")
 	private String outboundQueue;
@@ -71,19 +66,8 @@ public class KafkaResponseReversalInboundListener extends KafkaInboundListener i
 	@Autowired
 	private TaskExecutor taskInboundReversalExecutor;
 
-	public KafkaResponseReversalInboundListener(MetricRegistry metricRegistry){
-		if(metricRegistry!= null) {
-			String direction = FPSDirection.OUTPUT.getDirection();
-			inbound_sop_reversal_responses = metricRegistry.counter(name("connector_fps_inbound_reversal", "inbound", "SOP", direction));
-			inbound_sip_reversal_responses = metricRegistry.counter(name("connector_fps_inbound_reversal", "inbound", "SIP", direction));
-			inbound_cbp_reversal_responses = metricRegistry.counter(name("connector_fps_inbound_reversal", "inbound", "CBP", direction));
-			inbound_fdp_reversal_responses = metricRegistry.counter(name("connector_fps_inbound_reversal", "inbound", "FDP", direction));
-			inbound_srn_reversal_responses = metricRegistry.counter(name("connector_fps_inbound_reversal", "inbound", "SRN", direction));
-			inbound_rtn_reversal_responses = metricRegistry.counter(name("connector_fps_inbound_reversal", "inbound", "RTN", direction));
-		}else{
-			LOG.error("No exists metrics registry");
-		}
-	}
+	@Autowired
+	private MetricRegistry metricRegistry;
 
 	@Override
 	public void onMessage(ConsumerRecord<String, String> message) {
@@ -175,7 +159,7 @@ public class KafkaResponseReversalInboundListener extends KafkaInboundListener i
 						queueToSend = outboundQueue;
 					}
 
-					calculateMetrics(paymentType);
+					calculateMetricResponses(fpsPaymentReversalResponse, paymentType);
 
 					Header headerSite = headers.lastHeader(KafkaHeaders.FPS_SITE.getKafkaHeader());
 					environmentMQ = getEnvironment(headerSite, key);
@@ -199,7 +183,7 @@ public class KafkaResponseReversalInboundListener extends KafkaInboundListener i
 							brand
 					);
 					kafkaSender.sendInMemoryMessage(inMemoryResponseTopic, RawMessageUtils.encodeToString(Event.SCHEMA$, event),
-							FPID, uuid, environmentMQ, paymentType);
+							FPID, uuid, environmentMQ, paymentType, null);
 
 				} else {
 					throw new MessageConversionException("Exception in message emission. The transform for pacs_002_001 is null");
@@ -248,6 +232,7 @@ public class KafkaResponseReversalInboundListener extends KafkaInboundListener i
 		return fpsPaymentResponse.getPaymentId()+ RESP_SUFFIX;
 	}
 
+	/*
 	private void calculateMetrics(String paymentType) {
 		if (paymentType.equalsIgnoreCase(SIP)) {
 			inbound_sip_reversal_responses.inc();
@@ -263,4 +248,47 @@ public class KafkaResponseReversalInboundListener extends KafkaInboundListener i
 			inbound_rtn_reversal_responses.inc();
 		}
 	}
+*/
+
+	private void calculateMetricResponses(FPSOutboundReversalResponse fpsResponse, String paymentType) {
+		String txSts = fpsResponse.getRvsdSts();
+		SortedMap<String, Counter> counters = metricRegistry.getCounters();
+		if(org.apache.commons.lang3.StringUtils.isNotEmpty(txSts)){
+			Counter counter = null;
+			String stsRsn = fpsResponse.getRvsdRsn();
+			if(org.apache.commons.lang3.StringUtils.isNotEmpty(stsRsn)) {
+				String key = "connector_fps_inbound_reversal.inbound."+paymentType+"." + FPSDirection.OUTPUT.getDirection() + "." + txSts + "." + stsRsn;
+				if (counters.containsKey(key)) {
+					counter = counters.get(key);
+
+				} else {
+					counter = metricRegistry.counter(name("connector_fps_inbound_reversal", "inbound", paymentType, FPSDirection.OUTPUT.getDirection(), txSts, stsRsn));
+				}
+			}else{
+				String key = "connector_fps_inbound_reversal.inbound."+paymentType+"." + FPSDirection.OUTPUT.getDirection() + "." + txSts;
+				if (counters.containsKey(key)) {
+					counter = counters.get(key);
+
+				} else {
+					counter = metricRegistry.counter(name("connector_fps_inbound_reversal", "inbound", paymentType, FPSDirection.OUTPUT.getDirection(), txSts));
+				}
+			}
+			counter.inc();
+		}else{
+			calculateMetrics(counters, paymentType);
+		}
+	}
+
+    private void calculateMetrics(SortedMap<String, Counter> counters, String paymentType) {
+        String key = "connector_fps_inbound_reversal.inbound."+paymentType+"." + FPSDirection.OUTPUT.getDirection();
+        Counter counter = null;
+        if (counters.containsKey(key)) {
+            counter = counters.get(key);
+
+        } else {
+            counter = metricRegistry.counter(name("connector_fps_inbound_reversal", "inbound", paymentType, FPSDirection.OUTPUT.getDirection()));
+        }
+        counter.inc();
+
+    }
 }

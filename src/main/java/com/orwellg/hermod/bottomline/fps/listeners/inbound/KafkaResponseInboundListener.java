@@ -16,6 +16,7 @@ import com.orwellg.umbrella.commons.utils.enums.CurrencyCodes;
 import com.orwellg.umbrella.commons.utils.enums.FPSEvents;
 import com.orwellg.umbrella.commons.utils.enums.KafkaHeaders;
 import com.orwellg.umbrella.commons.utils.enums.fps.FPSDirection;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.Headers;
@@ -33,6 +34,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.StringWriter;
 import java.util.Date;
+import java.util.SortedMap;
 
 import static com.codahale.metrics.MetricRegistry.name;
 import static com.orwellg.hermod.bottomline.fps.utils.Constants.RESP_SUFFIX;
@@ -41,12 +43,6 @@ import static com.orwellg.hermod.bottomline.fps.utils.Constants.RESP_SUFFIX;
 public class KafkaResponseInboundListener extends KafkaInboundListener implements MessageListener<String, String>, KafkaDataListener<ConsumerRecord<String, String>> {
 
 	private static Logger LOG = LogManager.getLogger(KafkaResponseInboundListener.class);
-	private Counter inbound_sop_responses;
-	private Counter inbound_fdp_responses;
-	private Counter inbound_cbp_responses;
-	private Counter inbound_srn_responses;
-	private Counter inbound_rtn_responses;
-	private Counter inbound_sip_responses;
 
 	@Value("${wq.mq.queue.sip.inbound.resp}")
 	private String outboundQueue;
@@ -62,20 +58,9 @@ public class KafkaResponseInboundListener extends KafkaInboundListener implement
 	@Autowired
 	private TaskExecutor taskInboundResponseExecutor;
 
+	@Autowired
+	private MetricRegistry metricRegistry;
 
-	public KafkaResponseInboundListener(MetricRegistry metricRegistry){
-		if(metricRegistry!= null) {
-			String direction = FPSDirection.OUTPUT.getDirection();
-			inbound_sop_responses = metricRegistry.counter(name("connector_fps", "inbound", "SOP", direction));
-			inbound_cbp_responses = metricRegistry.counter(name("connector_fps", "inbound", "CBP", direction));
-			inbound_fdp_responses = metricRegistry.counter(name("connector_fps", "inbound", "FDP", direction));
-			inbound_srn_responses = metricRegistry.counter(name("connector_fps", "inbound", "SRN", direction));
-			inbound_rtn_responses = metricRegistry.counter(name("connector_fps", "inbound", "RTN", direction));
-			inbound_sip_responses = metricRegistry.counter(name("connector_fps", "inbound", "SIP", direction));
-		}else{
-			LOG.error("No exists metrics registry");
-		}
-	}
 
 	@Override
 	public void onMessage(ConsumerRecord<String, String> message) {
@@ -167,7 +152,8 @@ public class KafkaResponseInboundListener extends KafkaInboundListener implement
 						queueToSend = outboundQueue;
 					}
 
-					calculateMetrics(paymentType);
+					//calculateMetrics(paymentType);
+					calculateMetricResponses(fpsPaymentResponse, paymentType);
 
 					Header headerSite = headers.lastHeader(KafkaHeaders.FPS_SITE.getKafkaHeader());
 
@@ -191,7 +177,7 @@ public class KafkaResponseInboundListener extends KafkaInboundListener implement
                             brand
                     );
                     kafkaSender.sendInMemoryMessage(inMemoryResponseTopic, RawMessageUtils.encodeToString(Event.SCHEMA$, event),
-                            FPID, uuid, environmentMQ, paymentType);
+                            FPID, uuid, environmentMQ, paymentType, null);
 
                 } else {
                     throw new MessageConversionException("Exception in message emission. The transform for pacs_002_001 is null");
@@ -208,6 +194,7 @@ public class KafkaResponseInboundListener extends KafkaInboundListener implement
                 key, new Date().getTime()-startTime);
 	}
 
+	/*
 	private void calculateMetrics(String paymentType) {
 		if (paymentType.equalsIgnoreCase(SIP)) {
             inbound_sip_responses.inc();
@@ -223,12 +210,12 @@ public class KafkaResponseInboundListener extends KafkaInboundListener implement
             inbound_rtn_responses.inc();
         }
 	}
+	*/
 
 	private FPSAvroMessage generateFPSPacs002Response(FPSOutboundPaymentResponse fpsPaymentResponse) {
 		return generateFPSPacs002(fpsPaymentResponse.getOrgnlPaymentDocument(), fpsPaymentResponse.getPaymentId(),
 				fpsPaymentResponse.getStsRsn(), fpsPaymentResponse.getTxSts());
 	}
-
 
 
 	protected String extractFPID(com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Document originalMessage) {
@@ -248,8 +235,51 @@ public class KafkaResponseInboundListener extends KafkaInboundListener implement
 		}
 		return FPID;
 	}
+
 	private String getResponsePaymentId(FPSOutboundPaymentResponse fpsPaymentResponse) {
 		return fpsPaymentResponse.getPaymentId() + RESP_SUFFIX;
 	}
+
+	private void calculateMetricResponses(FPSOutboundPaymentResponse fpsResponse, String paymentType) {
+		String txSts = fpsResponse.getTxSts();
+		SortedMap<String, Counter> counters = metricRegistry.getCounters();
+		if(StringUtils.isNotEmpty(txSts)){
+			Counter counter = null;
+			String stsRsn = fpsResponse.getStsRsn();
+			if(StringUtils.isNotEmpty(stsRsn)) {
+				String key = "connector_fps.inbound."+paymentType+"." + FPSDirection.OUTPUT.getDirection() + "." + txSts + "." + stsRsn;
+				if (counters.containsKey(key)) {
+					counter = counters.get(key);
+
+				} else {
+					counter = metricRegistry.counter(name("connector_fps", "inbound", paymentType, FPSDirection.OUTPUT.getDirection(), txSts, stsRsn));
+				}
+			}else{
+				String key = "connector_fps.inbound."+paymentType+"." + FPSDirection.OUTPUT.getDirection() + "." + txSts;
+				if (counters.containsKey(key)) {
+					counter = counters.get(key);
+
+				} else {
+					counter = metricRegistry.counter(name("connector_fps", "inbound", paymentType, FPSDirection.OUTPUT.getDirection(), txSts));
+				}
+			}
+			counter.inc();
+		}else{
+			calculateMetrics(counters, paymentType);
+		}
+	}
+
+    private void calculateMetrics(SortedMap<String, Counter> counters, String paymentType) {
+        String key = "connector_fps.inbound."+paymentType+"." + FPSDirection.OUTPUT.getDirection();
+        Counter counter = null;
+        if (counters.containsKey(key)) {
+            counter = counters.get(key);
+
+        } else {
+            counter = metricRegistry.counter(name("connector_fps", "inbound", paymentType, FPSDirection.OUTPUT.getDirection()));
+        }
+        counter.inc();
+
+    }
 
 }
