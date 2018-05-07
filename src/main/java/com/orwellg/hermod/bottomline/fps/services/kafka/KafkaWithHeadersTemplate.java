@@ -4,6 +4,8 @@ import com.orwellg.umbrella.commons.utils.enums.KafkaHeaders;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.header.Headers;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
@@ -13,6 +15,8 @@ import org.springframework.util.concurrent.ListenableFuture;
 
 @Component
 public class KafkaWithHeadersTemplate<K, V> extends KafkaTemplate {
+
+    private static Logger LOG = LogManager.getLogger(KafkaWithHeadersTemplate.class);
 
     @Value("${qos.sla}")
     private Integer slaInMilliseconds;
