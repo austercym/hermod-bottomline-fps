@@ -16,7 +16,8 @@ public class SpringArchaiusPropertySource extends PropertySource<Void> {
 
 	private final static String ZK_HOST_KEY = ZkConfigurationParams.ZK_HOST_KEY;
 	private final static String ZK_PATH_KEY = "zookeeper.application.path";
-    
+	private final static String ZK_PATH_QOS_KEY = "zookeeper.qos.path";
+
     private DynamicPropertyFactory dynamicPropertyFactory;
     
     private Map<String, Object> defaultPropertyValues;
@@ -37,6 +38,9 @@ public class SpringArchaiusPropertySource extends PropertySource<Void> {
             zookeeperHost = props.getStringProperty(ZK_HOST_KEY);
             String zookeeperPath = props.getStringProperty(ZK_PATH_KEY);
             ZookeeperUtils.init(zookeeperHost, zookeeperPath);
+
+            String zookeeperQoSPath = props.getStringProperty(ZK_PATH_QOS_KEY);
+            ZookeeperUtils.init(zookeeperHost, zookeeperQoSPath);
 
             dynamicPropertyFactory = ZookeeperUtils.getDynamicPropertyFactory();
 

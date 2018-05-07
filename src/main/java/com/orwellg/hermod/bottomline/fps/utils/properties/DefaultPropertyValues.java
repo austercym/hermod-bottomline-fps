@@ -85,6 +85,8 @@ public class DefaultPropertyValues {
 	private final static Boolean SEND_PAYMENTS_ROUNDROBIN = false;
 	private final static Boolean SEND_RESPONSES_ROUNDROBIN = false;
 
+	private final static int DEFAULT_QOS_SLA = 3000;
+
 	
 	private final static Map<String, Object> defaultValues;
 	
@@ -175,6 +177,8 @@ public class DefaultPropertyValues {
 
 		defaultValues.put("connector.payments.sent.roundrobin", SEND_PAYMENTS_ROUNDROBIN);
 		defaultValues.put("connector.responses.sent.roundrobin", SEND_RESPONSES_ROUNDROBIN);
+
+		defaultValues.put("qos.sla", DEFAULT_QOS_SLA);
 
 
 	}

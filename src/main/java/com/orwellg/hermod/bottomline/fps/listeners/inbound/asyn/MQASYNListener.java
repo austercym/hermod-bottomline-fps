@@ -38,13 +38,13 @@ public abstract class MQASYNListener extends MQListener {
     }
 
     @Override
-    protected void sendToKafka(String topic, String uuid, Event event, String paymentType, String environmentMQ){
+    protected void sendToKafka(String topic, String uuid, Event event, String paymentType, String environmentMQ, Long qosMilliseconds){
         calculateMetrics(paymentType);
         kafkaSender.send(
                 topic,
                 RawMessageUtils.encodeToString(Event.SCHEMA$, event),
                 uuid,
-                replyTo, environmentMQ, paymentType, false
+                replyTo, environmentMQ, paymentType, false, qosMilliseconds
         );
     }
 

@@ -183,7 +183,7 @@ public class KafkaResponseReversalInboundListener extends KafkaInboundListener i
 							brand
 					);
 					kafkaSender.sendInMemoryMessage(inMemoryResponseTopic, RawMessageUtils.encodeToString(Event.SCHEMA$, event),
-							FPID, uuid, environmentMQ, paymentType);
+							FPID, uuid, environmentMQ, paymentType, null);
 
 				} else {
 					throw new MessageConversionException("Exception in message emission. The transform for pacs_002_001 is null");
