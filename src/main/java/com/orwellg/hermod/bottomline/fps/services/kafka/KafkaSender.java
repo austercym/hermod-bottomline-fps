@@ -12,15 +12,15 @@ public class KafkaSender {
 	private KafkaWithHeadersTemplate<String, String> kafkaTemplate;
 
 	public void send(String topic, String payload, String key, String replyTo, String environment, String paymentType,
-					 boolean isPOO) {
+					 boolean isPOO, Long qosMilliseconds) {
 		LOG.info("[FPS][PmtId: {}] Sending payload='{}' to topic='{}'", key, payload, topic);
-		kafkaTemplate.send(topic, payload, key, replyTo, environment, paymentType, isPOO, false);
+		kafkaTemplate.send(topic, payload, key, replyTo, environment, paymentType, isPOO, false, qosMilliseconds);
 	}
 
 	public void send(String topic, String payload, String key, String replyTo, String environment, String paymentType,
-					 boolean isPOO, boolean isStandin) {
+					 boolean isPOO, boolean isStandin, Long qosMilliseconds) {
 		LOG.info("[FPS][PmtId: {}] Sending payload='{}' to topic='{}'", key, payload, topic);
-		kafkaTemplate.send(topic, payload, key, replyTo, environment, paymentType, isPOO, isStandin);
+		kafkaTemplate.send(topic, payload, key, replyTo, environment, paymentType, isPOO, isStandin, qosMilliseconds);
 	}
 
 	public void sendRawMessage(String topic, String payload, String key) {
@@ -28,8 +28,8 @@ public class KafkaSender {
 		kafkaTemplate.sendRawMessage(topic, payload, key);
 	}
 
-	public void sendInMemoryMessage(String topic, String payload, String FPID, String key, String environment, String paymentType) {
+	public void sendInMemoryMessage(String topic, String payload, String FPID, String key, String environment, String paymentType, Long qosMilliseconds) {
 		LOG.info("[FPS][PmtId: {}] Sending payload='{}' to topic='{}'", key, payload, topic);
-		kafkaTemplate.sendInMemoryMessage(topic, payload, key, environment, paymentType, FPID);
+		kafkaTemplate.sendInMemoryMessage(topic, payload, key, environment, paymentType, FPID, qosMilliseconds);
 	}
 }
