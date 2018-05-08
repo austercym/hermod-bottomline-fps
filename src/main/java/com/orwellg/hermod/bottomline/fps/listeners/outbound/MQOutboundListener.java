@@ -219,7 +219,7 @@ public abstract class MQOutboundListener extends BaseListener implements Message
                             fpsResponse.setDbtrAccountId(originalMessage.getDbtrAccountId());
                         } else {
                             fpsResponse.setOrgnlPaymentId(paymentDocument.getFIToFIPmtStsRpt().getTxInfAndSts().get(0).getOrgnlTxId());
-                            uuid = fpsResponse.getOrgnlPaymentId();
+                            uuid = fpsResponse.getOrgnlPaymentId() + RESP_SUFFIX;
                             event = getRawMessageEvent(message, uuid, FPSEvents.FPS_HERMOD_BL_OUTBOUND_RESPONSE.getEventName());
 
                             kafkaSender.sendRawMessage(loggingTopic, RawMessageUtils.encodeToString(Event.SCHEMA$, event), uuid);
