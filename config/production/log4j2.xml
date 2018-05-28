@@ -1,21 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="debug">
     <Appenders>
-        <!--<Kafka name="KAFKA" topic="log_hermod_bottomline_fps_001" syncsend="true" ignoreexceptions="false">
+        <Kafka name="KAFKA" topic="com.orwellg.log.yggdrasil.hermod.bottomline.fps.1" syncsend="true" ignoreexceptions="false">
             <PatternLayout pattern="%d %-5p [%t] %C{2} (%F:%L) - %m%n"/>
-            <Property name="bootstrap.servers">confluent-node1:9092,confluent-node2:9092,confluent-node3:9092,confluent-node4:9092,confluent-node5:9092,confluent-node6:9092</Property>
+            <Property name="bootstrap.servers">hdf-group3-0.node.consul, hdf-group3-1.node.consul, hdf-group3-2.node.consul</Property>
+            <Property name="acks">1</Property>
+            <Property name="compression.type">snappy</Property>
+            <Property name="security.protocol">SASL_SSL</Property>
+            <Property name="ssl.truststore.location">/etc/ssl/kafka-client/kafka.client.truststore.jks</Property>
+            <Property name="ssl.truststore.password">Tempo.99</Property>
+            <Property name="ssl.keystore.location">/etc/ssl/kafka-client/kafka.client.keystore.jks</Property>
+            <Property name="ssl.keystore.password">Tempo.99</Property>
         </Kafka>
-        -->
-        <RollingFile name="FILE" filename="logs/hermod-bottomline-fps.log" filePattern="logs/hermod-bottomline-fps-%d{yyyy-MM-dd}-%i.log">
+        <!--RollingFile name="FILE" filename="logs/hermod-bottomline-fps.log" filePattern="logs/hermod-bottomline-fps-%d{yyyy-MM-dd}-%i.log">
             <PatternLayout pattern="%d %-5p [%t] %C{2} (%F:%L) - %m%n" />
             <Policies>
-                <SizeBasedTriggeringPolicy size="10 MB"/>
-                <!--<TimeBasedTriggeringPolicy interval="1" modulate="true" />-->
+                <SizeBasedTriggeringPolicy size="100 MB"/>
             </Policies>
-            <DefaultRolloverStrategy max="5" />
-        </RollingFile>
+            <DefaultRolloverStrategy max="100" />
+        </RollingFile-->
+        <File name="FILE" fileName="logs/hermod-bottomline-fps.log">
+            <PatternLayout pattern="%d %-5p [%t] %C{2} (%F:%L) - %m%n" />
+        </File>
         <Async name="ASYNC">
-            <!--<AppenderRef ref="KAFKA" />-->
+            <AppenderRef ref="KAFKA" />
             <AppenderRef ref="FILE" />
         </Async>
     </Appenders>
@@ -23,5 +31,9 @@
         <Root level="DEBUG">
             <AppenderRef ref="ASYNC" />
         </Root>
+        <Logger name="org.springframework" level="ERROR" >
+            <AppenderRef ref="ASYNC" />
+        </Logger>
+        <Logger name="org.apache.kafka" level="INFO" />
     </Loggers>
 </Configuration>

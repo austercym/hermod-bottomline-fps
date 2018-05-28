@@ -71,7 +71,7 @@ public class JmsSubscriberSite2Config extends ComponentConfig {
         listenerContainer.setRecoveryInterval(100);
         listenerContainer.setIdleConsumerLimit(5);
         listenerContainer.setIdleTaskExecutionLimit(10);
-
+        listenerContainer.setAutoStartup(false);
         return listenerContainer;
     }
 
@@ -84,7 +84,7 @@ public class JmsSubscriberSite2Config extends ComponentConfig {
         listenerContainer.setMessageListener(mqASYNSite2Listener);
         listenerContainer.setMaxConcurrentConsumers(maxConcurrentConsumers);
         listenerContainer.setSessionTransacted(true);
-
+        listenerContainer.setAutoStartup(false);
         return listenerContainer;
     }
 
@@ -97,7 +97,7 @@ public class JmsSubscriberSite2Config extends ComponentConfig {
         listenerContainer.setMessageListener(mqSTANDINSite2Listener);
         listenerContainer.setMaxConcurrentConsumers(maxConcurrentConsumers);
         listenerContainer.setSessionTransacted(true);
-
+        listenerContainer.setAutoStartup(false);
         return listenerContainer;
     }
 
@@ -110,7 +110,7 @@ public class JmsSubscriberSite2Config extends ComponentConfig {
         listenerContainer.setMessageListener(mqPOOSite2Listener);
         listenerContainer.setMaxConcurrentConsumers(maxConcurrentConsumers);
         listenerContainer.setSessionTransacted(true);
-
+        listenerContainer.setAutoStartup(false);
         return listenerContainer;
     }
 
@@ -123,7 +123,7 @@ public class JmsSubscriberSite2Config extends ComponentConfig {
         listenerContainer.setMessageListener(mqSIPOutboundRecvListener);
         listenerContainer.setMaxConcurrentConsumers(maxConcurrentConsumers);
         listenerContainer.setSessionTransacted(true);
-
+        listenerContainer.setAutoStartup(false);
         return listenerContainer;
     }
 
@@ -137,7 +137,7 @@ public class JmsSubscriberSite2Config extends ComponentConfig {
         listenerContainer.setMessageListener(mqAsynOutboundRecvListener);
         listenerContainer.setMaxConcurrentConsumers(maxConcurrentConsumers);
         listenerContainer.setSessionTransacted(true);
-
+        listenerContainer.setAutoStartup(false);
         return listenerContainer;
     }
 
@@ -151,7 +151,7 @@ public class JmsSubscriberSite2Config extends ComponentConfig {
         listenerContainer.setMessageListener(mqUSMListener);
         listenerContainer.setMaxConcurrentConsumers(maxConcurrentConsumers);
         listenerContainer.setSessionTransacted(true);
-
+        listenerContainer.setAutoStartup(false);
         return listenerContainer;
     }
 
