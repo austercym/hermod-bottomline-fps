@@ -17,16 +17,13 @@
             <Property name="ssl.keystore.password">Tempo.99</Property>
 
         </Kafka>
-        <!--RollingFile name="FILE" filename="logs/hermod-bottomline-fps.log" filePattern="logs/hermod-bottomline-fps-%d{yyyy-MM-dd}-%i.log">
+        <RollingFile name="FILE" filename="logs/hermod-bottomline-fps.log" filePattern="logs/hermod-bottomline-fps-%d{yyyy-MM-dd}-%i.log">
             <PatternLayout pattern="%d %-5p [%t] %C{2} (%F:%L) - %m%n" />
             <Policies>
                 <SizeBasedTriggeringPolicy size="100 MB"/>
             </Policies>
             <DefaultRolloverStrategy max="100" />
-        </RollingFile-->
-        <File name="FILE" fileName="logs/hermod-bottomline-fps.log">
-            <PatternLayout pattern="%d %-5p [%t] %C{2} (%F:%L) - %m%n" />
-        </File>
+        </RollingFile>
         <Async name="ASYNC">
             <AppenderRef ref="KAFKA" />
             <AppenderRef ref="FILE" />
