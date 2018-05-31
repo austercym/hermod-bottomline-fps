@@ -12,6 +12,8 @@ import org.springframework.context.event.EventListener;
 import org.springframework.jms.listener.DefaultMessageListenerContainer;
 import org.springframework.kafka.listener.AbstractMessageListenerContainer;
 
+import java.util.concurrent.CountDownLatch;
+
 @Configuration
 public class ProjectConfig extends ComponentConfig {
 
@@ -75,9 +77,12 @@ public class ProjectConfig extends ComponentConfig {
 	@Autowired
 	private MetricRegistry metricRegistry;
 
+    private CountDownLatch shutdownLatch = new CountDownLatch(1);
+
 	@EventListener(ApplicationReadyEvent.class)
 	public void startListeners() {
 	    LOG.info("Connector to Bottomline start. Starting containers....");
+        shutdownLatch = new CountDownLatch(1);
 
 		final JmxReporter reporterJMX = JmxReporter.forRegistry(metricRegistry).build();
 		reporterJMX.start();
@@ -86,23 +91,34 @@ public class ProjectConfig extends ComponentConfig {
 		}catch(Exception e){
 			LOG.error("[FPS] Error creating scheme validators to validate payment messages");
 		}
-		jmsSIPListenerContainer.start();
-		jmsASYNCListenerContainer.start();
-		jmsSTANDINListenerContainer.start();
-		jmsSIPOutboundListenerContainer.start();
-		jmsAsynOutboundListenerContainer.start();
-		jmsPOOListenerContainer.start();
-		jmsUSMListenerContainer.start();
 
-		jmsSIPListenerSite2Container.start();
-		jmsASYNCListenerSite2Container.start();
-		jmsSTANDINListenerSite2Container.start();
-		jmsSIPOutboundListenerSite2Container.start();
-		jmsAsynOutboundListenerSite2Container.start();
-		jmsPOOListenerSite2Container.start();
-		jmsUSMListenerSite2Container.start();
+        new Thread(() -> {
+            LOG.info("[FPS] Starting listeners to datacenter 1");
+            startDatacenter1Listeners();
+            setAutoStartListenersDatacenter1();
+            LOG.info("[FPS] Finishing listeners to datacenter 1");
+            shutdownLatch.countDown();
+        }).start();
 
-		kafkaResponseInboundListenerContainer.start();
+		new Thread(() -> {
+            LOG.info("[FPS] Starting listeners to datacenter 2");
+            startDatacenter2Listeners();
+
+            setAutoStartListenersDatacenter2();
+
+            LOG.info("[FPS] Finishing listeners to datacenter 2");
+            shutdownLatch.countDown();
+		}).start();
+
+
+
+        try {
+            shutdownLatch.await();
+        } catch (InterruptedException e) {
+            LOG.error("[FPS] Error waiting for connect to one datacenter al least");
+        }
+
+        kafkaResponseInboundListenerContainer.start();
 		kafkaRequestOutboundListenerContainer.start();
 		kafkaResponseReversalInboundListenerContainer.start();
 		kafkaRequestInMemoryListenerContainer.start();
@@ -110,4 +126,72 @@ public class ProjectConfig extends ComponentConfig {
 
 	    LOG.info("Connector started");
 	}
+
+    private void setAutoStartListenersDatacenter2() {
+        if(jmsSIPListenerSite2Container.isRunning()){
+            jmsSIPListenerSite2Container.setAutoStartup(true);
+        }
+        if(jmsASYNCListenerSite2Container.isRunning()){
+            jmsASYNCListenerSite2Container.setAutoStartup(true);
+        }
+        if(jmsSTANDINListenerSite2Container.isRunning()){
+            jmsSTANDINListenerSite2Container.setAutoStartup(true);
+        }
+        if(jmsSIPOutboundListenerSite2Container.isRunning()){
+            jmsSIPOutboundListenerSite2Container.setAutoStartup(true);
+        }
+        if(jmsAsynOutboundListenerSite2Container.isRunning()){
+            jmsAsynOutboundListenerSite2Container.setAutoStartup(true);
+        }
+        if(jmsPOOListenerSite2Container.isRunning()){
+            jmsPOOListenerSite2Container.setAutoStartup(true);
+        }
+        if(jmsUSMListenerSite2Container.isRunning()){
+            jmsUSMListenerSite2Container.setAutoStartup(true);
+        }
+    }
+
+    private void setAutoStartListenersDatacenter1() {
+        if(jmsSIPListenerContainer.isRunning()){
+            jmsSIPListenerContainer.setAutoStartup(true);
+        }
+        if(jmsASYNCListenerContainer.isRunning()){
+            jmsASYNCListenerContainer.setAutoStartup(true);
+        }
+        if(jmsSTANDINListenerContainer.isRunning()){
+            jmsSTANDINListenerContainer.setAutoStartup(true);
+        }
+        if(jmsSIPOutboundListenerContainer.isRunning()){
+            jmsSIPOutboundListenerContainer.setAutoStartup(true);
+        }
+        if(jmsAsynOutboundListenerContainer.isRunning()){
+            jmsAsynOutboundListenerContainer.setAutoStartup(true);
+        }
+        if(jmsPOOListenerContainer.isRunning()){
+            jmsPOOListenerContainer.setAutoStartup(true);
+        }
+        if(jmsUSMListenerContainer.isRunning()){
+            jmsUSMListenerContainer.setAutoStartup(true);
+        }
+    }
+
+    private void startDatacenter2Listeners() {
+        jmsSIPListenerSite2Container.start();
+        jmsASYNCListenerSite2Container.start();
+        jmsSTANDINListenerSite2Container.start();
+        jmsSIPOutboundListenerSite2Container.start();
+        jmsAsynOutboundListenerSite2Container.start();
+        jmsPOOListenerSite2Container.start();
+        jmsUSMListenerSite2Container.start();
+    }
+
+    private void startDatacenter1Listeners() {
+        jmsSIPListenerContainer.start();
+        jmsASYNCListenerContainer.start();
+        jmsSTANDINListenerContainer.start();
+        jmsSIPOutboundListenerContainer.start();
+        jmsAsynOutboundListenerContainer.start();
+        jmsPOOListenerContainer.start();
+        jmsUSMListenerContainer.start();
+    }
 }
