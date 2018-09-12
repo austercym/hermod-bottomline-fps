@@ -87,6 +87,9 @@ public class DefaultPropertyValues {
 
 	private final static int DEFAULT_QOS_SLA = 3000;
 
+	private final static Boolean USE_SSL_TO_CONNECT_TO_BOTTOMLINE = false;
+	private final static Boolean USE_IBM_CIPHER_MAPPINGS = false;
+
 	
 	private final static Map<String, Object> defaultValues;
 	
@@ -179,6 +182,16 @@ public class DefaultPropertyValues {
 		defaultValues.put("connector.responses.sent.roundrobin", SEND_RESPONSES_ROUNDROBIN);
 
 		defaultValues.put("qos.sla", DEFAULT_QOS_SLA);
+
+		//SSL CONNECTION
+		defaultValues.put("useSSL", USE_SSL_TO_CONNECT_TO_BOTTOMLINE);
+
+		defaultValues.put("keyStore", "-");
+		defaultValues.put("keyStorePassword", "-");
+		defaultValues.put("trustStorePassword", "-");
+		defaultValues.put("trustStore", "-");
+		defaultValues.put("SSLCipherSuite", "-");
+		defaultValues.put("useIBMCipherMappings", USE_IBM_CIPHER_MAPPINGS);
 
 
 	}

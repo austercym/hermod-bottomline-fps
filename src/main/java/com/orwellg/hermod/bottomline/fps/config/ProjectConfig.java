@@ -6,6 +6,7 @@ import com.orwellg.hermod.bottomline.fps.utils.singletons.SchemeValidatorBean;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
@@ -77,6 +78,24 @@ public class ProjectConfig extends ComponentConfig {
 	@Autowired
 	private MetricRegistry metricRegistry;
 
+    @Value("${useSSL}")
+    private Boolean useSSL;
+
+    @Value("${trustStore}")
+    private String trustStore;
+
+    @Value("${trustStorePassword}")
+    private String trustStorePassword;
+
+    @Value("${keyStore}")
+    private String keyStore;
+
+    @Value("${keyStorePassword}")
+    private String keyStorePassword;
+
+    @Value("${useIBMCipherMappings}")
+    private Boolean useIBMCipherMappings;
+
     private CountDownLatch shutdownLatch = new CountDownLatch(1);
 
 	@EventListener(ApplicationReadyEvent.class)
@@ -86,6 +105,16 @@ public class ProjectConfig extends ComponentConfig {
 
 		final JmxReporter reporterJMX = JmxReporter.forRegistry(metricRegistry).build();
 		reporterJMX.start();
+
+        LOG.info("Use SSL? {}", useSSL);
+        if(useSSL){
+            LOG.info("Connecting using SSl config. truststore: {}, keystore: {}", trustStore, keyStore);
+            System.setProperty("javax.net.ssl.trustStore", trustStore);
+            System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);
+            System.setProperty("javax.net.ssl.keyStore", keyStore);
+            System.setProperty("javax.net.ssl.keyStorePassword", keyStorePassword);
+            System.setProperty("com.ibm.mq.cfg.useIBMCipherMappings", useIBMCipherMappings.toString());
+        }
 		try{
 			SchemeValidatorBean.getInstance();
 		}catch(Exception e){
