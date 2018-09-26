@@ -2,16 +2,19 @@
 <Configuration status="debug">
     <Appenders>
         <Kafka name="KAFKA" topic="com.orwellg.log.hermod.bottomline.fps.1" syncsend="true" ignoreexceptions="false">
-            <PatternLayout pattern="%d %-5p [%t] %C{2} (%F:%L) - %m%n"/>
+            <PatternLayout pattern="[Host: sid-connector-0][Connector: 1] %d %-5p [%t] %C{2} (%F:%L) - %m%n"/>
             <Property name="bootstrap.servers">hdf-group3-0.node.consul, hdf-group3-1.node.consul, hdf-group3-2.node.consul</Property>
             <Property name="acks">1</Property>
             <Property name="compression.type">snappy</Property>
             <Property name="security.protocol">SASL_SSL</Property>
             <Property name="ssl.truststore.location">/etc/ssl/kafka-client/kafka.client.truststore.jks</Property>
-            <Property name="ssl.truststore.password">Tempo.99</Property>
+            <Property name="ssl.truststore.password">OG_s1dSSL@18</Property>
             <Property name="ssl.keystore.location">/etc/ssl/kafka-client/kafka.client.keystore.jks</Property>
-            <Property name="ssl.keystore.password">Tempo.99</Property>
+            <Property name="ssl.keystore.password">OG_s1dSSL@18</Property>
+
         </Kafka>
+
+
         <RollingFile name="FILE" filename="logs/hermod-bottomline-fps.log" filePattern="logs/hermod-bottomline-fps-%d{yyyy-MM-dd}-%i.log">
             <PatternLayout pattern="%d %-5p [%t] %C{2} (%F:%L) - %m%n" />
             <Policies>
