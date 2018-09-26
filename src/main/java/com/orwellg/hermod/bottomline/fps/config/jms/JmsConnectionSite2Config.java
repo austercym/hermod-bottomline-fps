@@ -35,6 +35,10 @@ public class JmsConnectionSite2Config extends ComponentConfig {
 	private String username;
 	@Value("${wq.mq.site2.password}")
 	private String password;
+	@Value("${useSSL}")
+	private Boolean useSSL;
+	@Value("${SSLCipherSuite}")
+	private String SSLCipherSuite;
 	
 	@Bean
     public ConnectionFactory connectionSite2Factory() {
@@ -53,6 +57,10 @@ public class JmsConnectionSite2Config extends ComponentConfig {
 	    mqQueueConnectionFactory.setHostName(host);
 	    try {
 	        mqQueueConnectionFactory.setTransportType(WMQConstants.WMQ_CM_CLIENT);
+
+			if(useSSL) {
+				mqQueueConnectionFactory.setSSLCipherSuite(SSLCipherSuite);
+			}
 	        // CCISD has to be the same within the Queue Manager, 1208 is UTF-8
 	        mqQueueConnectionFactory.setCCSID(1208);
 	        mqQueueConnectionFactory.setChannel(channel);
