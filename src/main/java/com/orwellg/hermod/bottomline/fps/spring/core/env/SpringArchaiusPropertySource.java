@@ -87,10 +87,14 @@ public class SpringArchaiusPropertySource extends PropertySource<Void> {
                 return dynamicPropertyFactory.getBooleanProperty(propertyName, (Boolean) defaultPropertyValues.get(propertyName)).get();
             } else if (defaultPropertyValues.get(propertyName) instanceof Float) {
                 return dynamicPropertyFactory.getFloatProperty(propertyName, (Float) defaultPropertyValues.get(propertyName)).get();
-            } else if(propertyName.toUpperCase().contains("PASSWORD")) {
-                return dynamicPropertyFactory.getSecretProperty(propertyName, (String) defaultPropertyValues.get(propertyName)).get();
-            } else {
-                return dynamicPropertyFactory.getStringProperty(propertyName, (String) defaultPropertyValues.get(propertyName)).get();
+            } else{
+                String stringProperty = null;
+                try{
+                    stringProperty = dynamicPropertyFactory.getSecretProperty(propertyName, (String) defaultPropertyValues.get(propertyName)).get();
+                }catch(RuntimeException iae){
+                    stringProperty = dynamicPropertyFactory.getStringProperty(propertyName, (String) defaultPropertyValues.get(propertyName)).get();
+                }
+                return stringProperty;
             }
 		} else {
 			return dynamicPropertyFactory.getStringProperty(propertyName, null).get();

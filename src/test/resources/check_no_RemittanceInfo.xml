@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pacs.008.001.05">
+    <FIToFICstmrCdtTrf>
+        <GrpHdr>
+            <MsgId>008-FPS1711150000002--1020171115826</MsgId>
+            <CreDtTm>2018-10-11T16:04:01</CreDtTm>
+            <NbOfTxs>1</NbOfTxs>
+            <SttlmInf>
+                <SttlmMtd>CLRG</SttlmMtd>
+            </SttlmInf>
+            <InstdAgt>
+                <FinInstnId>
+                    <ClrSysMmbId>
+                        <ClrSysId>
+                            <Prtry>ISCD Bank Code</Prtry>
+                        </ClrSysId>
+                        <MmbId>000535</MmbId>
+                    </ClrSysMmbId>
+                </FinInstnId>
+            </InstdAgt>
+        </GrpHdr>
+        <CdtTrfTxInf>
+            <PmtId>
+                <EndToEndId>CARDSERVICESONTHEINTERNETDOTCOM</EndToEndId>
+                <TxId>FPS1810100000012</TxId>
+                <ClrSysRef>20171115001</ClrSysRef>
+            </PmtId>
+            <PmtTpInf>
+                <InstrPrty>HIGH</InstrPrty>
+                <SvcLvl>
+                    <Cd>URNS</Cd>
+                </SvcLvl>
+                <LclInstrm>
+                    <Prtry>SIP/101010</Prtry>
+                </LclInstrm>
+                <CtgyPurp>
+                    <Prtry>INTERNET</Prtry>
+                </CtgyPurp>
+            </PmtTpInf>
+            <IntrBkSttlmAmt Ccy="GBP">1.23</IntrBkSttlmAmt>
+            <IntrBkSttlmDt>2018-10-11</IntrBkSttlmDt>
+            <ChrgBr>SHAR</ChrgBr>
+            <InstgAgt>
+                <FinInstnId>
+                    <ClrSysMmbId>
+                        <ClrSysId>
+                            <Cd>GBDSC</Cd>
+                        </ClrSysId>
+                        <MmbId>400000</MmbId>
+                    </ClrSysMmbId>
+                </FinInstnId>
+            </InstgAgt>
+            <IntrmyAgt1>
+                <FinInstnId>
+                    <ClrSysMmbId>
+                        <ClrSysId>
+                            <Prtry>ISCD Bank Code</Prtry>
+                        </ClrSysId>
+                        <MmbId>000005</MmbId>
+                    </ClrSysMmbId>
+                </FinInstnId>
+            </IntrmyAgt1>
+            <IntrmyAgt2>
+                <FinInstnId>
+                    <ClrSysMmbId>
+                        <ClrSysId>
+                            <Prtry>ISCD Bank Code</Prtry>
+                        </ClrSysId>
+                        <MmbId>000535</MmbId>
+                    </ClrSysMmbId>
+                </FinInstnId>
+            </IntrmyAgt2>
+            <Dbtr>
+                <Nm>MR SMITH</Nm>
+                <PstlAdr>
+                    <AdrLine>67 FALKIRK DRIVE</AdrLine>
+                    <AdrLine>GLASGOW G99 9ZZ</AdrLine>
+                </PstlAdr>
+            </Dbtr>
+            <DbtrAcct>
+                <Id>
+                    <Othr>
+                        <Id>12345678</Id>
+                    </Othr>
+                </Id>
+            </DbtrAcct>
+            <DbtrAgt>
+                <FinInstnId>
+                    <ClrSysMmbId>
+                        <ClrSysId>
+                            <Cd>GBDSC</Cd>
+                        </ClrSysId>
+                        <MmbId>400328</MmbId>
+                    </ClrSysMmbId>
+                </FinInstnId>
+            </DbtrAgt>
+            <CdtrAgt>
+                <FinInstnId>
+                    <ClrSysMmbId>
+                        <ClrSysId>
+                            <Cd>GBDSC</Cd>
+                        </ClrSysId>
+                        <MmbId>233456</MmbId>
+                    </ClrSysMmbId>
+                </FinInstnId>
+            </CdtrAgt>
+            <Cdtr>
+                <Nm>MISS CHRISTINE JONES</Nm>
+            </Cdtr>
+            <CdtrAcct>
+                <Id>
+                    <Othr>
+                        <Id>23000032</Id>
+                    </Othr>
+                </Id>
+            </CdtrAcct>
+            <InstrForNxtAgt>
+                <InstrInf>/FPID/FPS1810110000012  1020181010826400000     </InstrInf>
+            </InstrForNxtAgt>
+            <RmtInf>
+                <Strd>
+                    <CdtrRefInf>
+                        <Ref>HAPPY BIRTHDAY</Ref>
+                    </CdtrRefInf>
+                </Strd>
+            </RmtInf>
+        </CdtTrfTxInf>
+    </FIToFICstmrCdtTrf>
+</Document>
