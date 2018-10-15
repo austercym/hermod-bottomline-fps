@@ -189,7 +189,7 @@ public class Pacs008FPS2AvroTransform {
                         com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.RemittanceInformation10 rmtInf2 = new com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.RemittanceInformation10();
 
                         List<StructuredRemittanceInformation12> strdList = rmtInf.getStrd();
-                        List<com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.StructuredRemittanceInformation12> strdLst = rmtInf2.getStrd();
+                        List<com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.StructuredRemittanceInformation12> strdLst2 = new ArrayList<com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.StructuredRemittanceInformation12>();
                         if(strdList !=null) {
                             if(!strdList.isEmpty()) {
                                 for (StructuredRemittanceInformation12 strd : strdList) {
@@ -213,10 +213,9 @@ public class Pacs008FPS2AvroTransform {
                                         }
                                     }
 
-                                    if (strdLst == null) {
-                                        strdLst = new ArrayList<com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.StructuredRemittanceInformation12>();
-                                    }
-                                    strdLst.add(strd1);
+
+                                    strdLst2.add(strd1);
+                                    rmtInf2.setStrd(strdLst2);
                                 }
                             }
                         }

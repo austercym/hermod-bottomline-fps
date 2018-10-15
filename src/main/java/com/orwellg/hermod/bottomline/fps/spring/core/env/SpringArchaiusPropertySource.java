@@ -8,6 +8,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.core.env.PropertySource;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class SpringArchaiusPropertySource extends PropertySource<Void> {
@@ -17,6 +19,10 @@ public class SpringArchaiusPropertySource extends PropertySource<Void> {
 	private final static String ZK_HOST_KEY = ZkConfigurationParams.ZK_HOST_KEY;
 	private final static String ZK_PATH_KEY = "zookeeper.application.path";
 	private final static String ZK_PATH_QOS_KEY = "zookeeper.qos.path";
+    private final static String ZK_PATH_FPS_KEY = "zookeeper.dsl.fps";
+    private final static String ZK_PATH_IDGENERATOR = "zookeeper.id.generator.config.subbranch";
+
+    private final static String ZK_PATH_KAFKA_KEY = "zookeeper.kafka.config.subbranch";
 
     private DynamicPropertyFactory dynamicPropertyFactory;
     
@@ -36,11 +42,15 @@ public class SpringArchaiusPropertySource extends PropertySource<Void> {
             LOG.info("[FPS] Reading properties connector {} listening port {}", connectorId, props.getIntProperty("server.port"));
 
             zookeeperHost = props.getStringProperty(ZK_HOST_KEY);
-            String zookeeperPath = props.getStringProperty(ZK_PATH_KEY);
-            ZookeeperUtils.init(zookeeperHost, zookeeperPath);
 
-            String zookeeperQoSPath = props.getStringProperty(ZK_PATH_QOS_KEY);
-            ZookeeperUtils.init(zookeeperHost, zookeeperQoSPath);
+            List<String> paths = new ArrayList<>();
+            paths.add(props.getStringProperty(ZK_PATH_KEY));
+            paths.add(props.getStringProperty(ZK_PATH_KAFKA_KEY));
+            paths.add(props.getStringProperty(ZK_PATH_FPS_KEY));
+            paths.add(props.getStringProperty(ZK_PATH_IDGENERATOR));
+            paths.add(props.getStringProperty(ZK_PATH_QOS_KEY));
+            ZookeeperUtils.init(zookeeperHost, paths);
+
 
             dynamicPropertyFactory = ZookeeperUtils.getDynamicPropertyFactory();
 
@@ -77,8 +87,14 @@ public class SpringArchaiusPropertySource extends PropertySource<Void> {
                 return dynamicPropertyFactory.getBooleanProperty(propertyName, (Boolean) defaultPropertyValues.get(propertyName)).get();
             } else if (defaultPropertyValues.get(propertyName) instanceof Float) {
                 return dynamicPropertyFactory.getFloatProperty(propertyName, (Float) defaultPropertyValues.get(propertyName)).get();
-            } else {
-                return dynamicPropertyFactory.getStringProperty(propertyName, (String) defaultPropertyValues.get(propertyName)).get();
+            } else{
+                String stringProperty = null;
+                try{
+                    stringProperty = dynamicPropertyFactory.getSecretProperty(propertyName, (String) defaultPropertyValues.get(propertyName)).get();
+                }catch(RuntimeException iae){
+                    stringProperty = dynamicPropertyFactory.getStringProperty(propertyName, (String) defaultPropertyValues.get(propertyName)).get();
+                }
+                return stringProperty;
             }
 		} else {
 			return dynamicPropertyFactory.getStringProperty(propertyName, null).get();
