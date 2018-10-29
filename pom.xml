@@ -5,7 +5,7 @@
 	<groupId>com.orwellg.hermod.bottomline.fps</groupId>
 	<artifactId>hermod-bottomline-fps</artifactId>
 
-	<version>0.1.7</version>
+	<version>0.1.8</version>
 
 	<name>hermod-bottomline-fps</name>
 	<description>Project to connect to Bottomline and send/retrieve messages to Kafka</description>
@@ -184,6 +184,30 @@
 
 	<build>
 		<plugins>
+
+			<!-- Release management ( https://github.com/aleksandr-m/gitflow-maven-plugin
+				) [NEXG-3731] -->
+			<plugin>
+				<groupId>com.amashchenko.maven.plugin</groupId>
+				<artifactId>gitflow-maven-plugin</artifactId>
+				<version>1.9.0</version>
+				<configuration>
+					<!-- optional configuration -->
+				</configuration>
+			</plugin>
+			<!-- Generate sources jar -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 			<!-- Package as an executable jar/war -->
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

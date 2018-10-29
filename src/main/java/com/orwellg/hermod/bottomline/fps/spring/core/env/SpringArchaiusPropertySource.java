@@ -87,18 +87,28 @@ public class SpringArchaiusPropertySource extends PropertySource<Void> {
                 return dynamicPropertyFactory.getBooleanProperty(propertyName, (Boolean) defaultPropertyValues.get(propertyName)).get();
             } else if (defaultPropertyValues.get(propertyName) instanceof Float) {
                 return dynamicPropertyFactory.getFloatProperty(propertyName, (Float) defaultPropertyValues.get(propertyName)).get();
-            } else{
+            }else{
+                // If propertyName is in dynamicPropertyFactory, then it tries to decrypt it
+                String defaultValue = (String) defaultPropertyValues.get(propertyName);
                 String stringProperty = null;
                 try{
-                    stringProperty = dynamicPropertyFactory.getSecretProperty(propertyName, (String) defaultPropertyValues.get(propertyName)).get();
+                    // Try to decrypt
+                    stringProperty = dynamicPropertyFactory.getSecretProperty(propertyName, defaultValue).get();
                 }catch(RuntimeException iae){
-                    stringProperty = dynamicPropertyFactory.getStringProperty(propertyName, (String) defaultPropertyValues.get(propertyName)).get();
+                    // If decrypt did not work, assume it is not an encrypted value, then get string value as is
+                    stringProperty = dynamicPropertyFactory.getStringProperty(propertyName, defaultValue).get();
                 }
                 return stringProperty;
             }
-		} else {
-			return dynamicPropertyFactory.getStringProperty(propertyName, null).get();
-		}
+        }
+
+        String defaultPropertyValue = null;
+        try{
+            defaultPropertyValue = dynamicPropertyFactory.getSecretProperty(propertyName, null).get();
+        }catch(RuntimeException iae){
+            defaultPropertyValue = dynamicPropertyFactory.getStringProperty(propertyName, null).get();
+        }
+        return defaultPropertyValue;
 	}
 
 }
