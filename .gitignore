@@ -175,3 +175,6 @@ hs_err_pid*
 /main/
 /src/main/generated/
 /FFDC/
+/target/
+/.classpath
+/.project
