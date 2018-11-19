@@ -19,8 +19,11 @@ import com.orwellg.umbrella.avro.types.payment.fps.FPSOutboundPayment;
 import com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.Document;
 import com.orwellg.umbrella.commons.types.utils.avro.RawMessageUtils;
 import com.orwellg.umbrella.commons.utils.enums.FPSEvents;
+import com.orwellg.umbrella.commons.utils.enums.KafkaHeaders;
 import com.orwellg.umbrella.commons.utils.enums.fps.FPSDirection;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.common.header.Header;
+import org.apache.kafka.common.header.Headers;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +42,7 @@ import javax.xml.validation.Validator;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.nio.ByteBuffer;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -65,6 +69,10 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
     @Value("${kafka.topic.fps.outbound.logging}")
     private String loggingTopic;
 
+    @Value("${kafka.topic.fps.outbound.undopayment}")
+    private String undoPaymentTopic;
+
+
     @Value("${inmemory.cache.expiringMinutes}")
     private int expiringMinutes;
 
@@ -85,11 +93,10 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
     @Value("${connector.payments.sent.roundrobin}")
     private Boolean roundRobinSent;
 
-    @Autowired
-    private KafkaSender kafkaSender;
+    private final KafkaSender kafkaSender;
 
-    @Autowired
-    private TaskExecutor taskOutboundRequestExecutor;
+    private final TaskExecutor taskOutboundRequestExecutor;
+
     private Counter outbound_sip_requests;
     private Counter outbound_sop_requests;
     private Counter outbound_fdp_requests;
@@ -118,7 +125,8 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
         return environment;
     }
 
-    public KafkaRequestOutboundListener(MetricRegistry metricRegistry){
+    @Autowired
+    public KafkaRequestOutboundListener(MetricRegistry metricRegistry, KafkaSender kafkaSender, TaskExecutor taskOutboundRequestExecutor){
         if(metricRegistry!= null) {
             String direction = FPSDirection.OUTPUT.getDirection();
             outbound_sop_requests = metricRegistry.counter(name("connector_fps", "outbound", "SOP", direction));
@@ -130,19 +138,23 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
         }else{
             LOG.error("No exists metrics registry");
         }
+        this.kafkaSender = kafkaSender;
+        this.taskOutboundRequestExecutor = taskOutboundRequestExecutor;
     }
 
     @Override
     public void onMessage(ConsumerRecord<String, String> message) {
 
         try {
+
             String key = message.key();
             String value = message.value();
+            Headers headers = message.headers();
             LOG.debug("[FPS][PmtId: {}] Processing event request for FPS outbound payment", key);
             taskOutboundRequestExecutor.execute(new Runnable(){
                 @Override
                 public void run() {
-                    processOutboundPayment(key, value);
+                    processOutboundPayment(key, value, headers);
                 }
             } );
             LOG.debug("[FPS][PmtId: {}] End processing event request for FPS outbound payment", key);
@@ -151,8 +163,44 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
         }
     }
 
+    public Boolean checkQoS(Headers headers) {
+        Long currentTimestamp = new Date().getTime();
+
+        Long qosTimestamp = null;
+        Integer qosSLA = null;
+
+        Boolean validQoS = Boolean.TRUE;
+
+        Header[] headersList = headers.toArray();
+        for (Header header: headersList){
+            if(header.value() != null){
+                try{
+                    if(header.key().equalsIgnoreCase(KafkaHeaders.QOS_TIMESTAMP.getKafkaHeader())){
+                        LOG.info("[FPS] QoS Timestamp {}", header.value());
+                        qosTimestamp = Long.parseLong(new String(header.value()));
+
+                    }else if(header.key().equalsIgnoreCase(KafkaHeaders.QOS_SLA.getKafkaHeader())){
+                        LOG.info("[FPS] qosSLA {}", header.value());
+                        qosSLA = Integer.parseInt(new String(header.value()));
+                    }
+                }catch(NumberFormatException ex){
+                    LOG.warn("[FPS} Header {} value {}",header.key(), header.value());
+                }
+            }
+        }
+
+        if(qosSLA != null && qosTimestamp != null) {
+            LOG.info("[FPS] Checking QoS service, sla ={}, timestamp={}, current timestamp={}", qosSLA, qosTimestamp, currentTimestamp);
+            if ((qosTimestamp + qosSLA) <= currentTimestamp) {
+                validQoS = Boolean.FALSE;
+            }
+        }
+        return validQoS;
+    }
+
     @Async("taskOutboundRequestExecutor")
-    public void processOutboundPayment(String key, String value) {
+    public void processOutboundPayment(String key, String value, Headers headers) {
+        Boolean validQoS = checkQoS(headers);
         long startTime = new Date().getTime();
         Event event = null;
         Gson gson = new Gson();
@@ -225,21 +273,21 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
                             rawMessage);
                 }
 
-                if (schemaValidation) {
+                if (schemaValidation && validQoS) {
 
                     //Send to MQ (Environment=Queue)
                     String queueToSend = outboundAsyncQueue;
 
-                    if(paymentType.equalsIgnoreCase("SIP")){
+                    if (paymentType.equalsIgnoreCase("SIP")) {
                         queueToSend = outboundQueue;
                     }
 
 
                     String datacenter = getEnvironment();
                     boolean paymentSent = sendToMQ(key, rawMessage.toString(), queueToSend, paymentType, datacenter);
-                    if(!paymentSent){
+                    if (!paymentSent) {
                         String alternativeEnvironmentMQ = environmentMQSite1;
-                        if(datacenter.equalsIgnoreCase(environmentMQSite1)){
+                        if (datacenter.equalsIgnoreCase(environmentMQSite1)) {
                             alternativeEnvironmentMQ = environmentMQSite2;
                         }
                         paymentSent = sendToMQ(key, rawMessage.toString(), queueToSend, paymentType, alternativeEnvironmentMQ);
@@ -260,25 +308,39 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
 
                     LOG.info("[FPS][PmtId: {}] Finish sending FPS Outbound payment", paymentId);
 
+
                 } else {
-                    LOG.info("[FPS][PmtId: {}] Generating reject because of invalid message format FPS Outbound payment",
-                            paymentId);
+                    String topic = outboundResponseTopic;
+                    if(validQoS) {
+                        LOG.info("[FPS][PmtId: {}] Generating reject because of invalid message format FPS Outbound payment", paymentId);
+                        event = EventGenerator.generateEvent(
+                                this.getClass().getName(),
+                                FPSEvents.FPS_VALIDATION_ERROR.getEventName(),
+                                paymentId,
+                                gson.toJson(fpsOutboundPayment),
+                                entity,
+                                brand
+                        );
+                    }else{
+                        LOG.info("[FPS][PmtId: {}] Generating reject because of invalid QoS for FPS Outbound payment", paymentId);
+                        event = EventGenerator.generateEvent(
+                                this.getClass().getName(),
+                                FPSEvents.FPS_UNDO_PAYMENT.getEventName(),
+                                paymentId,
+                                gson.toJson(paymentId),
+                                entity,
+                                brand
+                        );
+                        topic = undoPaymentTopic;
+                    }
 
                     fpsOutboundPayment.setTxSts(Constants.REJECT_CODE);
                     fpsOutboundPayment.setStsRsn(Constants.NO_VALIDATION_CODE);
                     fpsOutboundPayment.setPaymentTimestamp(new Date().getTime());
 
-                    event = EventGenerator.generateEvent(
-                            this.getClass().getName(),
-                            FPSEvents.FPS_VALIDATION_ERROR.getEventName(),
-                            paymentId,
-                            gson.toJson(fpsOutboundPayment),
-                            entity,
-                            brand
-                    );
 
                     LOG.info("[FPS][PmtId: {}] Sending Message to Topic {}", key, outboundResponseTopic);
-                    sendToKafka(outboundResponseTopic, key, event);
+                    sendToKafka(topic, key, event);
                     LOG.error("[FPS][PmtId: {}] Finish validating FPS Outbound payment request. Message {}",
                             paymentId, rawMessage);
                 }

@@ -22,7 +22,7 @@
 		<kafka.clients.version>1.0.0</kafka.clients.version>
 		<!--yggdrasil.network.version>0.1.0</yggdrasil.network.version-->
 		<yggdrasil.network.client.version>0.1.1</yggdrasil.network.client.version>
-		<umbrella.commons.version>0.6.0</umbrella.commons.version>
+		<umbrella.commons.version>0.7.1-SNAPSHOT</umbrella.commons.version>
 		<umbrella.commons.types.version>0.3.0</umbrella.commons.types.version>
 		<spring.version>4.3.8.RELEASE</spring.version>
 		<com.ibm.mq.version>9.0.3.0</com.ibm.mq.version>

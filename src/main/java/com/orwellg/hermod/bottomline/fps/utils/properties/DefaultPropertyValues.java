@@ -71,6 +71,8 @@ public class DefaultPropertyValues {
 	private final static String KAFKA_DEFAULT_MESSAGE_LOGGING_INBOUND_TOPIC    = "com.orwellg.hermod.bottomline.fps.inbound.raw.messages.1";
 	private final static String KAFKA_DEFAULT_MESSAGE_LOGGING_OUTBOUND_TOPIC   = "com.orwellg.hermod.bottomline.fps.outbound.raw.messages.1";
 
+	private final static String KAFKA_DEFAULT_OUTBOUND_UNDO_PAYMENT_TOPIC   = "com.orwellg.yggdrasil.payments.accounting.undo.1";
+
 	private final static Integer KAFKA_DEFAULT_OUTBOUND_TOPIC_PARTITIONS = 3;
 	private final static String KAFKA_DEFAULT_CONSUMER_GROUP_ID = "hermod-bottomline-fps-inbound";
 	private final static String KAFKA_DEFAULT_CONSUMER_INMEMORY_GROUP_ID = "hermod-bottomline-fps-inmemory.1";
@@ -160,6 +162,8 @@ public class DefaultPropertyValues {
 
 		defaultValues.put("kafka.topic.fps.inbound.logging", KAFKA_DEFAULT_MESSAGE_LOGGING_INBOUND_TOPIC);
 		defaultValues.put("kafka.topic.fps.outbound.logging", KAFKA_DEFAULT_MESSAGE_LOGGING_OUTBOUND_TOPIC);
+
+		defaultValues.put("kafka.topic.fps.outbound.undopayment", KAFKA_DEFAULT_OUTBOUND_UNDO_PAYMENT_TOPIC);
 
 		defaultValues.put("kafka.consumer.group.id", KAFKA_DEFAULT_CONSUMER_GROUP_ID);
 		defaultValues.put("kafka.consumer.threads.num", KAFKA_DEFAULT_CONSUMER_THREADS);
