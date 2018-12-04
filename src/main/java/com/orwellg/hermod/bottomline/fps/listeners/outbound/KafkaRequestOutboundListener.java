@@ -11,6 +11,8 @@ import com.orwellg.hermod.bottomline.fps.storage.PaymentOutboundBean;
 import com.orwellg.hermod.bottomline.fps.storage.PaymentStatus;
 import com.orwellg.hermod.bottomline.fps.types.FPSMessage;
 import com.orwellg.hermod.bottomline.fps.utils.Constants;
+import com.orwellg.hermod.bottomline.fps.utils.QoSHeaders;
+import com.orwellg.hermod.bottomline.fps.utils.QoSValidationExceotion;
 import com.orwellg.hermod.bottomline.fps.utils.singletons.EventGenerator;
 import com.orwellg.hermod.bottomline.fps.utils.singletons.SchemeValidatorBean;
 import com.orwellg.umbrella.avro.types.event.Event;
@@ -21,6 +23,7 @@ import com.orwellg.umbrella.commons.types.utils.avro.RawMessageUtils;
 import com.orwellg.umbrella.commons.utils.enums.FPSEvents;
 import com.orwellg.umbrella.commons.utils.enums.KafkaHeaders;
 import com.orwellg.umbrella.commons.utils.enums.fps.FPSDirection;
+import com.orwellg.umbrella.commons.utils.enums.fps.FPSValidationErrorCodes;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.Headers;
@@ -163,44 +166,11 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
         }
     }
 
-    public Boolean checkQoS(Headers headers) {
-        Long currentTimestamp = new Date().getTime();
 
-        Long qosTimestamp = null;
-        Integer qosSLA = null;
-
-        Boolean validQoS = Boolean.TRUE;
-
-        Header[] headersList = headers.toArray();
-        for (Header header: headersList){
-            if(header.value() != null){
-                try{
-                    if(header.key().equalsIgnoreCase(KafkaHeaders.QOS_TIMESTAMP.getKafkaHeader())){
-                        LOG.info("[FPS] QoS Timestamp {}", header.value());
-                        qosTimestamp = Long.parseLong(new String(header.value()));
-
-                    }else if(header.key().equalsIgnoreCase(KafkaHeaders.QOS_SLA.getKafkaHeader())){
-                        LOG.info("[FPS] qosSLA {}", header.value());
-                        qosSLA = Integer.parseInt(new String(header.value()));
-                    }
-                }catch(NumberFormatException ex){
-                    LOG.warn("[FPS} Header {} value {}",header.key(), header.value());
-                }
-            }
-        }
-
-        if(qosSLA != null && qosTimestamp != null) {
-            LOG.info("[FPS] Checking QoS service, sla ={}, timestamp={}, current timestamp={}", qosSLA, qosTimestamp, currentTimestamp);
-            if ((qosTimestamp + qosSLA) <= currentTimestamp) {
-                validQoS = Boolean.FALSE;
-            }
-        }
-        return validQoS;
-    }
 
     @Async("taskOutboundRequestExecutor")
     public void processOutboundPayment(String key, String value, Headers headers) {
-        Boolean validQoS = checkQoS(headers);
+        QoSHeaders qoSHeaders = getQoSData(headers);
         long startTime = new Date().getTime();
         Event event = null;
         Gson gson = new Gson();
@@ -273,7 +243,7 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
                             rawMessage);
                 }
 
-                if (schemaValidation && validQoS) {
+                if (schemaValidation) {
 
                     //Send to MQ (Environment=Queue)
                     String queueToSend = outboundAsyncQueue;
@@ -282,67 +252,64 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
                         queueToSend = outboundQueue;
                     }
 
-
                     String datacenter = getEnvironment();
-                    boolean paymentSent = sendToMQ(key, rawMessage.toString(), queueToSend, paymentType, datacenter);
-                    if (!paymentSent) {
-                        String alternativeEnvironmentMQ = environmentMQSite1;
-                        if (datacenter.equalsIgnoreCase(environmentMQSite1)) {
-                            alternativeEnvironmentMQ = environmentMQSite2;
+                    boolean paymentSent =  false;
+
+                    try {
+                        paymentSent = sendToMQ(key, rawMessage.toString(), queueToSend, paymentType, datacenter, qoSHeaders);
+                        if (!paymentSent) {
+                            String alternativeEnvironmentMQ = environmentMQSite1;
+                            if (datacenter.equalsIgnoreCase(environmentMQSite1)) {
+                                alternativeEnvironmentMQ = environmentMQSite2;
+                            }
+                            paymentSent = sendToMQ(key, rawMessage.toString(), queueToSend, paymentType, alternativeEnvironmentMQ, qoSHeaders);
                         }
-                        paymentSent = sendToMQ(key, rawMessage.toString(), queueToSend, paymentType, alternativeEnvironmentMQ);
+
+                        if(paymentSent) {
+
+                            fpsOutboundPayment.setTxSts("SENT");
+
+                            String eventName = FPSEvents.FPS_PAYMENT_SENT.getEventName();
+                            if (eventPayment.getEvent().getName().equalsIgnoreCase(FPSEvents.FPS_SEND_RETURN.getEventName())) {
+                                eventName = FPSEvents.FPS_RETURN_SENT.getEventName();
+                            }
+                            event = EventGenerator.generateEvent(this.getClass().getName(), eventName, paymentId,
+                                    gson.toJson(fpsOutboundPayment), entity, brand);
+
+                            LOG.info("[FPS][PmtId: {}] Sending Message to Topic {}", key, outboundResponseTopic);
+                            sendToKafka(outboundResponseTopic, key, event);
+
+                            storeOutboundPayment(paymentId, fpsOutboundPayment);
+
+                            LOG.info("[FPS][PmtId: {}] Finish sending FPS Outbound payment", paymentId);
+                        }else{ // Payment can not be sent to Bottomline
+                            LOG.info("[FPS][PmtId: {}] Generating reject because of connection error to Gateway for FPS Outbound payment",
+                                    paymentId);
+                            rejectPayment(key, fpsOutboundPayment, paymentId, FPSValidationErrorCodes.ERROR_GATEWAY_CONNECTION,
+                                    FPSEvents.FPS_HERMOD_BL_CONNECTION_FAILED);
+                            LOG.error("[FPS][PmtId: {}] Finish connection error to Gateway sending FPS Outbound payment request. Message {}",
+                                    paymentId,
+                                    rawMessage);
+                        }
+
+                    }catch (QoSValidationExceotion e){
+                        // Error because of QoS
+                        LOG.info("[FPS][PmtId: {}] Generating reject because of invalid QoS for FPS Outbound payment",
+                                paymentId);
+                        rejectPayment(key, fpsOutboundPayment, paymentId, FPSValidationErrorCodes.ERROR_QOS_VALIDATION,
+                                FPSEvents.FPS_VALIDATION_ERROR);
+                        LOG.error("[FPS][PmtId: {}] Finish validating QoS for FPS Outbound payment request. Message {}",
+                                paymentId,
+                                rawMessage);
                     }
-
-                    fpsOutboundPayment.setTxSts("SENT");
-
-                    String eventName = FPSEvents.FPS_PAYMENT_SENT.getEventName();
-                    if (eventPayment.getEvent().getName().equalsIgnoreCase(FPSEvents.FPS_SEND_RETURN.getEventName())) {
-                        eventName = FPSEvents.FPS_RETURN_SENT.getEventName();
-                    }
-                    event = EventGenerator.generateEvent(this.getClass().getName(), eventName, paymentId, gson.toJson(fpsOutboundPayment), entity, brand);
-
-                    LOG.info("[FPS][PmtId: {}] Sending Message to Topic {}", key, outboundResponseTopic);
-                    sendToKafka(outboundResponseTopic, key, event);
-
-                    storeOutboundPayment(paymentId, fpsOutboundPayment);
-
-                    LOG.info("[FPS][PmtId: {}] Finish sending FPS Outbound payment", paymentId);
-
-
                 } else {
-                    String topic = outboundResponseTopic;
-                    if(validQoS) {
-                        LOG.info("[FPS][PmtId: {}] Generating reject because of invalid message format FPS Outbound payment", paymentId);
-                        event = EventGenerator.generateEvent(
-                                this.getClass().getName(),
-                                FPSEvents.FPS_VALIDATION_ERROR.getEventName(),
-                                paymentId,
-                                gson.toJson(fpsOutboundPayment),
-                                entity,
-                                brand
-                        );
-                    }else{
-                        LOG.info("[FPS][PmtId: {}] Generating reject because of invalid QoS for FPS Outbound payment", paymentId);
-                        event = EventGenerator.generateEvent(
-                                this.getClass().getName(),
-                                FPSEvents.FPS_UNDO_PAYMENT.getEventName(),
-                                paymentId,
-                                gson.toJson(paymentId),
-                                entity,
-                                brand
-                        );
-                        topic = undoPaymentTopic;
-                    }
-
-                    fpsOutboundPayment.setTxSts(Constants.REJECT_CODE);
-                    fpsOutboundPayment.setStsRsn(Constants.NO_VALIDATION_CODE);
-                    fpsOutboundPayment.setPaymentTimestamp(new Date().getTime());
-
-
-                    LOG.info("[FPS][PmtId: {}] Sending Message to Topic {}", key, outboundResponseTopic);
-                    sendToKafka(topic, key, event);
-                    LOG.error("[FPS][PmtId: {}] Finish validating FPS Outbound payment request. Message {}",
-                            paymentId, rawMessage);
+                    // Error validating payment with scheme
+                    LOG.info("[FPS][PmtId: {}] Generating reject because of invalid FPS Outbound payment", paymentId);
+                    rejectPayment(key, fpsOutboundPayment, paymentId, FPSValidationErrorCodes.ERROR_SCHEME_VALIDATION,
+                            FPSEvents.FPS_VALIDATION_ERROR);
+                    LOG.error("[FPS][PmtId: {}] Finish validating error on FPS Outbound payment request. Message {}",
+                            paymentId,
+                            rawMessage);
                 }
             } else {
                 throw new MessageConversionException("Exception in message emission. The transform for pacs_008_001 is null");
@@ -354,6 +321,75 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
 
         LOG.debug("[FPS][PmtId: {}] Time to process outbound payment request: {} ms",
                 paymentId, new Date().getTime()-startTime);
+    }
+
+    private void rejectPayment(String key, FPSOutboundPayment fpsOutboundPayment, String paymentId,
+                               FPSValidationErrorCodes fpsValidationErrorCodes, FPSEvents fpsEvents) {
+        Event event;
+
+        Gson gson = new Gson();
+
+        //Undo payment
+
+        event = EventGenerator.generateEvent(this.getClass().getName(), FPSEvents.FPS_UNDO_PAYMENT.getEventName(), paymentId,
+                gson.toJson(paymentId), entity, brand);
+        String topic = undoPaymentTopic;
+
+        LOG.info("[FPS][PmtId: {}] Sending Message to Topic {} to undo payment", key, topic);
+        sendToKafka(topic, key, event);
+
+        // Reject Response to outbound response topic
+
+        topic = outboundResponseTopic;
+        fpsOutboundPayment.setTxSts(Constants.REJECT_CODE);
+        fpsOutboundPayment.setStsRsn(fpsValidationErrorCodes.getError().toString());
+        fpsOutboundPayment.setPaymentTimestamp(new Date().getTime());
+        LOG.info("[FPS][PmtId: {}] Generating reject payment", paymentId);
+        event = EventGenerator.generateEvent(this.getClass().getName(), fpsEvents.getEventName(), paymentId,
+                gson.toJson(fpsOutboundPayment), entity, brand);
+        LOG.info("[FPS][PmtId: {}] Sending Message to Topic {} to reject payment", key, outboundResponseTopic);
+        sendToKafka(topic, key, event);
+    }
+
+    private Boolean checkQoS(Headers headers) {
+        Long currentTimestamp = new Date().getTime();
+
+        Boolean validQoS = Boolean.TRUE;
+
+        QoSHeaders qoSHeaders = getQoSData(headers);
+
+        Integer qosSLA = qoSHeaders.getQosSLA();
+        Long qosTimestamp = qoSHeaders.getQosTimestamp();
+        if(qosSLA != null && qosTimestamp != null) {
+            LOG.info("[FPS] Checking QoS service, sla ={}, timestamp={}, current timestamp={}", qosSLA, qosTimestamp, currentTimestamp);
+            if ((qosTimestamp + qosSLA) <= currentTimestamp) {
+                validQoS = Boolean.FALSE;
+            }
+        }
+        return validQoS;
+    }
+
+    private QoSHeaders getQoSData(Headers headers) {
+        QoSHeaders qoSHeaders = new QoSHeaders();
+        Header[] headersList = headers.toArray();
+        for (Header header: headersList){
+            if(header.value() != null){
+                try{
+                    if(header.key().equalsIgnoreCase(KafkaHeaders.QOS_TIMESTAMP.getKafkaHeader())){
+                        LOG.info("[FPS] QoS Timestamp {}", header.value());
+                        qoSHeaders.setQosTimestamp(Long.parseLong(new String(header.value())));
+
+                    }else if(header.key().equalsIgnoreCase(KafkaHeaders.QOS_SLA.getKafkaHeader())){
+                        LOG.info("[FPS] qosSLA {}", header.value());
+                        qoSHeaders.setQosSLA(Integer.parseInt(new String(header.value())));
+                    }
+                }catch(NumberFormatException ex){
+                    LOG.warn("[FPS} Header {} value {}",header.key(), header.value());
+                }
+            }
+        }
+
+        return qoSHeaders;
     }
 
     private PaymentOutboundBean storeOutboundPayment(String paymentId, FPSOutboundPayment outboundPayment) {

@@ -1,6 +1,8 @@
 package com.orwellg.hermod.bottomline.fps.listeners;
 
 import com.orwellg.hermod.bottomline.fps.services.transform.FPSTransform;
+import com.orwellg.hermod.bottomline.fps.utils.QoSHeaders;
+import com.orwellg.hermod.bottomline.fps.utils.QoSValidationExceotion;
 import com.orwellg.hermod.bottomline.fps.utils.singletons.EventGenerator;
 import com.orwellg.umbrella.avro.types.event.Event;
 import org.apache.logging.log4j.LogManager;
@@ -9,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jms.core.JmsOperations;
 
+import java.util.Date;
 import java.util.Map;
 
 public class BaseListener {
@@ -66,6 +69,54 @@ public class BaseListener {
 		if(sendMessageToBL) {
 			LOG.info("[FPS][PaymentType: {}][PmtId: {}] Sending message to queue {} to Bottomline {}. Attempts to try {}", paymentType, key, queueToSend, environmentMQ, numAttempts);
 			while (!messageSent && numAttempts > 0) {
+				try {
+					LOG.info("[FPS][PaymentType: {}][PmtId: {}] Message to be sent to queue {} to Bottomline {}: {}", paymentType, key, queueToSend, environmentMQ, rawMessage);
+					if (environmentMQ.equalsIgnoreCase(environmentMQSite1)) {
+						jmsOperations.send(queueToSend, session -> session.createTextMessage(rawMessage));
+					} else {
+						jmsOperationsSite2.send(queueToSend, session -> session.createTextMessage(rawMessage));
+					}
+					messageSent = true;
+				} catch (Exception ex) {
+					LOG.error("[FPS] Error sending message to Bottomline. Error Message: {}", ex.getMessage());
+					numAttempts--;
+					LOG.info("[FPS][PaymentType: {}][PmtId: {}] Sending message to queue {} to Bottomline {}. Attempts to try {}", paymentType, key, queueToSend, environmentMQ, numAttempts);
+				}
+			}
+			if (!messageSent) {
+				LOG.error("[FPS][PmtId: {}] Error sending message to {} queue. Max number of attempts reached", key, queueToSend);
+			}
+		}else{
+			LOG.debug("[FPS][PaymentType: {}][PmtId: {}] Message NOT SENT to queue {} to Bottomline {}", paymentType, key, queueToSend, environmentMQ);
+		}
+		return messageSent;
+	}
+
+	private Boolean validQoS(QoSHeaders qoSHeaders) {
+		Long currentTimestamp = new Date().getTime();
+
+		Boolean validQoS = Boolean.TRUE;
+
+		Integer qosSLA = qoSHeaders.getQosSLA();
+		Long qosTimestamp = qoSHeaders.getQosTimestamp();
+		if(qosSLA != null && qosTimestamp != null) {
+			LOG.info("[FPS] Checking QoS service, sla ={}, timestamp={}, current timestamp={}", qosSLA, qosTimestamp, currentTimestamp);
+			if ((qosTimestamp + qosSLA) <= currentTimestamp) {
+				validQoS = Boolean.FALSE;
+			}
+		}
+		return validQoS;
+	}
+
+	protected boolean sendToMQ(String key, String rawMessage, String queueToSend, String paymentType, String environmentMQ, QoSHeaders qoSHeaders ) throws QoSValidationExceotion {
+		boolean messageSent = false;
+		int numAttempts = numMaxAttempts;
+		if(sendMessageToBL) {
+			LOG.info("[FPS][PaymentType: {}][PmtId: {}] Sending message to queue {} to Bottomline {}. Attempts to try {}", paymentType, key, queueToSend, environmentMQ, numAttempts);
+			while (!messageSent && numAttempts > 0) {
+				if(!validQoS(qoSHeaders)){
+					throw new QoSValidationExceotion();
+				}
 				try {
 					LOG.info("[FPS][PaymentType: {}][PmtId: {}] Message to be sent to queue {} to Bottomline {}: {}", paymentType, key, queueToSend, environmentMQ, rawMessage);
 					if (environmentMQ.equalsIgnoreCase(environmentMQSite1)) {
