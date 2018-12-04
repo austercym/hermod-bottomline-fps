@@ -184,6 +184,13 @@ public class Pacs008FPS2AvroTransform {
                         }
                     }
 
+                    List<com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.RemittanceLocation4> listRemittanceLocation4 = new ArrayList<>();
+                    creditTransferTransaction19.setRltdRmtInf(listRemittanceLocation4);
+
+                    List<com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.SupplementaryData1> listSupplementaryData1 = new ArrayList<>();
+                    creditTransferTransaction19.setSplmtryData(listSupplementaryData1);
+
+
                     RemittanceInformation10 rmtInf = cdtTrfTxInf.getRmtInf();
                     if(rmtInf!= null) {
                         com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.RemittanceInformation10 rmtInf2 = new com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.RemittanceInformation10();
