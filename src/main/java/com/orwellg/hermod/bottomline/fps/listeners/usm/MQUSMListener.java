@@ -87,6 +87,7 @@ public class MQUSMListener extends BaseListener implements MessageListener {
     public void onMessage(Message message) {
 
         inbound_usm_requests.inc();
+        Long qosTimestamp = new Date().getTime();
 
         LOG.info("[FPS] Getting usm message...............");
         InputStream stream = null;
@@ -107,7 +108,7 @@ public class MQUSMListener extends BaseListener implements MessageListener {
                 throw new MessageConversionException("The received message with type " + message.getJMSType() + " is not recognized.");
             }
             IOUtils.copy(reader, writer);
-            sendMessageToTopic(writer, null);
+            sendMessageToTopic(writer, null, qosTimestamp);
         } catch (Exception e) {
             throw new MessageConversionException("Exception in message reception. Message: " + e.getMessage(), e);
         } finally {
@@ -126,7 +127,7 @@ public class MQUSMListener extends BaseListener implements MessageListener {
     }
 
 
-    public void sendMessageToTopic(Writer writer, String id) {
+    public void sendMessageToTopic(Writer writer, String id, Long qosMilliseconds) {
         Event event = null;
         if (writer != null) {
             String message = "";
@@ -174,7 +175,7 @@ public class MQUSMListener extends BaseListener implements MessageListener {
                                 entity, brand
                         );
 
-                        sendToKafka(usmTopic, uuid, event);
+                        sendToKafka(usmTopic, uuid, event, qosMilliseconds);
                         LOG.info("[FPS][PmtId: {}] Sent FPS USM message to topic {}", uuid, usmTopic);
                     }
 
@@ -220,12 +221,12 @@ public class MQUSMListener extends BaseListener implements MessageListener {
         return true;
     }
 
-    protected void sendToKafka(String topic, String uuid, Event event){
+    protected void sendToKafka(String topic, String uuid, Event event, Long qosMilliseconds){
         kafkaSender.send(
                 topic,
                 RawMessageUtils.encodeToString(Event.SCHEMA$, event),
                 uuid,
-                null, environmentMQ, USM, false, null
+                null, environmentMQ, USM, false, qosMilliseconds
         );
     }
 
