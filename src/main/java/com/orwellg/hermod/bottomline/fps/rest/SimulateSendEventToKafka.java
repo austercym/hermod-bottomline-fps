@@ -239,7 +239,7 @@ public class SimulateSendEventToKafka {
         Writer writer = null;
         try{
             writer= getStringWriter(queueMessage);
-            mqUSMListener.sendMessageToTopic(writer, key);
+            mqUSMListener.sendMessageToTopic(writer, key, new Date().getTime());
             return new ResponseEntity<>("Message sent ", HttpStatus.OK);
         }catch(IOException e){
             LOG.error("Error processing message: {}", e.getMessage());
