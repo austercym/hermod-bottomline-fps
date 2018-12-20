@@ -39,7 +39,7 @@ public abstract class MQPOOListener extends MQListener {
                 topic,
                 RawMessageUtils.encodeToString(Event.SCHEMA$, event),
                 uuid,
-                replyTo, environmentMQ, POO, true, qosMilliseconds
+                replyTo, environmentMQ, POO, true,false, qosMilliseconds
         );
     }
 }
