@@ -295,7 +295,6 @@ public abstract class MQListener extends BaseListener implements MessageListener
                                 event = EventGenerator.generateEvent(this.getClass().getName(),
                                         eventName, uuid, gson.toJson(fpsRequest), entity, brand
                                 );
-                                LOG.info("[FPS][PmtId: {}] Sending FPS Inbound payment request to {}", uuid, nextEnvironment);
                                 sendToKafka(inboundTopic, uuid, event, paymentTypeCode, nextEnvironment, qosMilliseconds, isReversal);
                             }else{
                                 FPSInboundReversal fpsInboundReversal = new FPSInboundReversal();
