@@ -1,5 +1,6 @@
 package com.orwellg.hermod.bottomline.fps.listeners.inbound.poo;
 
+import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
 import com.orwellg.hermod.bottomline.fps.listeners.inbound.MQListener;
 import com.orwellg.umbrella.avro.types.event.Event;
@@ -9,6 +10,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.jms.Message;
+
+import java.util.SortedMap;
 
 import static com.codahale.metrics.MetricRegistry.name;
 
@@ -20,11 +23,7 @@ public abstract class MQPOOListener extends MQListener {
     protected abstract String getEnvironment();
 
     public MQPOOListener(MetricRegistry metricRegistry){
-        if(metricRegistry!= null) {
-            inbound_poo_requests = metricRegistry.counter(name("connector_fps", "inbound", "POO", FPSDirection.INPUT.getDirection()));
-        }else{
-            LOG.error("No exists metrics registry");
-        }
+        super(metricRegistry);
     }
 
     @Override
@@ -33,13 +32,23 @@ public abstract class MQPOOListener extends MQListener {
     }
 
     @Override
-    protected void sendToKafka(String topic, String uuid, Event event, String paymentType, String environmentMQ, Long qosMilliseconds){
-        inbound_poo_requests.inc();
+    protected void sendToKafka(String topic, String uuid, Event event, String paymentType, String environmentMQ, Long qosMilliseconds, boolean isReversal){
+
+        incrementPooMetric();
+        calculateMetrics(paymentType, isReversal);
         kafkaSender.send(
                 topic,
                 RawMessageUtils.encodeToString(Event.SCHEMA$, event),
                 uuid,
-                replyTo, environmentMQ, POO, true,false, qosMilliseconds
+                replyTo, environmentMQ, paymentType, true,false, qosMilliseconds
         );
+    }
+
+    private void incrementPooMetric() {
+        SortedMap <String, Counter> counters = metricRegistry.getCounters();
+        Counter inboundPooMetric = counters.get(name("connector_fps", "inbound", "POO", FPSDirection.INPUT.getDirection()));
+        if(inboundPooMetric!= null) {
+            inboundPooMetric.inc();
+        }
     }
 }

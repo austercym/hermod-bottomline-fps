@@ -1,6 +1,5 @@
 package com.orwellg.hermod.bottomline.fps.listeners.usm;
 
-import com.bottomline.directfps.fpsusmelements.*;
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.gson.Gson;
@@ -44,6 +43,7 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Validator;
 import java.io.*;
 import java.util.Date;
+import java.util.SortedMap;
 
 import static com.codahale.metrics.MetricRegistry.name;
 
@@ -77,7 +77,8 @@ public class MQUSMListener extends BaseListener implements MessageListener {
 
     public MQUSMListener(MetricRegistry metricRegistry){
         if(metricRegistry!= null) {
-            inbound_usm_requests = metricRegistry.counter(name("connector_fps", "inbound", "USM", FPSDirection.INPUT.getDirection()));
+            SortedMap <String, Counter> counters = metricRegistry.getCounters();
+            inbound_usm_requests = counters.get(name("connector_fps", "inbound", "USM", FPSDirection.INPUT.getDirection()));
         }else{
             LOG.error("No exists metrics registry");
         }

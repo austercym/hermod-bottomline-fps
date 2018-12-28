@@ -194,23 +194,6 @@ public class KafkaResponseInboundListener extends KafkaInboundListener implement
                 key, new Date().getTime()-startTime);
 	}
 
-	/*
-	private void calculateMetrics(String paymentType) {
-		if (paymentType.equalsIgnoreCase(SIP)) {
-            inbound_sip_responses.inc();
-        }else if (paymentType.equalsIgnoreCase(SOP)) {
-            inbound_sop_responses.inc();
-        }else if (paymentType.equalsIgnoreCase(FDP)) {
-            inbound_fdp_responses.inc();
-        }else if (paymentType.equalsIgnoreCase(CBP)) {
-            inbound_cbp_responses.inc();
-        }else if (paymentType.equalsIgnoreCase(SRN)) {
-            inbound_srn_responses.inc();
-        }else if (paymentType.equalsIgnoreCase(RTN)) {
-            inbound_rtn_responses.inc();
-        }
-	}
-	*/
 
 	private FPSAvroMessage generateFPSPacs002Response(FPSOutboundPaymentResponse fpsPaymentResponse) {
 		return generateFPSPacs002(fpsPaymentResponse.getOrgnlPaymentDocument(), fpsPaymentResponse.getPaymentId(),
@@ -264,12 +247,15 @@ public class KafkaResponseInboundListener extends KafkaInboundListener implement
 				}
 			}
 			counter.inc();
+
+			totalResponseMetrics(txSts, counters, "connector_fps");
 		}else{
 			calculateMetrics(counters, paymentType);
 		}
 	}
 
-    private void calculateMetrics(SortedMap<String, Counter> counters, String paymentType) {
+
+	private void calculateMetrics(SortedMap<String, Counter> counters, String paymentType) {
         String key = "connector_fps.inbound."+paymentType+"." + FPSDirection.OUTPUT.getDirection();
         Counter counter = null;
         if (counters.containsKey(key)) {

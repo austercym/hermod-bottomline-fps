@@ -232,23 +232,6 @@ public class KafkaResponseReversalInboundListener extends KafkaInboundListener i
 		return fpsPaymentResponse.getPaymentId()+ RESP_SUFFIX;
 	}
 
-	/*
-	private void calculateMetrics(String paymentType) {
-		if (paymentType.equalsIgnoreCase(SIP)) {
-			inbound_sip_reversal_responses.inc();
-		}else if (paymentType.equalsIgnoreCase(SOP)) {
-			inbound_sop_reversal_responses.inc();
-		}else if (paymentType.equalsIgnoreCase(FDP)) {
-			inbound_fdp_reversal_responses.inc();
-		}else if (paymentType.equalsIgnoreCase(CBP)) {
-			inbound_cbp_reversal_responses.inc();
-		}else if (paymentType.equalsIgnoreCase(SRN)) {
-			inbound_srn_reversal_responses.inc();
-		}else if (paymentType.equalsIgnoreCase(RTN)) {
-			inbound_rtn_reversal_responses.inc();
-		}
-	}
-*/
 
 	private void calculateMetricResponses(FPSOutboundReversalResponse fpsResponse, String paymentType) {
 		String txSts = fpsResponse.getRvsdSts();
@@ -257,23 +240,25 @@ public class KafkaResponseReversalInboundListener extends KafkaInboundListener i
 			Counter counter = null;
 			String stsRsn = fpsResponse.getRvsdRsn();
 			if(org.apache.commons.lang3.StringUtils.isNotEmpty(stsRsn)) {
-				String key = "connector_fps_inbound_reversal.inbound."+paymentType+"." + FPSDirection.OUTPUT.getDirection() + "." + txSts + "." + stsRsn;
+				String key = "connector_fps_reversal.inbound."+paymentType+"." + FPSDirection.OUTPUT.getDirection() + "." + txSts + "." + stsRsn;
 				if (counters.containsKey(key)) {
 					counter = counters.get(key);
 
 				} else {
-					counter = metricRegistry.counter(name("connector_fps_inbound_reversal", "inbound", paymentType, FPSDirection.OUTPUT.getDirection(), txSts, stsRsn));
+					counter = metricRegistry.counter(name("connector_fps_reversal", "inbound", paymentType, FPSDirection.OUTPUT.getDirection(), txSts, stsRsn));
 				}
 			}else{
-				String key = "connector_fps_inbound_reversal.inbound."+paymentType+"." + FPSDirection.OUTPUT.getDirection() + "." + txSts;
+				String key = "connector_fps_reversal.inbound."+paymentType+"." + FPSDirection.OUTPUT.getDirection() + "." + txSts;
 				if (counters.containsKey(key)) {
 					counter = counters.get(key);
 
 				} else {
-					counter = metricRegistry.counter(name("connector_fps_inbound_reversal", "inbound", paymentType, FPSDirection.OUTPUT.getDirection(), txSts));
+					counter = metricRegistry.counter(name("connector_fps_reversal", "inbound", paymentType, FPSDirection.OUTPUT.getDirection(), txSts));
 				}
 			}
 			counter.inc();
+			totalResponseMetrics(txSts,counters, "connector_fps_reversal");
+
 		}else{
 			calculateMetrics(counters, paymentType);
 		}

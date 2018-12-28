@@ -45,8 +45,8 @@ import javax.xml.validation.Validator;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.nio.ByteBuffer;
 import java.util.Date;
+import java.util.SortedMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static com.codahale.metrics.MetricRegistry.name;
@@ -56,6 +56,7 @@ import static com.codahale.metrics.MetricRegistry.name;
 public class KafkaRequestOutboundListener extends KafkaOutboundListener implements MessageListener<String, String>, KafkaDataListener<ConsumerRecord<String, String>> {
 
     private static Logger LOG = LogManager.getLogger(KafkaRequestOutboundListener.class);
+
 
     @Value("${wq.mq.queue.sip.outbound}")
     private String outboundQueue;
@@ -98,14 +99,9 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
 
     private final KafkaSender kafkaSender;
 
-    private final TaskExecutor taskOutboundRequestExecutor;
+    private final MetricRegistry metricRegistry;
 
-    private Counter outbound_sip_requests;
-    private Counter outbound_sop_requests;
-    private Counter outbound_fdp_requests;
-    private Counter outbound_cbp_requests;
-    private Counter outbound_srn_requests;
-    private Counter outbound_rtn_requests;
+    private final TaskExecutor taskOutboundRequestExecutor;
 
     private static AtomicLong index;
     static {
@@ -130,17 +126,7 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
 
     @Autowired
     public KafkaRequestOutboundListener(MetricRegistry metricRegistry, KafkaSender kafkaSender, TaskExecutor taskOutboundRequestExecutor){
-        if(metricRegistry!= null) {
-            String direction = FPSDirection.OUTPUT.getDirection();
-            outbound_sop_requests = metricRegistry.counter(name("connector_fps", "outbound", "SOP", direction));
-            outbound_fdp_requests = metricRegistry.counter(name("connector_fps", "outbound", "FDP", direction));
-            outbound_cbp_requests = metricRegistry.counter(name("connector_fps", "outbound", "CBP", direction));
-            outbound_srn_requests = metricRegistry.counter(name("connector_fps", "outbound", "SRN", direction));
-            outbound_rtn_requests = metricRegistry.counter(name("connector_fps", "outbound", "RTN", direction));
-            outbound_sip_requests = metricRegistry.counter(name("connector_fps", "outbound", "SIP", direction));
-        }else{
-            LOG.error("No exists metrics registry");
-        }
+        this.metricRegistry = metricRegistry;
         this.kafkaSender = kafkaSender;
         this.taskOutboundRequestExecutor = taskOutboundRequestExecutor;
     }
@@ -450,19 +436,15 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
     }
 
     private void calculateMetrics(String paymentType) {
-        if (paymentType.equalsIgnoreCase(SIP)) {
-            outbound_sip_requests.inc();
-        }else if (paymentType.equalsIgnoreCase(SOP)) {
-            outbound_sop_requests.inc();
-        }else if (paymentType.equalsIgnoreCase(FDP)) {
-            outbound_fdp_requests.inc();
-        }else if (paymentType.equalsIgnoreCase(CBP)) {
-            outbound_cbp_requests.inc();
-        }else if (paymentType.equalsIgnoreCase(SRN)) {
-            outbound_srn_requests.inc();
-        }else if (paymentType.equalsIgnoreCase(RTN)) {
-            outbound_rtn_requests.inc();
+        String direction = FPSDirection.OUTPUT.getDirection();
+
+        SortedMap <String, Counter> counters = metricRegistry.getCounters();
+
+        Counter metric = counters.get(name("connector_fps", "outbound", paymentType, direction));
+        if(metric == null) {
+            metric = metricRegistry.counter(name("connector_fps", "outbound", paymentType, direction));
         }
+        metric.inc();
     }
 
 }
