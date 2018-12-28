@@ -255,6 +255,20 @@ public class ProjectConfig extends ComponentConfig {
         metricRegistry.counter(name("connector_fps", "outbound", PaymentType.PaymentTypeCode.RTN.name(), FPSDirection.OUTPUT.getDirection()));
         metricRegistry.counter(name("connector_fps", "outbound", PaymentType.PaymentTypeCode.SIP.name(), FPSDirection.OUTPUT.getDirection()));
 
+        metricRegistry.counter(name("connector_fps", "inbound", PaymentType.PaymentTypeCode.SOP.name(), FPSDirection.OUTPUT.getDirection(),"RJCT","1181"));
+        metricRegistry.counter(name("connector_fps", "inbound", PaymentType.PaymentTypeCode.FDP.name(), FPSDirection.OUTPUT.getDirection(),"RJCT","1181"));
+        metricRegistry.counter(name("connector_fps", "inbound", PaymentType.PaymentTypeCode.CBP.name(), FPSDirection.OUTPUT.getDirection(),"RJCT","1181"));
+        metricRegistry.counter(name("connector_fps", "inbound", PaymentType.PaymentTypeCode.SRN.name(), FPSDirection.OUTPUT.getDirection(),"RJCT","1181"));
+        metricRegistry.counter(name("connector_fps", "inbound", PaymentType.PaymentTypeCode.RTN.name(), FPSDirection.OUTPUT.getDirection(),"RJCT","1181"));
+        metricRegistry.counter(name("connector_fps", "inbound", PaymentType.PaymentTypeCode.SIP.name(), FPSDirection.OUTPUT.getDirection(),"RJCT","1181"));
+
+        metricRegistry.counter(name("connector_fps", "outbound", PaymentType.PaymentTypeCode.SOP.name(), FPSDirection.INPUT.getDirection(),"RJCT","1913"));
+        metricRegistry.counter(name("connector_fps", "outbound", PaymentType.PaymentTypeCode.FDP.name(), FPSDirection.INPUT.getDirection(),"RJCT","1913"));
+        metricRegistry.counter(name("connector_fps", "outbound", PaymentType.PaymentTypeCode.CBP.name(), FPSDirection.INPUT.getDirection(),"RJCT","1913"));
+        metricRegistry.counter(name("connector_fps", "outbound", PaymentType.PaymentTypeCode.SRN.name(), FPSDirection.INPUT.getDirection(),"RJCT","1913"));
+        metricRegistry.counter(name("connector_fps", "outbound", PaymentType.PaymentTypeCode.RTN.name(), FPSDirection.INPUT.getDirection(),"RJCT","1913"));
+        metricRegistry.counter(name("connector_fps", "outbound", PaymentType.PaymentTypeCode.SIP.name(), FPSDirection.INPUT.getDirection(),"RJCT","1913"));
+
         metricRegistry.counter(name("connector_fps", "inbound", "-", FPSDirection.OUTPUT.getDirection(),"TotalRejects"));
         metricRegistry.counter(name("connector_fps", "inbound", "-", FPSDirection.OUTPUT.getDirection(),"TotalAcceptances"));
 
