@@ -1,6 +1,5 @@
 package com.orwellg.hermod.bottomline.fps.listeners.usm;
 
-import com.bottomline.directfps.fpsusmelements.*;
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.gson.Gson;
@@ -15,6 +14,7 @@ import com.orwellg.hermod.bottomline.fps.utils.singletons.SchemeValidatorBean;
 import com.orwellg.umbrella.avro.types.event.Event;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSInboundUSM;
+import com.bottomline.directfps.fpsusmelements.*;
 import com.orwellg.umbrella.commons.types.utils.avro.RawMessageUtils;
 import com.orwellg.umbrella.commons.utils.enums.FPSEvents;
 import com.orwellg.umbrella.commons.utils.enums.fps.FPSDirection;
@@ -44,6 +44,7 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Validator;
 import java.io.*;
 import java.util.Date;
+import java.util.SortedMap;
 
 import static com.codahale.metrics.MetricRegistry.name;
 
@@ -77,7 +78,8 @@ public class MQUSMListener extends BaseListener implements MessageListener {
 
     public MQUSMListener(MetricRegistry metricRegistry){
         if(metricRegistry!= null) {
-            inbound_usm_requests = metricRegistry.counter(name("connector_fps", "inbound", "USM", FPSDirection.INPUT.getDirection()));
+            SortedMap <String, Counter> counters = metricRegistry.getCounters();
+            inbound_usm_requests = counters.get(name("connector_fps", "inbound", "USM", FPSDirection.INPUT.getDirection()));
         }else{
             LOG.error("No exists metrics registry");
         }
@@ -226,7 +228,7 @@ public class MQUSMListener extends BaseListener implements MessageListener {
                 topic,
                 RawMessageUtils.encodeToString(Event.SCHEMA$, event),
                 uuid,
-                null, environmentMQ, USM, false, qosMilliseconds
+                null, environmentMQ, USM, false, false, qosMilliseconds
         );
     }
 

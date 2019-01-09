@@ -3,6 +3,7 @@ package com.orwellg.hermod.bottomline.fps.config;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.jmx.JmxReporter;
 import com.orwellg.hermod.bottomline.fps.utils.singletons.SchemeValidatorBean;
+import com.orwellg.umbrella.commons.types.fps.PaymentType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,8 +13,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
 import org.springframework.jms.listener.DefaultMessageListenerContainer;
 import org.springframework.kafka.listener.AbstractMessageListenerContainer;
+import com.orwellg.umbrella.commons.utils.enums.fps.FPSDirection;
 
 import java.util.concurrent.CountDownLatch;
+
+import static com.codahale.metrics.MetricRegistry.name;
 
 @Configuration
 public class ProjectConfig extends ComponentConfig {
@@ -102,6 +106,8 @@ public class ProjectConfig extends ComponentConfig {
 	public void startListeners() {
 	    LOG.info("Connector to Bottomline start. Starting containers....");
         shutdownLatch = new CountDownLatch(1);
+
+        initializeMetrics();
 
 		final JmxReporter reporterJMX = JmxReporter.forRegistry(metricRegistry).build();
 		reporterJMX.start();
@@ -222,5 +228,63 @@ public class ProjectConfig extends ComponentConfig {
         jmsAsynOutboundListenerContainer.start();
         jmsPOOListenerContainer.start();
         jmsUSMListenerContainer.start();
+    }
+
+    private void initializeMetrics(){
+
+	    LOG.info("Defining default metrics and initialize to 0");
+
+        metricRegistry.counter(name("connector_fps", "inbound", PaymentType.PaymentTypeCode.SOP.name(),  FPSDirection.INPUT.getDirection()));
+        metricRegistry.counter(name("connector_fps", "inbound", PaymentType.PaymentTypeCode.CBP.name(), FPSDirection.INPUT.getDirection()));
+        metricRegistry.counter(name("connector_fps", "inbound", PaymentType.PaymentTypeCode.FDP.name(), FPSDirection.INPUT.getDirection()));
+        metricRegistry.counter(name("connector_fps", "inbound", PaymentType.PaymentTypeCode.SRN.name(), FPSDirection.INPUT.getDirection()));
+        metricRegistry.counter(name("connector_fps", "inbound", PaymentType.PaymentTypeCode.RTN.name(), FPSDirection.INPUT.getDirection()));
+        metricRegistry.counter(name("connector_fps", "inbound", PaymentType.PaymentTypeCode.SIP.name(), FPSDirection.INPUT.getDirection()));
+
+        metricRegistry.counter(name("connector_fps_reversal", "inbound", PaymentType.PaymentTypeCode.SOP.name(),  FPSDirection.INPUT.getDirection()));
+        metricRegistry.counter(name("connector_fps_reversal", "inbound", PaymentType.PaymentTypeCode.CBP.name(), FPSDirection.INPUT.getDirection()));
+        metricRegistry.counter(name("connector_fps_reversal", "inbound", PaymentType.PaymentTypeCode.FDP.name(), FPSDirection.INPUT.getDirection()));
+        metricRegistry.counter(name("connector_fps_reversal", "inbound", PaymentType.PaymentTypeCode.SRN.name(), FPSDirection.INPUT.getDirection()));
+        metricRegistry.counter(name("connector_fps_reversal", "inbound", PaymentType.PaymentTypeCode.RTN.name(), FPSDirection.INPUT.getDirection()));
+        metricRegistry.counter(name("connector_fps_reversal", "inbound", PaymentType.PaymentTypeCode.SIP.name(), FPSDirection.INPUT.getDirection()));
+
+        metricRegistry.counter(name("connector_fps", "outbound", PaymentType.PaymentTypeCode.SOP.name(), FPSDirection.OUTPUT.getDirection()));
+        metricRegistry.counter(name("connector_fps", "outbound", PaymentType.PaymentTypeCode.FDP.name(), FPSDirection.OUTPUT.getDirection()));
+        metricRegistry.counter(name("connector_fps", "outbound", PaymentType.PaymentTypeCode.CBP.name(), FPSDirection.OUTPUT.getDirection()));
+        metricRegistry.counter(name("connector_fps", "outbound", PaymentType.PaymentTypeCode.SRN.name(), FPSDirection.OUTPUT.getDirection()));
+        metricRegistry.counter(name("connector_fps", "outbound", PaymentType.PaymentTypeCode.RTN.name(), FPSDirection.OUTPUT.getDirection()));
+        metricRegistry.counter(name("connector_fps", "outbound", PaymentType.PaymentTypeCode.SIP.name(), FPSDirection.OUTPUT.getDirection()));
+
+        metricRegistry.counter(name("connector_fps", "inbound", PaymentType.PaymentTypeCode.SOP.name(), FPSDirection.OUTPUT.getDirection(),"RJCT","1181"));
+        metricRegistry.counter(name("connector_fps", "inbound", PaymentType.PaymentTypeCode.FDP.name(), FPSDirection.OUTPUT.getDirection(),"RJCT","1181"));
+        metricRegistry.counter(name("connector_fps", "inbound", PaymentType.PaymentTypeCode.CBP.name(), FPSDirection.OUTPUT.getDirection(),"RJCT","1181"));
+        metricRegistry.counter(name("connector_fps", "inbound", PaymentType.PaymentTypeCode.SRN.name(), FPSDirection.OUTPUT.getDirection(),"RJCT","1181"));
+        metricRegistry.counter(name("connector_fps", "inbound", PaymentType.PaymentTypeCode.RTN.name(), FPSDirection.OUTPUT.getDirection(),"RJCT","1181"));
+        metricRegistry.counter(name("connector_fps", "inbound", PaymentType.PaymentTypeCode.SIP.name(), FPSDirection.OUTPUT.getDirection(),"RJCT","1181"));
+
+        metricRegistry.counter(name("connector_fps", "outbound", PaymentType.PaymentTypeCode.SOP.name(), FPSDirection.INPUT.getDirection(),"RJCT","1913"));
+        metricRegistry.counter(name("connector_fps", "outbound", PaymentType.PaymentTypeCode.FDP.name(), FPSDirection.INPUT.getDirection(),"RJCT","1913"));
+        metricRegistry.counter(name("connector_fps", "outbound", PaymentType.PaymentTypeCode.CBP.name(), FPSDirection.INPUT.getDirection(),"RJCT","1913"));
+        metricRegistry.counter(name("connector_fps", "outbound", PaymentType.PaymentTypeCode.SRN.name(), FPSDirection.INPUT.getDirection(),"RJCT","1913"));
+        metricRegistry.counter(name("connector_fps", "outbound", PaymentType.PaymentTypeCode.RTN.name(), FPSDirection.INPUT.getDirection(),"RJCT","1913"));
+        metricRegistry.counter(name("connector_fps", "outbound", PaymentType.PaymentTypeCode.SIP.name(), FPSDirection.INPUT.getDirection(),"RJCT","1913"));
+
+        metricRegistry.counter(name("connector_fps", "inbound", "-", FPSDirection.OUTPUT.getDirection(),"TotalRejects"));
+        metricRegistry.counter(name("connector_fps", "inbound", "-", FPSDirection.OUTPUT.getDirection(),"TotalAcceptances"));
+
+        metricRegistry.counter(name("connector_fps", "inbound", "-", FPSDirection.OUTPUT.getDirection(),"TotalRejects"));
+        metricRegistry.counter(name("connector_fps", "inbound", "-", FPSDirection.OUTPUT.getDirection(),"TotalAcceptances"));
+
+        metricRegistry.counter(name("connector_fps_reversal", "inbound", "-", FPSDirection.OUTPUT.getDirection(),"TotalRejects"));
+        metricRegistry.counter(name("connector_fps_reversal", "inbound", "-", FPSDirection.OUTPUT.getDirection(),"TotalAcceptances"));
+
+        metricRegistry.counter(name("connector_fps", "outbound", "-", FPSDirection.INPUT.getDirection(),"TotalRejects"));
+        metricRegistry.counter(name("connector_fps", "outbound", "-", FPSDirection.INPUT.getDirection(),"TotalAcceptances"));
+
+        metricRegistry.counter(name("connector_fps", "inbound", "STANDIN", FPSDirection.INPUT.getDirection()));
+        metricRegistry.counter(name("connector_fps", "inbound", "POO", FPSDirection.INPUT.getDirection()));
+
+        metricRegistry.counter(name("connector_fps", "inbound", "USM", FPSDirection.INPUT.getDirection()));
+
     }
 }

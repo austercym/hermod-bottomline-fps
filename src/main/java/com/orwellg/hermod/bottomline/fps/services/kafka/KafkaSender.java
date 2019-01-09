@@ -12,14 +12,8 @@ public class KafkaSender {
 	private KafkaWithHeadersTemplate<String, String> kafkaTemplate;
 
 	public void send(String topic, String payload, String key, String replyTo, String environment, String paymentType,
-					 boolean isPOO, Long qosMilliseconds) {
-		LOG.info("[FPS][PmtId: {}] Sending payload='{}' to topic='{}'", key, payload, topic);
-		kafkaTemplate.send(topic, payload, key, replyTo, environment, paymentType, isPOO, false, qosMilliseconds);
-	}
-
-	public void send(String topic, String payload, String key, String replyTo, String environment, String paymentType,
 					 boolean isPOO, boolean isStandin, Long qosMilliseconds) {
-		LOG.info("[FPS][PmtId: {}] Sending payload='{}' to topic='{}'", key, payload, topic);
+		LOG.info("[FPS][PmtId: {}] Sending payload='{}' to topic='{} isPOO={}, isStandin={}'", key, payload, topic, isPOO, isStandin);
 		kafkaTemplate.send(topic, payload, key, replyTo, environment, paymentType, isPOO, isStandin, qosMilliseconds);
 	}
 

@@ -10,9 +10,7 @@ import com.orwellg.hermod.bottomline.fps.services.transform.helper.ConversionExc
 import com.orwellg.hermod.bottomline.fps.storage.InMemoryOutboundPaymentStorage;
 import com.orwellg.hermod.bottomline.fps.storage.PaymentOutboundBean;
 import com.orwellg.hermod.bottomline.fps.types.FPSMessage;
-import com.orwellg.hermod.bottomline.fps.utils.Constants;
 import com.orwellg.hermod.bottomline.fps.utils.singletons.EventGenerator;
-import com.orwellg.hermod.bottomline.fps.utils.singletons.IDGeneratorBean;
 import com.orwellg.hermod.bottomline.fps.utils.singletons.SchemeValidatorBean;
 import com.orwellg.umbrella.avro.types.event.Event;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
@@ -23,6 +21,7 @@ import com.orwellg.umbrella.commons.types.utils.avro.DecimalTypeUtils;
 import com.orwellg.umbrella.commons.types.utils.avro.RawMessageUtils;
 import com.orwellg.umbrella.commons.utils.enums.FPSEvents;
 import com.orwellg.umbrella.commons.utils.enums.fps.FPSDirection;
+import com.orwellg.umbrella.commons.utils.enums.fps.FPSTxSts;
 import org.apache.activemq.util.ByteArrayInputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -355,6 +354,26 @@ public abstract class MQOutboundListener extends BaseListener implements Message
                 }
             }
             counter.inc();
+            if(org.apache.commons.lang3.StringUtils.equalsIgnoreCase(txSts, FPSTxSts.REJECTED.getStatus())) {
+                Counter rejectMetric = counters.get(name("connector_fps", "outbound", "-", FPSDirection.INPUT.getDirection(), "TotalRejects"));
+                if(rejectMetric != null) {
+                    rejectMetric.inc();
+                }else{
+                    LOG.error("There is not metric for Total Rejects for outbound responses");
+                }
+            }
+
+
+            if(org.apache.commons.lang3.StringUtils.equalsIgnoreCase(txSts, FPSTxSts.ACCEPTED.getStatus()) || org.apache.commons.lang3.StringUtils.equalsIgnoreCase(txSts, FPSTxSts.ACCEPTED_WITH_CHANGE.getStatus()) ||
+                    org.apache.commons.lang3.StringUtils.equalsIgnoreCase(txSts, FPSTxSts.ACCEPTED_WITH_QUALIFICATION.getStatus())) {
+                Counter acceptanceMetrics = counters.get(name("connector_fps", "outbound", "-", FPSDirection.INPUT.getDirection(), "TotalAcceptances"));
+                if(acceptanceMetrics != null) {
+                    acceptanceMetrics.inc();
+                }else{
+                    LOG.error("There is not metric for Total Acceptances for outbound responses");
+                }
+            }
+
         }else{
 
             calculateMetrics(counters, paymentType);

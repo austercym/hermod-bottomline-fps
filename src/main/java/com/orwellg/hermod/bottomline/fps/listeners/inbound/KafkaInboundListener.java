@@ -9,11 +9,11 @@ import com.orwellg.hermod.bottomline.fps.types.FPSMessage;
 import com.orwellg.hermod.bottomline.fps.utils.singletons.IDGeneratorBean;
 import com.orwellg.hermod.bottomline.fps.utils.singletons.JAXBContextBean;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSAvroMessage;
-import com.orwellg.umbrella.avro.types.payment.fps.FPSOutboundPaymentResponse;
 import com.orwellg.umbrella.avro.types.payment.fps.FPSOutboundReversalResponse;
 import com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs002_001_06.*;
 import com.orwellg.umbrella.avro.types.payment.iso20022.pacs.pacs008_001_05.InstructionForNextAgent1;
 import com.orwellg.umbrella.commons.utils.enums.fps.FPSDirection;
+import com.orwellg.umbrella.commons.utils.enums.fps.FPSTxSts;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -311,6 +311,27 @@ public class KafkaInboundListener extends BaseListener {
 
         avroMessage.setMessage(fpsPacs002Response);
         return avroMessage;
+    }
+
+    protected void totalResponseMetrics(String txSts, SortedMap <String, Counter> counters, String metricName) {
+        if(StringUtils.equalsIgnoreCase(txSts, FPSTxSts.REJECTED.getStatus())) {
+            Counter rejectMetric = counters.get(name(metricName, "inbound", "-", FPSDirection.OUTPUT.getDirection(), "TotalRejects"));
+            if(rejectMetric != null) {
+                rejectMetric.inc();
+            }else{
+                LOG.error("There is not metric for Total Rejects for inbound responses");
+            }
+        }
+
+        if(StringUtils.equalsIgnoreCase(txSts, FPSTxSts.ACCEPTED.getStatus()) || StringUtils.equalsIgnoreCase(txSts, FPSTxSts.ACCEPTED_WITH_CHANGE.getStatus()) ||
+                StringUtils.equalsIgnoreCase(txSts, FPSTxSts.ACCEPTED_WITH_QUALIFICATION.getStatus())) {
+            Counter acceptanceMetrics = counters.get(name(metricName, "inbound", "-", FPSDirection.OUTPUT.getDirection(), "TotalAcceptances"));
+            if(acceptanceMetrics != null) {
+                acceptanceMetrics.inc();
+            }else{
+                LOG.error("There is not metric for Total Acceptances for inbound responses");
+            }
+        }
     }
 
 }

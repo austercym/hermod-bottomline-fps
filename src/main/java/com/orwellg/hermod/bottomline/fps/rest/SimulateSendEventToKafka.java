@@ -6,6 +6,7 @@ import com.orwellg.hermod.bottomline.fps.listeners.inbound.asyn.MQASYNSite1Liste
 import com.orwellg.hermod.bottomline.fps.listeners.inbound.asyn.MQASYNSite2Listener;
 import com.orwellg.hermod.bottomline.fps.listeners.inbound.poo.MQPOOSite1Listener;
 import com.orwellg.hermod.bottomline.fps.listeners.inbound.poo.MQPOOSite2Listener;
+import com.orwellg.hermod.bottomline.fps.listeners.inbound.standin.MQSTANDINListener;
 import com.orwellg.hermod.bottomline.fps.listeners.inbound.sync.MQSIPSite1Listener;
 import com.orwellg.hermod.bottomline.fps.listeners.inbound.sync.MQSIPSite2Listener;
 import com.orwellg.hermod.bottomline.fps.listeners.outbound.MQSIPOutboundRecvListener;
@@ -61,6 +62,10 @@ public class SimulateSendEventToKafka {
     @Autowired
     @Qualifier("mqPOOSite2Listener")
     MQPOOSite2Listener mqPOOSite2Listener;
+
+    @Autowired
+    @Qualifier("mqSTANDINSite1Listener")
+    MQSTANDINListener mqstandinListener;
 
     @Autowired
     MQUSMListener mqUSMListener;
@@ -194,6 +199,29 @@ public class SimulateSendEventToKafka {
         try {
             writer = getStringWriter(queueMessage);
             mqPOOSite2Listener.sendMessageToTopic(writer, BaseListener.POO, key, new Date().getTime());
+            return new ResponseEntity<>("Message sent ", HttpStatus.OK);
+        }catch(IOException e){
+            LOG.error("Error processing message: {}", e.getMessage());
+            return new ResponseEntity<>("Message not sent ", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        finally {
+            try {
+                if (writer != null) {
+                    writer.close();
+                }
+            }catch (Exception e) {
+                LOG.error("[FPS] Error closing streams resources. Message: {}", e.getMessage());
+            }
+        }
+    }
+
+    @RequestMapping(method= RequestMethod.POST, value="/standin")
+    public ResponseEntity<String> sendStandin(@RequestBody String queueMessage,
+                                               @RequestHeader("x-process-id") String key) {
+        Writer writer = null;
+        try {
+            writer = getStringWriter(queueMessage);
+            mqstandinListener.sendMessageToTopic(writer, BaseListener.STANDIN, key, new Date().getTime());
             return new ResponseEntity<>("Message sent ", HttpStatus.OK);
         }catch(IOException e){
             LOG.error("Error processing message: {}", e.getMessage());

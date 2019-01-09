@@ -1,5 +1,6 @@
 package com.orwellg.hermod.bottomline.fps.listeners.inbound.standin;
 
+import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
 import com.orwellg.hermod.bottomline.fps.listeners.inbound.MQListener;
 import com.orwellg.umbrella.avro.types.event.Event;
@@ -11,6 +12,8 @@ import org.apache.logging.log4j.Logger;
 
 import javax.jms.Message;
 
+import java.util.SortedMap;
+
 import static com.codahale.metrics.MetricRegistry.name;
 
 public abstract class MQSTANDINListener extends MQListener {
@@ -18,11 +21,7 @@ public abstract class MQSTANDINListener extends MQListener {
     public static Logger LOG = LogManager.getLogger(MQSTANDINListener.class);
 
     public MQSTANDINListener(MetricRegistry metricRegistry){
-        if(metricRegistry!= null) {
-            inbound_standin_requests = metricRegistry.counter(name("connector_fps", "inbound", "STANDIN", FPSDirection.INPUT.getDirection()));
-        }else{
-            LOG.error("No exists metrics registry");
-        }
+        super(metricRegistry);
     }
 
     @Override
@@ -31,14 +30,23 @@ public abstract class MQSTANDINListener extends MQListener {
     }
 
     @Override
-    protected void sendToKafka(String topic, String uuid, Event event, String paymentType, String environmentMQ, Long qosMilliseconds){
-        inbound_standin_requests.inc();
+    protected void sendToKafka(String topic, String uuid, Event event, String paymentType, String environmentMQ, Long qosMilliseconds, boolean isReversal){
+        incrementStandinMetric();
+        calculateMetrics(paymentType, isReversal);
         kafkaSender.send(
                 topic,
                 RawMessageUtils.encodeToString(Event.SCHEMA$, event),
                 uuid,
                 replyTo, environmentMQ, paymentType, false, true, qosMilliseconds
         );
+    }
+
+    private void incrementStandinMetric() {
+        SortedMap <String, Counter> counters = metricRegistry.getCounters();
+        Counter inboundPooMetric = counters.get(name("connector_fps", "inbound", "STANDIN", FPSDirection.INPUT.getDirection()));
+        if(inboundPooMetric!= null) {
+            inboundPooMetric.inc();
+        }
     }
 
     @Override
