@@ -564,13 +564,12 @@ public class Pacs008Avro2FPSTransform {
     }
 
     private static iso.std.iso._20022.tech.xsd.pacs_008_001.PartyIdentification43 getCdtr(CreditTransferTransaction19 cdtTrfTxInf) {
-        iso.std.iso._20022.tech.xsd.pacs_008_001.PartyIdentification43 cdtr = null;
+        iso.std.iso._20022.tech.xsd.pacs_008_001.PartyIdentification43 cdtr = new iso.std.iso._20022.tech.xsd.pacs_008_001.PartyIdentification43();
         if(cdtTrfTxInf != null) {
             PartyIdentification43 cdtr1 = cdtTrfTxInf.getCdtr();
             if (cdtr1 != null) {
                 String nm = cdtr1.getNm();
                 if (StringUtils.isNotEmpty(nm)) {
-                    cdtr = new iso.std.iso._20022.tech.xsd.pacs_008_001.PartyIdentification43();
                     cdtr.setNm(nm);
                 }
                 PostalAddress6 pstlAdr = cdtr1.getPstlAdr();
@@ -595,13 +594,12 @@ public class Pacs008Avro2FPSTransform {
     }
 
     private static iso.std.iso._20022.tech.xsd.pacs_008_001.PartyIdentification43 getDbtr(CreditTransferTransaction19 cdtTrfTxInf) {
-        iso.std.iso._20022.tech.xsd.pacs_008_001.PartyIdentification43 dbtr = null;
+        iso.std.iso._20022.tech.xsd.pacs_008_001.PartyIdentification43 dbtr = new iso.std.iso._20022.tech.xsd.pacs_008_001.PartyIdentification43();
         if(cdtTrfTxInf != null) {
             PartyIdentification43 dbtr1 = cdtTrfTxInf.getDbtr();
             if (dbtr1 != null) {
                 String nm = dbtr1.getNm();
                 if (StringUtils.isNotEmpty(nm)) {
-                    dbtr = new iso.std.iso._20022.tech.xsd.pacs_008_001.PartyIdentification43();
                     dbtr.setNm(nm);
                 }
                 PostalAddress6 pstlAdr = dbtr1.getPstlAdr();
