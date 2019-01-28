@@ -282,7 +282,6 @@ public class ProjectConfig extends ComponentConfig {
         metricRegistry.counter(name("connector_fps", "outbound", "-", FPSDirection.INPUT.getDirection(),"TotalAcceptances"));
 
         metricRegistry.counter(name("connector_fps", "inbound", "STANDIN", FPSDirection.INPUT.getDirection()));
-        metricRegistry.counter(name("connector_fps", "inbound", "POO", FPSDirection.INPUT.getDirection()));
 
         metricRegistry.counter(name("connector_fps", "inbound", "USM", FPSDirection.INPUT.getDirection()));
 
