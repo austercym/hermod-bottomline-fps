@@ -34,7 +34,6 @@ public abstract class MQPOOListener extends MQListener {
     @Override
     protected void sendToKafka(String topic, String uuid, Event event, String paymentType, String environmentMQ, Long qosMilliseconds, boolean isReversal){
 
-        incrementPooMetric();
         calculateMetrics(paymentType, isReversal);
         kafkaSender.send(
                 topic,
@@ -43,12 +42,5 @@ public abstract class MQPOOListener extends MQListener {
                 replyTo, environmentMQ, paymentType, true,false, qosMilliseconds
         );
     }
-
-    private void incrementPooMetric() {
-        SortedMap <String, Counter> counters = metricRegistry.getCounters();
-        Counter inboundPooMetric = counters.get(name("connector_fps", "inbound", "POO", FPSDirection.INPUT.getDirection()));
-        if(inboundPooMetric!= null) {
-            inboundPooMetric.inc();
-        }
-    }
+    
 }
