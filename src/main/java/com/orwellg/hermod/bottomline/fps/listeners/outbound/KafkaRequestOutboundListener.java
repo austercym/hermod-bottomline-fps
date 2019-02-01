@@ -318,7 +318,7 @@ public class KafkaRequestOutboundListener extends KafkaOutboundListener implemen
         //Undo payment
 
         event = EventGenerator.generateEvent(this.getClass().getName(), FPSEvents.FPS_UNDO_PAYMENT.getEventName(), paymentId,
-                gson.toJson(paymentId), entity, brand);
+                paymentId, entity, brand);
         String topic = undoPaymentTopic;
 
         LOG.info("[FPS][PmtId: {}] Sending Message to Topic {} to undo payment", key, topic);
